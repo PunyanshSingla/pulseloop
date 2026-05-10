@@ -1,8 +1,18 @@
 import { z } from "zod";
+import dotenv from "dotenv"
+dotenv.config();
 const envSchema = z.object({
-    PORT: z.string().optional(),
-    NODE_ENV: z.string().optional(),
-    CLIENT_URL: z.string()
+  PORT: z.string().optional(),
+  NODE_ENV: z.string().optional(),
+  CLIENT_URL: z.string(),
+  MONGODB_URI: z.string(),
+  DATABASE_NAME: z.string(),
+  BETTER_AUTH_URL: z.string(),
+  RESEND_API_KEY: z.string(),
+  EMAIL_FROM: z.string(),
+  GOOGLE_CLIENT_ID: z.string(),
+  GOOGLE_CLIENT_SECRET: z.string(),
+
 })
 function createEnv(env: NodeJS.ProcessEnv) {
   const parsed = envSchema.safeParse(env);
