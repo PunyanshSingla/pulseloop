@@ -5,9 +5,16 @@ const envSchema = z.object({
     CLIENT_URL: z.string()
 })
 function createEnv(env: NodeJS.ProcessEnv) {
-    const safeParseResult = envSchema.safeParse(env);
-    if (!safeParseResult.success) throw new Error(safeParseResult.error.message);
-    return safeParseResult.data;
+  const parsed = envSchema.safeParse(env);
+  if (!parsed.success) {
+    console.error(
+      "❌ Invalid environment variables:"
+    );
+    console.error(parsed.error.flatten().fieldErrors);
+    process.exit(1);
+  }
+
+  return parsed.data;
 }
 
 export const env = createEnv(process.env)
