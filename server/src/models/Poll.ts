@@ -1,6 +1,19 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
-const pollSchema = new mongoose.Schema(
+export interface IPoll extends Document {
+  title: string;
+  description: string;
+  visibility: "public" | "private";
+  status: "draft" | "active" | "closed";
+  allowAnonymous: boolean;
+  resultsPublished: boolean;
+  expiresAt: Date | null;
+  createdBy: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const pollSchema = new Schema<IPoll>(
   {
     title: {
       type: String,
@@ -41,7 +54,7 @@ const pollSchema = new mongoose.Schema(
     },
 
     createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
@@ -51,4 +64,4 @@ const pollSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Poll", pollSchema);
+export default mongoose.model<IPoll>("Poll", pollSchema);

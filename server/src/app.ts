@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser";
 import { env } from "./config/env";
 import { errorMiddleware } from "./middlewares/error.middleware";
 
+import pollRoutes from "./modules/polls/polls.routes";
+
 const app = express();
 
 app.use(
@@ -21,6 +23,8 @@ app.use(
 );
 
 app.use(cookieParser());
+
+app.use("/api/polls", pollRoutes);
 
 app.get("/api/health", (_, res) => {
   res.status(200).json({
