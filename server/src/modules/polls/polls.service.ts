@@ -2,9 +2,10 @@ import Poll, { IPoll } from "../../models/Poll";
 import Question from "../../models/Question";
 import QuestionOption from "../../models/QuestionOption";
 import mongoose from "mongoose";
+import { CreatePollInput, UpdatePollInput } from "./poll.types";
 
 export class PollsService {
-  async createPoll(data: any, userId: string) {
+  async createPoll(data: CreatePollInput, userId: string) {
     const { questions, ...pollData } = data;
 
     const poll = new Poll({
@@ -63,7 +64,7 @@ export class PollsService {
     return { ...poll, questions: questionsWithOptions };
   }
 
-  async updatePoll(id: string, data: any, userId: string) {
+  async updatePoll(id: string, data: UpdatePollInput, userId: string) {
     const poll = await Poll.findOne({ _id: id, createdBy: userId });
     if (!poll) throw new Error("Poll not found or unauthorized");
 
