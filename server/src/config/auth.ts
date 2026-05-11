@@ -16,16 +16,22 @@ export const auth = betterAuth({
         env.CLIENT_URL
     ],
     emailVerification: {
-        sendVerificationEmail: async ({ user, url }) => {
-            await sendVerificationEmail({ email: user.email, url, name: user.name });
+        async sendVerificationEmail({ user, url, token }) {
+            const verificationUrl = `${env.CLIENT_URL}/verify-email?token=${token}`;
+            await sendVerificationEmail({ email: user.email, url: verificationUrl, name: user.name });
         },
         sendOnSignIn: true,
     },
 
     emailAndPassword: {
         enabled: true,
-        sendResetPassword: async ({ user, url }) => {
-            await sendResetPasswordEmail({ to: user.email, resetUrl: url, name: user.name });
+        async sendResetPassword({ user, url, token }) {
+            const resetUrl = `${env.CLIENT_URL}/reset-password?token=${token}`;
+            await sendResetPasswordEmail({
+                to: user.email,
+                resetUrl: resetUrl,
+                name: user.name,
+            });
         },
         requireEmailVerification: true,
     },

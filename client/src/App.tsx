@@ -3,14 +3,22 @@ import SignInPage from "./pages/sign-in.tsx";
 import SignUpPage from "./pages/sign-up.tsx";
 import ForgotPasswordPage from "./pages/forgot-password.tsx";
 import ResetPasswordPage from "./pages/reset-password.tsx";
+import VerifyEmailPage from "./pages/verify-email.tsx";
+import DashboardPage from "./pages/dashboard.tsx";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/sign-in" element={<SignInPage />} />
-      <Route path="/sign-up" element={<SignUpPage />} />
-      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/sign-in" element={<SignInPage />} />
+        <Route path="/sign-up" element={<SignUpPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+      </Routes>
+      <Toaster />
+    </>
   );
 }
