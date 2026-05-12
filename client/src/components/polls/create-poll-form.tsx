@@ -3,9 +3,9 @@ import { useCreatePoll } from "@/hooks/use-polls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, X } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "../ui/badge";
+
 
 export function CreatePollForm() {
   const { mutate: createPoll, isPending } = useCreatePoll();

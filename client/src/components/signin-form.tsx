@@ -30,7 +30,6 @@ export function LoginForm({
       email,
       password,
       callbackURL: appUrl("/dashboard"),
-      errorCallbackURL: appUrl("/sign-in"),
     })
     setLoading(false)
     if (error) {

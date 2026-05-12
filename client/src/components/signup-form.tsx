@@ -37,7 +37,6 @@ export function SignupForm({
       password,
       name,
       callbackURL: appUrl("/sign-in"),
-      errorCallbackURL: appUrl("/sign-up"),
     })
     setLoading(false)
     if (error) {
@@ -108,10 +107,10 @@ export function SignupForm({
   }
 
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={handleSignUp}>
-      <FieldGroup>
+    <form className={cn("flex flex-col gap-4", className)} {...props} onSubmit={handleSignUp}>
+      <FieldGroup className="gap-4">
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Create your account</h1>
+          <h1 className="text-xl font-bold">Create your account</h1>
           <p className="text-sm text-balance text-muted-foreground">
             Fill in the form below to create your account
           </p>
@@ -137,10 +136,10 @@ export function SignupForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <FieldDescription>
-            We&apos;ll use this to contact you. We will not share your email
-            with anyone else.
-          </FieldDescription>
+
+
+
+
         </Field>
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -151,9 +150,9 @@ export function SignupForm({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <FieldDescription>
-            Must be at least 8 characters long.
-          </FieldDescription>
+
+
+
         </Field>
         <Field>
           <FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
@@ -164,7 +163,7 @@ export function SignupForm({
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          <FieldDescription>Please confirm your password.</FieldDescription>
+
         </Field>
         <Field>
           <Button type="submit" disabled={loading}>
@@ -180,7 +179,7 @@ export function SignupForm({
             Google
           </Button>
         </Field>
-        <FieldDescription className="px-6 text-center">
+        <FieldDescription className="text-center">
             Already have an account? <Link to="/sign-in" className="underline underline-offset-4">Sign in</Link>
         </FieldDescription>
       </FieldGroup>
