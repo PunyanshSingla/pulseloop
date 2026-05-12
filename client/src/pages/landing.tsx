@@ -19,79 +19,80 @@ import Logo from "@/components/logo";
 export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background selection:bg-primary/20 selection:text-primary">
-      {/* Background Noise & Gradients */}
+      {/* Background Noise & Dynamic Gradients */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[10%] right-[-10%] w-[50%] h-[50%] bg-accent/20 rounded-full blur-[120px]" />
+        <div className="absolute inset-0 opacity-[0.015] dark:opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+        <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-accent/15 rounded-full blur-[120px]" />
       </div>
 
       <Navbar />
       
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative pt-24 pb-32 overflow-hidden">
-          <div className="container mx-auto px-4 sm:px-8 text-center relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold mb-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
-              <Sparkles className="w-3 h-3" />
-              <span>The next generation of polling</span>
-            </div>
-            
-            <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9] animate-in fade-in slide-in-from-bottom-4 duration-700">
-              POLL WITH <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-b from-primary to-primary/60">PURPOSE.</span>
-            </h1>
-            
-            <p className="max-w-xl mx-auto text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed animate-in fade-in slide-in-from-bottom-5 duration-1000">
-              Stop guessing. Start knowing. PulseLoop gives you the tools to create, share, and analyze feedback with precision.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-              <Link to="/sign-up">
-                <Button size="lg" className="h-14 px-10 text-lg font-bold rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-95 group">
-                  Start Creating <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <Link to="/sign-in">
-                <Button size="lg" variant="outline" className="h-14 px-10 text-lg font-bold rounded-xl border-2 hover:bg-muted transition-all active:scale-95">
-                  Live Preview
-                </Button>
-              </Link>
-            </div>
+        <section className="relative pt-20 pb-32 lg:pt-32 lg:pb-48 overflow-hidden">
+          <div className="container mx-auto px-6 sm:px-8 relative z-10">
+            <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+              <div className="flex-1 text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-bold mb-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>The next generation of polling</span>
+                </div>
+                
+                <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  Capture the heartbeat <br />
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">of your audience.</span>
+                </h1>
+                
+                <p className="max-w-xl mx-auto lg:mx-0 text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed font-medium animate-in fade-in slide-in-from-bottom-5 duration-1000">
+                  Stop guessing. Start knowing. PulseLoop gives you the tools to create, share, and analyze feedback with effortless precision.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+                  <Link to="/sign-up">
+                    <Button size="lg" className="h-14 px-8 text-base font-bold rounded-2xl shadow-xl shadow-primary/10 hover:shadow-2xl hover:shadow-primary/20 transition-all active:scale-95 group">
+                      Get Started Free <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                  <Link to="/sign-in">
+                    <Button size="lg" variant="outline" className="h-14 px-8 text-base font-bold rounded-2xl border-2 hover:bg-muted transition-all active:scale-95">
+                      Live Preview
+                    </Button>
+                  </Link>
+                </div>
+              </div>
 
-            {/* Floating Elements Mockup */}
-            <div className="mt-24 relative max-w-6xl mx-auto px-4">
-              <div className="relative group">
-                {/* Main Card */}
-                <div className="rounded-3xl border border-border/50 bg-card/40 backdrop-blur-xl p-4 shadow-2xl transition-all duration-500 group-hover:shadow-primary/5 group-hover:-translate-y-1">
-                  <div className="rounded-2xl border border-border bg-background/80 overflow-hidden">
-                    <div className="h-12 border-b border-border bg-muted/20 flex items-center px-6 justify-between">
-                      <div className="flex gap-2">
-                        <div className="w-3 h-3 rounded-full bg-destructive/20" />
-                        <div className="w-3 h-3 rounded-full bg-primary/20" />
-                        <div className="w-3 h-3 rounded-full bg-accent/20" />
+              <div className="flex-1 w-full lg:w-auto relative animate-in fade-in slide-in-from-right-8 duration-1000">
+                <div className="relative group">
+                  {/* Main Card */}
+                  <div className="rounded-[32px] border border-border/50 bg-card/40 backdrop-blur-2xl p-2 shadow-2xl transition-all duration-700 group-hover:-translate-y-2">
+                    <div className="rounded-[24px] border border-border/50 bg-background/80 overflow-hidden shadow-inner">
+                      <div className="h-12 border-b border-border/40 bg-muted/20 flex items-center px-6 justify-between">
+                        <div className="flex gap-1.5">
+                          <div className="w-2.5 h-2.5 rounded-full bg-border" />
+                          <div className="w-2.5 h-2.5 rounded-full bg-border" />
+                          <div className="w-2.5 h-2.5 rounded-full bg-border" />
+                        </div>
+                        <div className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">Analytics Dashboard</div>
+                        <div className="w-8" />
                       </div>
-                      <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Analytics Dashboard</div>
-                      <div className="w-12" />
-                    </div>
-                    <div className="p-8 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-16">
-                      <div className="space-y-8">
+                      <div className="p-8 space-y-8">
                         <div>
-                          <h3 className="text-3xl font-black tracking-tighter mb-4">Event Satisfaction?</h3>
-                          <p className="text-muted-foreground">Real-time feedback from 2,400+ attendees.</p>
+                          <h3 className="text-2xl font-bold tracking-tight mb-2">Event Satisfaction?</h3>
+                          <p className="text-sm text-muted-foreground/70 font-medium">Real-time feedback loop active.</p>
                         </div>
                         <div className="space-y-6">
                           {[
                             { label: "Exceeded Expectations", val: 78, color: "bg-primary" },
-                            { label: "Met Expectations", val: 18, color: "bg-muted-foreground" },
-                            { label: "Below Expectations", val: 4, color: "bg-destructive" }
+                            { label: "Met Expectations", val: 18, color: "bg-muted-foreground/30" },
+                            { label: "Below Expectations", val: 4, color: "bg-destructive/40" }
                           ].map((item, i) => (
                             <div key={i} className="space-y-2">
-                              <div className="flex justify-between text-sm font-bold">
-                                <span>{item.label}</span>
+                              <div className="flex justify-between text-xs font-bold tracking-tight">
+                                <span className="opacity-60">{item.label}</span>
                                 <span>{item.val}%</span>
                               </div>
-                              <div className="h-3 w-full bg-muted rounded-full overflow-hidden">
+                              <div className="h-2 w-full bg-muted/20 rounded-full overflow-hidden">
                                 <div 
                                   className={`h-full ${item.color} rounded-full transition-all duration-1000 ease-out`} 
                                   style={{ width: `${item.val}%` }} 
@@ -101,45 +102,18 @@ export default function LandingPage() {
                           ))}
                         </div>
                       </div>
-                      <div className="flex items-center justify-center relative">
-                        <div className="w-64 h-64 rounded-full border-8 border-primary/10 flex items-center justify-center relative">
-                          <PieChart className="w-32 h-32 text-primary opacity-20 absolute" />
-                          <div className="text-center">
-                            <span className="text-5xl font-black tracking-tighter">78%</span>
-                            <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold mt-1">Positive</p>
-                          </div>
-                          {/* Floating badge */}
-                          <div className="absolute -top-4 -right-4 bg-primary text-primary-foreground text-[10px] font-black px-3 py-1.5 rounded-lg shadow-xl animate-bounce">
-                            NEW RECORD
-                          </div>
-                        </div>
+                    </div>
+                  </div>
+
+                  {/* Floating Elements for depth */}
+                  <div className="absolute -top-12 -right-8 w-40 p-4 rounded-2xl bg-background/90 border border-border shadow-2xl backdrop-blur-xl animate-bounce duration-[4000ms]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Users className="w-3.5 h-3.5 text-primary" />
                       </div>
+                      <div className="text-[10px] font-bold uppercase opacity-40">Live</div>
                     </div>
-                  </div>
-                </div>
-
-                {/* Overlapping small cards for depth */}
-                <div className="hidden lg:block absolute -top-12 -left-12 w-48 p-4 rounded-2xl bg-background/80 border border-border shadow-2xl backdrop-blur-xl animate-in slide-in-from-left-8 duration-1000 delay-500">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
-                      <Users className="w-4 h-4 text-accent" />
-                    </div>
-                    <div className="text-[10px] font-black tracking-widest uppercase opacity-50">Audience</div>
-                  </div>
-                  <div className="text-2xl font-black tracking-tighter">2.4k</div>
-                  <div className="text-[10px] text-primary font-bold">+12% vs last week</div>
-                </div>
-
-                <div className="hidden lg:block absolute -bottom-8 -right-8 w-56 p-4 rounded-2xl bg-background/80 border border-border shadow-2xl backdrop-blur-xl animate-in slide-in-from-right-8 duration-1000 delay-700">
-                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                      <Clock className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="text-[10px] font-black tracking-widest uppercase opacity-50">Live Status</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                    <span className="text-sm font-bold tracking-tight">Collecting Responses...</span>
+                    <div className="text-xl font-bold tracking-tighter">2.4k</div>
                   </div>
                 </div>
               </div>
@@ -148,107 +122,145 @@ export default function LandingPage() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-32 relative overflow-hidden">
-          <div className="container mx-auto px-4 sm:px-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
-              <div className="max-w-xl">
-                <Badge className="mb-4">Features</Badge>
-                <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">Built for speed. <br />Designed for impact.</h2>
+        <section id="features" className="py-48 relative overflow-hidden">
+          <div className="container mx-auto px-6 sm:px-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-32 gap-12">
+              <div className="max-w-2xl">
+                <Badge variant="outline" className="mb-6 px-4 py-1 border-primary/20 text-primary bg-primary/5 text-[10px] font-bold uppercase tracking-widest">Capabilities</Badge>
+                <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1]">Powerful simplicity. <br />Designed for impact.</h2>
               </div>
-              <p className="text-muted-foreground md:max-w-xs font-medium">
-                Everything you need to create engaging polls and analyze them in real-time.
+              <p className="text-muted-foreground md:max-w-xs font-medium text-lg leading-relaxed opacity-70">
+                A comprehensive suite of tools designed to help you capture and understand the voice of your audience.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16">
               {[
                 {
                   icon: <Zap className="h-6 w-6" />,
-                  title: "Rapid Creation",
+                  title: "Instant Setup",
                   desc: "Zero friction. Go from idea to live poll in under 60 seconds."
                 },
                 {
                   icon: <BarChart3 className="h-6 w-6" />,
-                  title: "Deep Analytics",
-                  desc: "Visual summaries and detailed insights for every single question."
+                  title: "Real-time Insights",
+                  desc: "Watch responses roll in and see beautiful live visualizations."
                 },
                 {
                   icon: <Link2 className="h-6 w-6" />,
                   title: "Smart Sharing",
-                  desc: "Unique URLs that look great on any platform or social network."
+                  desc: "Unique URLs that look incredible on any platform or social network."
                 },
                 {
                   icon: <Shield className="h-6 w-6" />,
-                  title: "Secure Voting",
+                  title: "Advanced Privacy",
                   desc: "Choose between anonymous feedback or authenticated responses."
                 },
                 {
                   icon: <Clock className="h-6 w-6" />,
-                  title: "Time Control",
+                  title: "Automated Control",
                   desc: "Set expiry times to automatically close polls and publish results."
                 },
                 {
                   icon: <MousePointer2 className="h-6 w-6" />,
-                  title: "Single Choice",
-                  desc: "Optimized for clear, decisive feedback with single-option selection."
+                  title: "Clean Experience",
+                  desc: "A focused voting interface that ensures high response rates."
                 }
               ].map((feature, i) => (
-                <div key={i} className="group p-8 rounded-3xl border border-border/50 bg-card/30 hover:bg-card/80 transition-all duration-300 hover:border-primary/50 hover:shadow-2xl shadow-sm">
-                  <div className="mb-6 w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                <div key={i} className="group flex flex-col items-start gap-6">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 shadow-sm">
                     {feature.icon}
                   </div>
-                  <h3 className="text-xl font-bold mb-3 tracking-tight">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed font-medium">{feature.desc}</p>
+                  <div>
+                    <h3 className="text-xl font-bold mb-3 tracking-tight">{feature.title}</h3>
+                    <p className="text-muted-foreground/70 leading-relaxed font-medium">{feature.desc}</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Process Section - Horizontal Scroll feel */}
-        <section className="py-32 bg-muted/20">
-          <div className="container mx-auto px-4 sm:px-8">
-            <div className="text-center mb-20">
-               <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">THE WORKFLOW</h2>
-               <p className="text-muted-foreground font-medium">Three steps to clarity.</p>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-               {[
-                 { step: "01", title: "CRAFT", desc: "Build your poll with our intuitive multi-question editor. Set your rules." },
-                 { step: "02", title: "BROADCAST", desc: "Share your unique PulseLoop link. Respondents can join from any device." },
-                 { step: "03", title: "REVEAL", desc: "Analyze the data in real-time. Publish final results when you're ready." }
-               ].map((item, i) => (
-                 <div key={i} className="relative p-8 rounded-3xl bg-background border border-border shadow-xl">
-                   <div className="absolute -top-6 -right-6 w-20 h-20 bg-primary flex items-center justify-center text-primary-foreground font-black text-3xl rounded-full shadow-2xl">
-                     {item.step}
-                   </div>
-                   <h3 className="text-2xl font-black tracking-tighter mb-4 mt-4">{item.title}</h3>
-                   <p className="text-muted-foreground font-medium leading-relaxed">{item.desc}</p>
-                 </div>
-               ))}
+        {/* Process Section - Vertical Editorial Path */}
+        <section id="how-it-works" className="py-48 relative overflow-hidden bg-muted/5">
+          <div className="container mx-auto px-6 sm:px-8">
+            <div className="flex flex-col lg:flex-row gap-24">
+              <div className="lg:w-1/3 sticky top-32 h-fit">
+                <Badge variant="outline" className="mb-6 px-4 py-1 border-primary/20 text-primary bg-primary/5 text-[10px] font-bold uppercase tracking-widest">Workflow</Badge>
+                <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8 text-pretty leading-[1.1]">
+                  From curiosity <br />to clarity.
+                </h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed opacity-70">
+                  We’ve stripped away the complexity to leave you with a refined, three-step journey to audience insights.
+                </p>
+              </div>
+
+              <div className="lg:w-2/3 space-y-32 relative">
+                {/* Visual Path Line */}
+                <div className="absolute left-8 top-8 bottom-8 w-[1px] bg-gradient-to-b from-primary/50 via-border to-transparent hidden md:block" />
+
+                {[
+                  { 
+                    step: "01", 
+                    title: "Craft Your Narrative", 
+                    desc: "Our intuitive editor allows you to build multi-question polls that feel more like a conversation than a survey. Set logic, timing, and privacy with a single click.",
+                    icon: <Sparkles className="w-6 h-6" />
+                  },
+                  { 
+                    step: "02", 
+                    title: "Broadcast With Impact", 
+                    desc: "Deploy your unique PulseLoop link to any platform. Our responsive interface ensures a flawless experience whether your audience is on mobile, tablet, or desktop.",
+                    icon: <Link2 className="w-6 h-6" />
+                  },
+                  { 
+                    step: "03", 
+                    title: "Reveal The Heartbeat", 
+                    desc: "Watch sentiment shift in real-time. Our analytics dashboard doesn’t just show numbers; it reveals the underlying pulse of your community.",
+                    icon: <PieChart className="w-6 h-6" />
+                  }
+                ].map((item, i) => (
+                  <div key={i} className="relative pl-0 md:pl-24 group animate-in fade-in slide-in-from-bottom-8 duration-700" style={{ animationDelay: `${i * 200}ms` }}>
+                    {/* Step Number Bubble */}
+                    <div className="absolute -left-4 md:left-0 top-0 w-16 h-16 rounded-2xl bg-background border border-border flex items-center justify-center text-primary font-bold text-xl z-10 group-hover:border-primary group-hover:shadow-[0_12px_24px_-8px_rgba(var(--primary),0.3)] transition-all duration-500 transform group-hover:-translate-y-1">
+                      {item.step}
+                    </div>
+                    
+                    <div className="pt-2">
+                      <div className="inline-flex items-center gap-2 text-primary/40 mb-4 group-hover:text-primary transition-colors duration-500">
+                        {item.icon}
+                        <span className="text-xs font-bold uppercase tracking-widest">Step {item.step}</span>
+                      </div>
+                      <h3 className="text-2xl md:text-3xl font-bold tracking-tight mb-4 group-hover:text-foreground transition-colors">{item.title}</h3>
+                      <p className="text-muted-foreground/70 font-medium text-lg leading-relaxed max-w-2xl">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
         {/* CTA Section */}
-        <section className="py-32 container mx-auto px-4 sm:px-8">
-          <div className="rounded-[40px] bg-primary text-primary-foreground p-12 md:p-24 text-center relative overflow-hidden shadow-2xl shadow-primary/20">
-            <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+        <section className="py-32 lg:py-48 container mx-auto px-6 sm:px-8">
+          <div className="rounded-[48px] bg-gradient-to-br from-foreground to-foreground/90 text-background p-16 md:p-32 text-center relative overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] invert" />
+            <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/30 rounded-full blur-[120px]" />
             <div className="relative z-10">
-              <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">START THE <br />CONVERSATION.</h2>
-              <p className="text-primary-foreground/80 max-w-lg mx-auto mb-12 text-lg font-bold">
-                Join the thousands of creators using PulseLoop to get the answers they need.
+              <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-none">Start the conversation today.</h2>
+              <p className="text-background/60 max-w-xl mx-auto mb-16 text-lg md:text-xl font-medium">
+                Join thousands of creators who trust PulseLoop to capture what matters most.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <Link to="/sign-up">
-                  <Button size="lg" variant="secondary" className="h-16 px-12 text-xl font-black rounded-2xl shadow-2xl active:scale-95 transition-all">
-                    Get Started Now
+                  <Button size="lg" variant="secondary" className="h-16 px-12 text-lg font-bold rounded-2xl shadow-xl active:scale-95 transition-all">
+                    Get Started Free
                   </Button>
                 </Link>
                 <Link to="/about">
-                  <Button size="lg" variant="ghost" className="h-16 px-12 text-xl font-black rounded-2xl hover:bg-white/10 text-white">
-                    Our Mission
+                  <Button size="lg" variant="ghost" className="h-16 px-12 text-lg font-bold rounded-2xl hover:bg-white/10 text-background">
+                    Learn More
                   </Button>
                 </Link>
               </div>
@@ -257,52 +269,62 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="py-20 border-t border-border">
-        <div className="container mx-auto px-4 sm:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-12">
-            <div className="space-y-6">
-              <Link to="/" className="group">
-                <Logo />
-              </Link>
-              <p className="text-muted-foreground font-medium max-w-xs">
-                Capturing the heartbeat of communities everywhere.
+      <footer className="relative pt-32 pb-16 overflow-hidden bg-muted/20 border-t border-border/40">
+        <div className="container mx-auto px-6 sm:px-8 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-32">
+            <div className="lg:col-span-2 space-y-8">
+              <Logo />
+              <p className="text-muted-foreground max-w-sm font-medium leading-relaxed">
+                The next generation of audience intelligence. Refined polling for the modern era.
               </p>
+              <div className="flex gap-6">
+                {['Twitter', 'GitHub', 'LinkedIn'].map((platform) => (
+                  <a 
+                    key={platform} 
+                    href="#" 
+                    aria-label={`Follow us on ${platform}`}
+                    className="text-muted-foreground/40 hover:text-primary transition-colors duration-300"
+                  >
+                    <span className="text-[10px] font-bold tracking-widest uppercase">{platform}</span>
+                  </a>
+                ))}
+              </div>
             </div>
             
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-12 md:gap-24">
-              <div className="space-y-4">
-                <h4 className="font-black text-xs uppercase tracking-widest">Product</h4>
-                <ul className="space-y-2 text-sm font-bold text-muted-foreground">
-                  <li><a href="#" className="hover:text-primary transition-colors">Features</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">Pricing</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">API</a></li>
+            <div className="grid grid-cols-2 gap-12 lg:col-span-2">
+              <div className="space-y-6">
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Platform</h4>
+                <ul className="space-y-4">
+                  <li><a href="#features" className="text-muted-foreground/60 hover:text-primary transition-all text-sm font-medium">Features</a></li>
+                  <li><a href="#how-it-works" className="text-muted-foreground/60 hover:text-primary transition-all text-sm font-medium">Workflow</a></li>
+                  <li><Link to="/sign-in" className="text-muted-foreground/60 hover:text-primary transition-all text-sm font-medium">Sign In</Link></li>
                 </ul>
               </div>
-              <div className="space-y-4">
-                <h4 className="font-black text-xs uppercase tracking-widest">Company</h4>
-                <ul className="space-y-2 text-sm font-bold text-muted-foreground">
-                  <li><a href="#" className="hover:text-primary transition-colors">About</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">Blog</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">Careers</a></li>
-                </ul>
-              </div>
-              <div className="space-y-4">
-                <h4 className="font-black text-xs uppercase tracking-widest">Legal</h4>
-                <ul className="space-y-2 text-sm font-bold text-muted-foreground">
-                  <li><a href="#" className="hover:text-primary transition-colors">Privacy</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">Terms</a></li>
+              <div className="space-y-6">
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Legal</h4>
+                <ul className="space-y-4">
+                  <li><a href="#" className="text-muted-foreground/60 hover:text-primary transition-all text-sm font-medium">Privacy Policy</a></li>
+                  <li><a href="#" className="text-muted-foreground/60 hover:text-primary transition-all text-sm font-medium">Terms of Service</a></li>
+                  <li><a href="#" className="text-muted-foreground/60 hover:text-primary transition-all text-sm font-medium">Cookie Settings</a></li>
                 </ul>
               </div>
             </div>
           </div>
-          <div className="mt-20 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">
-            <p>© 2026 PulseLoop. Built for the Hackathon.</p>
-            <div className="flex gap-8">
-              <a href="#" className="hover:text-primary transition-colors">Twitter</a>
-              <a href="#" className="hover:text-primary transition-colors">GitHub</a>
-              <a href="#" className="hover:text-primary transition-colors">Discord</a>
+          
+          <div className="pt-16 border-t border-border/40 flex flex-col md:flex-row justify-between items-center gap-8">
+            <p className="text-muted-foreground/40 text-[10px] font-bold uppercase tracking-widest">
+              © {new Intl.DateTimeFormat('en-US', { year: 'numeric' }).format(new Date())} PulseLoop Inc. All rights reserved.
+            </p>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">System Status: All Systems Operational</span>
             </div>
           </div>
+        </div>
+
+        {/* Massive Background Mark */}
+        <div className="absolute -bottom-24 -right-24 pointer-events-none select-none opacity-[0.03] dark:opacity-[0.05]">
+          <span className="text-[20rem] font-black tracking-tighter leading-none">PULSE</span>
         </div>
       </footer>
     </div>
