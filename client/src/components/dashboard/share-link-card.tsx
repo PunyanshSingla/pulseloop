@@ -2,7 +2,7 @@ import { Globe, Copy } from "lucide-react";
 
 export function ShareLinkCard() {
   return (
-    <div className="rounded-xl border border-border/70 bg-card p-5">
+    <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium">Quick share</p>
         <Globe className="size-4 text-muted-foreground" />

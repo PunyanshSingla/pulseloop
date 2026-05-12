@@ -10,8 +10,8 @@ const polls = [
 
 export function PollsTable() {
   return (
-    <div className="rounded-xl border border-border/70 bg-card">
-      <div className="flex items-center justify-between border-b border-border/70 px-5 py-4">
+    <div className="rounded-xl border border-border bg-card">
+      <div className="flex items-center justify-between border-b border-border px-5 py-4">
         <div>
           <p className="text-sm font-medium">Recent polls</p>
           <p className="text-xs text-muted-foreground">5 of 18 polls</p>
@@ -23,7 +23,7 @@ export function PollsTable() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border/70 text-left text-xs text-muted-foreground">
+            <tr className="border-b border-border text-left text-xs text-muted-foreground">
               <th className="px-5 py-2.5 font-medium">Poll</th>
               <th className="px-5 py-2.5 font-medium">Status</th>
               <th className="px-5 py-2.5 text-right font-medium">Responses</th>
@@ -34,7 +34,7 @@ export function PollsTable() {
           </thead>
           <tbody>
             {polls.map((p) => (
-              <tr key={p.name} className="border-b border-border/40 last:border-0 transition-colors hover:bg-muted/40">
+              <tr key={p.name} className="border-b border-border/70 last:border-0 transition-colors hover:bg-muted/40">
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-3">
                     <div className="grid size-8 place-items-center rounded-md bg-muted text-muted-foreground">

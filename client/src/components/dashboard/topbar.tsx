@@ -8,7 +8,7 @@ export function Topbar({ userName }: TopbarProps) {
   const firstName = userName?.split(" ")[0] || "there";
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/70 bg-background/80 px-6 backdrop-blur-md">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/80 px-6 backdrop-blur-md">
       <div>
         <h1 className="text-lg font-semibold tracking-tight">Overview</h1>
         <p className="text-xs text-muted-foreground">Welcome back, {firstName}. Here's what's moving today.</p>

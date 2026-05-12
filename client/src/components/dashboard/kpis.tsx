@@ -13,7 +13,7 @@ export function KPIs() {
       {kpis.map((k) => (
         <div
           key={k.label}
-          className="group relative overflow-hidden rounded-xl border border-border/70 bg-card p-5 transition-shadow hover:shadow-sm"
+          className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-sm"
         >
           <p className="text-xs font-medium text-muted-foreground">{k.label}</p>
           <div className="mt-2 flex items-baseline justify-between">

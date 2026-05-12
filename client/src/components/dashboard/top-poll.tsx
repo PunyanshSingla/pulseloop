@@ -7,7 +7,7 @@ export function TopPoll() {
     { label: "Light mode by default", pct: 10, votes: 297 },
   ];
   return (
-    <div className="rounded-xl border border-border/70 bg-card p-5">
+    <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium">Top performing poll</p>
@@ -39,7 +39,7 @@ export function TopPoll() {
           </div>
         ))}
       </div>
-      <div className="mt-5 flex items-center justify-between border-t border-border/70 pt-4 text-xs text-muted-foreground">
+      <div className="mt-5 flex items-center justify-between border-t border-border pt-4 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
           <Eye className="size-3.5" /> 4,210 views
         </span>

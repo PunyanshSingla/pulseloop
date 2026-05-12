@@ -14,7 +14,7 @@ import Logo from "@/components/logo";
 // ─── Nav ───────────────────────────────────────────────────────────────────────
 function Nav() {
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/80 backdrop-blur-md">
+    <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <div className="flex items-center gap-8">
           <Logo />

@@ -7,7 +7,7 @@ export function ActivityFeed() {
     { who: "Priya S.", what: "shared", poll: "Conference topics", when: "1h ago" },
   ];
   return (
-    <div className="rounded-xl border border-border/70 bg-card p-5">
+    <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium">Live activity</p>
         <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">

@@ -15,7 +15,7 @@ export function ResponsesChart() {
   const area = `0,${h} ${points} ${w},${h}`;
 
   return (
-    <div className="rounded-xl border border-border/70 bg-card p-5">
+    <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium">Responses over time</p>

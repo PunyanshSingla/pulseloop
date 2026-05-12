@@ -1,5 +1,6 @@
 import { LayoutGrid, BarChart3, Users, Link2, Settings, Sparkles } from "lucide-react";
 import { Logo } from "@/components/logo";
+import { Link, useLocation } from "react-router-dom";
 
 interface SidebarProps {
   user?: {
@@ -10,12 +11,13 @@ interface SidebarProps {
 }
 
 export function Sidebar({ user }: SidebarProps) {
+  const location = useLocation();
   const nav = [
-    { icon: LayoutGrid, label: "Overview", active: true },
-    { icon: BarChart3, label: "Polls" },
-    { icon: Users, label: "Audience" },
-    { icon: Link2, label: "Share links" },
-    { icon: Settings, label: "Settings" },
+    { icon: LayoutGrid, label: "Overview", href: "/dashboard" },
+    { icon: BarChart3, label: "Polls", href: "/polls" },
+    { icon: Users, label: "Audience", href: "#" },
+    { icon: Link2, label: "Share links", href: "#" },
+    { icon: Settings, label: "Settings", href: "#" },
   ];
 
   const initials = user?.name
@@ -27,8 +29,8 @@ export function Sidebar({ user }: SidebarProps) {
     : "??";
 
   return (
-    <aside className="hidden w-64 shrink-0 h-screen sticky top-0 flex-col border-r border-border/70 bg-background/50 lg:flex">
-      <div className="flex h-16 items-center gap-2 border-b border-border/70 px-6">
+    <aside className="hidden w-64 shrink-0 h-screen sticky top-0 flex-col border-r border-border bg-background/50 lg:flex">
+      <div className="flex h-16 items-center gap-2 border-b border-border px-6">
         <Logo className="scale-75 origin-left" />
       </div>
 
@@ -37,22 +39,26 @@ export function Sidebar({ user }: SidebarProps) {
           Workspace
         </p>
         <ul className="space-y-0.5">
-          {nav.map((n) => (
-            <li key={n.label}>
-              <button
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  n.active
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <n.icon className="size-4" />
-                {n.label}
-              </button>
-            </li>
-          ))}
+          {nav.map((n) => {
+            const isActive = location.pathname === n.href;
+            return (
+              <li key={n.label}>
+                <Link
+                  to={n.href}
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <n.icon className="size-4" />
+                  {n.label}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
-        <div className="mt-8 rounded-xl border border-border/70 bg-muted/30 p-4">
+        <div className="mt-8 rounded-xl border border-border bg-muted/30 p-4">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Sparkles className="size-4 text-primary" />
             Upgrade to Pro
@@ -66,7 +72,7 @@ export function Sidebar({ user }: SidebarProps) {
         </div>
       </nav>
 
-      <div className="border-t border-border/70 p-4 bg-background">
+      <div className="border-t border-border p-4 bg-background">
         <div className="flex items-center gap-3">
           {user?.image ? (
             <img src={user.image} alt={user.name} className="size-9 rounded-full object-cover ring-2 ring-primary/20" />

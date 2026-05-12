@@ -6,6 +6,7 @@ import ForgotPasswordPage from "./pages/forgot-password.tsx";
 import ResetPasswordPage from "./pages/reset-password.tsx";
 import VerifyEmailPage from "./pages/verify-email.tsx";
 import DashboardPage from "./pages/dashboard.tsx";
+import PollsPage from "./pages/polls.tsx";
 import { Toaster } from "@/components/ui/sonner";
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/polls" element={<PollsPage />} />
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
