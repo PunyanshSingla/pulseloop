@@ -11,6 +11,7 @@ import { Link } from "react-router-dom"
 import { useState } from "react"
 import { authClient } from "@/lib/auth-client"
 import { toast } from "sonner"
+import { appUrl } from "@/lib/auth-redirect"
 
 export function ForgotPasswordForm({
   className,
@@ -25,7 +26,7 @@ export function ForgotPasswordForm({
     setLoading(true)
     const { error } = await authClient.requestPasswordReset({
       email,
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: appUrl("/reset-password"),
     })
     setLoading(false)
     if (error) {

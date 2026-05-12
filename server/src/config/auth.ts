@@ -11,6 +11,9 @@ export const auth = betterAuth({
     database: mongodbAdapter(db, {
         client
     }),
+    account: {
+        storeStateStrategy: "cookie",
+    },
     baseURL: env.BETTER_AUTH_URL,
     trustedOrigins: [
         env.CLIENT_URL
@@ -25,8 +28,8 @@ export const auth = betterAuth({
 
     emailAndPassword: {
         enabled: true,
-        async sendResetPassword({ user, url, token }) {
-            const resetUrl = `${env.CLIENT_URL}/reset-password?token=${token}`;
+        async sendResetPassword({ user, url }) {
+            const resetUrl = url.replace(env.BETTER_AUTH_URL, env.CLIENT_URL);
             await sendResetPasswordEmail({
                 to: user.email,
                 resetUrl: resetUrl,

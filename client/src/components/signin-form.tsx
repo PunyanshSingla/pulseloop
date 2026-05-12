@@ -12,6 +12,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { authClient } from "@/lib/auth-client"
 import { toast } from "sonner"
+import { appUrl } from "@/lib/auth-redirect"
 
 export function LoginForm({
   className,
@@ -25,10 +26,11 @@ export function LoginForm({
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    const { data, error } = await authClient.signIn.email({
+    const { error } = await authClient.signIn.email({
       email,
       password,
-      callbackURL: "/",
+      callbackURL: appUrl("/dashboard"),
+      errorCallbackURL: appUrl("/sign-in"),
     })
     setLoading(false)
     if (error) {
@@ -41,12 +43,15 @@ export function LoginForm({
 
   const handleSocialSignIn = async (provider: "google") => {
       setLoading(true)
-      const { data, error } = await authClient.signIn.social({
+      const { error } = await authClient.signIn.social({
           provider,
-          callbackURL: "/"
+          callbackURL: appUrl("/dashboard"),
+          errorCallbackURL: appUrl("/sign-in"),
       })
       setLoading(false)
       if (error) {
+
+          console.error(error)
           toast.error(error.message || `An error occurred during ${provider} sign in`)
       }
   }
