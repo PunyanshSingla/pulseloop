@@ -27,7 +27,7 @@ export const useCreatePoll = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["polls"] });
       toast.success("Poll created successfully!");
-      navigate("/");
+      navigate("/polls");
     },
     onError: (error: any) => {
       toast.error(error.message || "Failed to create poll");

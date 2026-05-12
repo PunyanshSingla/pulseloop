@@ -17,17 +17,20 @@ import {
   MessageSquare
 } from "lucide-react";
 import { toast } from "sonner";
+import { useCreatePoll } from "@/hooks/use-polls";
 
 export default function CreatePollPage() {
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending: isSessionPending } = authClient.useSession();
+  const { mutate: createPoll, isPending: isCreating } = useCreatePoll();
   const navigate = useNavigate();
   
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [questions, setQuestions] = useState([
     { id: 1, text: "", options: ["", ""] }
   ]);
 
-  if (isPending) {
+  if (isSessionPending) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -53,6 +56,21 @@ export default function CreatePollPage() {
     }
   };
 
+  const handleQuestionChange = (id: number, text: string) => {
+    setQuestions(questions.map(q => q.id === id ? { ...q, text } : q));
+  };
+
+  const handleOptionChange = (qId: number, oIdx: number, text: string) => {
+    setQuestions(questions.map(q => {
+      if (q.id === qId) {
+        const newOptions = [...q.options];
+        newOptions[oIdx] = text;
+        return { ...q, options: newOptions };
+      }
+      return q;
+    }));
+  };
+
   const addOption = (qId: number) => {
     setQuestions(questions.map(q => 
       q.id === qId ? { ...q, options: [...q.options, ""] } : q
@@ -60,8 +78,19 @@ export default function CreatePollPage() {
   };
 
   const handleCreate = () => {
-    toast.success("Poll created successfully! (Dummy)");
-    navigate("/polls");
+    if (!title.trim()) return toast.error("Please enter a poll title");
+    
+    const formattedQuestions = questions.map(q => ({
+      text: q.text,
+      options: q.options.map(o => ({ text: o }))
+    }));
+
+    createPoll({
+      title,
+      description,
+      status: "active",
+      questions: formattedQuestions,
+    });
   };
 
   return (
@@ -98,6 +127,16 @@ export default function CreatePollPage() {
                       onChange={(e) => setTitle(e.target.value)}
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description (Optional)</Label>
+                    <Input 
+                      id="description" 
+                      placeholder="Provide some context..." 
+                      className="h-11 bg-muted/30 border-border focus:ring-primary/20"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-6">
@@ -123,17 +162,21 @@ export default function CreatePollPage() {
                           <Input 
                             placeholder="What would you like to ask?" 
                             className="h-11 bg-muted/30 border-border"
+                            value={q.text}
+                            onChange={(e) => handleQuestionChange(q.id, e.target.value)}
                           />
                         </div>
 
                         <div className="space-y-3">
                           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Options</Label>
                           <div className="grid gap-2">
-                            {q.options.map((_, oIdx) => (
+                            {q.options.map((option, oIdx) => (
                               <Input 
                                 key={oIdx} 
                                 placeholder={`Option ${oIdx + 1}`} 
                                 className="h-10 bg-muted/20 border-border/60"
+                                value={option}
+                                onChange={(e) => handleOptionChange(q.id, oIdx, e.target.value)}
                               />
                             ))}
                           </div>
@@ -204,8 +247,9 @@ export default function CreatePollPage() {
                     <Button 
                       className="w-full h-11 font-bold shadow-lg shadow-primary/20"
                       onClick={handleCreate}
+                      disabled={isCreating}
                     >
-                      Create Poll
+                      {isCreating ? "Creating..." : "Create Poll"}
                     </Button>
                     <p className="mt-3 text-center text-[10px] text-muted-foreground">
                       By creating a poll, you agree to our terms of service.

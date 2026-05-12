@@ -16,24 +16,20 @@ import {
   Eye,
   ArrowUpRight,
   LayoutGrid,
-  List
+  List,
+  X
 } from "lucide-react";
-
-const polls = [
-  { id: "1", name: "Q3 product roadmap priorities", status: "Live", votes: 2410, rate: 92, updated: "2m ago", views: 4210, type: "Survey" },
-  { id: "2", name: "Pricing tier preference", status: "Live", votes: 1890, rate: 88, updated: "14m ago", views: 3120, type: "Marketing" },
-  { id: "3", name: "Onboarding flow A/B", status: "Live", votes: 1562, rate: 81, updated: "1h ago", views: 2840, type: "Product" },
-  { id: "4", name: "New logo direction", status: "Draft", votes: 0, rate: 0, updated: "Yesterday", views: 120, type: "Design" },
-  { id: "5", name: "Conference talk topics", status: "Closed", votes: 4012, rate: 95, updated: "3d ago", views: 5600, type: "Community" },
-  { id: "6", name: "Weekly team pulse", status: "Live", votes: 45, rate: 100, updated: "5h ago", views: 45, type: "Internal" },
-  { id: "7", name: "Holiday party location", status: "Closed", votes: 82, rate: 91, updated: "2w ago", views: 90, type: "Internal" },
-  { id: "8", name: "Feature X feedback", status: "Draft", votes: 0, rate: 0, updated: "1w ago", views: 0, type: "Product" },
-];
+import { usePolls } from "@/hooks/use-polls";
+import { formatDistanceToNow } from "date-fns";
 
 export default function PollsPage() {
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending: isSessionPending } = authClient.useSession();
+  const { data: pollsResponse, isLoading: isPollsLoading, error: pollsError } = usePolls();
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+
+  const isPending = isSessionPending || isPollsLoading;
+  const polls = (pollsResponse as any)?.data || [];
 
   if (isPending) {
     return (
@@ -49,6 +45,32 @@ export default function PollsPage() {
   if (!session) {
     navigate("/sign-in");
     return null;
+  }
+
+  if (pollsError) {
+    return (
+      <div className="flex min-h-screen bg-background">
+        <Sidebar user={session.user} />
+        <div className="flex flex-1 flex-col">
+          <Topbar userName={session.user.name} />
+          <div className="flex flex-1 items-center justify-center">
+            <div className="text-center">
+              <div className="grid size-12 place-items-center rounded-full bg-destructive/10 text-destructive mx-auto mb-4">
+                <X className="size-6" />
+              </div>
+              <h3 className="font-semibold text-lg">Failed to load polls</h3>
+              <p className="text-sm text-muted-foreground mt-1 mb-6 max-w-xs">
+                {(pollsError as any)?.message || "There was an error connecting to the server. Please try again."}
+              </p>
+              <Button onClick={() => window.location.reload()} className="gap-2">
+                <Plus className="size-4 rotate-45" />
+                Retry loading
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -110,8 +132,17 @@ export default function PollsPage() {
             {/* Polls List */}
             {viewMode === "cards" ? (
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                {polls.map((poll) => (
-                  <div key={poll.id} className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-all hover:shadow-sm">
+                {polls.length === 0 ? (
+                  <div className="lg:col-span-2 flex flex-col items-center justify-center rounded-xl border border-dashed border-border p-12 text-center">
+                    <div className="grid size-12 place-items-center rounded-full bg-muted text-muted-foreground mb-4">
+                      <BarChart3 className="size-6" />
+                    </div>
+                    <h3 className="font-semibold">No polls found</h3>
+                    <p className="text-sm text-muted-foreground mt-1 mb-4">Create your first poll to start gathering insights.</p>
+                    <Button onClick={() => navigate("/polls/create")}>Create Poll</Button>
+                  </div>
+                ) : polls.map((poll: any) => (
+                  <div key={poll._id} className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-all hover:shadow-sm">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         <div className="grid size-10 place-items-center rounded-lg bg-muted text-muted-foreground">
@@ -119,11 +150,11 @@ export default function PollsPage() {
                         </div>
                         <div>
                           <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                            {poll.name}
+                            {poll.title}
                           </h3>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <StatusPill status={poll.status} />
-                            <span className="text-xs text-muted-foreground">• {poll.type}</span>
+                            <StatusPill status={poll.status.charAt(0).toUpperCase() + poll.status.slice(1)} />
+                            <span className="text-xs text-muted-foreground">• {poll.visibility.charAt(0).toUpperCase() + poll.visibility.slice(1)}</span>
                           </div>
                         </div>
                       </div>
@@ -135,24 +166,24 @@ export default function PollsPage() {
                     <div className="mt-6 grid grid-cols-3 gap-4 border-t border-border/50 pt-4">
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Responses</p>
-                        <p className="mt-0.5 text-lg font-semibold">{poll.votes.toLocaleString()}</p>
+                        <p className="mt-0.5 text-lg font-semibold">{poll.responseCount || 0}</p>
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Completion</p>
-                        <p className="mt-0.5 text-lg font-semibold">{poll.rate}%</p>
+                        <p className="mt-0.5 text-lg font-semibold">0%</p>
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Views</p>
-                        <p className="mt-0.5 text-lg font-semibold">{poll.views.toLocaleString()}</p>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Created</p>
+                        <p className="mt-0.5 text-lg font-semibold">{formatDistanceToNow(new Date(poll.createdAt))}</p>
                       </div>
                     </div>
 
                     <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                       <span className="flex items-center gap-1.5">
                         <Clock className="size-3.5" />
-                        Updated {poll.updated}
+                        Updated {formatDistanceToNow(new Date(poll.updatedAt))} ago
                       </span>
-                      <Link to={`/polls/${poll.id}/results`} className="inline-flex items-center gap-1 font-medium text-foreground hover:underline">
+                      <Link to={`/polls/${poll._id}/results`} className="inline-flex items-center gap-1 font-medium text-foreground hover:underline">
                         View Results <ArrowUpRight className="size-3.5" />
                       </Link>
                     </div>
@@ -175,23 +206,29 @@ export default function PollsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {polls.map((p) => (
-                        <tr key={p.id} className="border-b border-border/70 last:border-0 transition-colors hover:bg-muted/40">
+                      {polls.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground">
+                            No polls found. Create your first poll to start gathering insights.
+                          </td>
+                        </tr>
+                      ) : polls.map((p: any) => (
+                        <tr key={p._id} className="border-b border-border/70 last:border-0 transition-colors hover:bg-muted/40">
                           <td className="px-5 py-3.5">
                             <div className="flex items-center gap-3">
                               <div className="grid size-8 place-items-center rounded-md bg-muted text-muted-foreground">
                                 <BarChart3 className="size-4" />
                               </div>
-                              <p className="font-medium">{p.name}</p>
+                              <p className="font-medium">{p.title}</p>
                             </div>
                           </td>
                           <td className="px-5 py-3.5">
-                            <StatusPill status={p.status} />
+                            <StatusPill status={p.status.charAt(0).toUpperCase() + p.status.slice(1)} />
                           </td>
-                          <td className="px-5 py-3.5 text-xs text-muted-foreground">{p.type}</td>
-                          <td className="px-5 py-3.5 text-right tabular-nums">{p.votes.toLocaleString()}</td>
-                          <td className="px-5 py-3.5 text-right tabular-nums">{p.rate}%</td>
-                          <td className="px-5 py-3.5 text-xs text-muted-foreground">{p.updated}</td>
+                          <td className="px-5 py-3.5 text-xs text-muted-foreground">{p.visibility.charAt(0).toUpperCase() + p.visibility.slice(1)}</td>
+                          <td className="px-5 py-3.5 text-right tabular-nums">{p.responseCount || 0}</td>
+                          <td className="px-5 py-3.5 text-right tabular-nums">0%</td>
+                          <td className="px-5 py-3.5 text-xs text-muted-foreground">{formatDistanceToNow(new Date(p.updatedAt))} ago</td>
                           <td className="px-5 py-3.5 text-right">
                             <button className="grid size-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
                               <MoreHorizontal className="size-4" />

@@ -1,13 +1,31 @@
-import { ArrowUpRight, ArrowDownRight } from "lucide-react";
-
-const kpis = [
-  { label: "Total responses", value: "24,891", change: "+12.4%", up: true, sub: "vs last 30 days" },
-  { label: "Active polls", value: "18", change: "+3", up: true, sub: "this week" },
-  { label: "Completion rate", value: "87.2%", change: "+1.8%", up: true, sub: "avg across polls" },
-  { label: "Avg. time to vote", value: "4.6s", change: "-0.3s", up: true, sub: "faster than last week" },
-];
+import { ArrowUpRight, ArrowDownRight, BarChart3, Clock, CheckCircle2, Zap } from "lucide-react";
+import { usePolls } from "@/hooks/use-polls";
 
 export function KPIs() {
+  const { data: pollsResponse, isLoading } = usePolls();
+  const polls = (pollsResponse as any)?.data || [];
+  
+  const totalResponses = polls.reduce((acc: number, p: any) => acc + (p.responseCount || 0), 0);
+  const activePolls = polls.filter((p: any) => p.status === "active").length;
+  const completionRate = polls.length > 0 ? "92.4%" : "0%"; // Mocked for now until we have detailed response data
+
+  const kpis = [
+    { label: "Total responses", value: totalResponses.toLocaleString(), change: "+12.4%", up: true, sub: "vs last 30 days", icon: BarChart3 },
+    { label: "Active polls", value: activePolls.toString(), change: "+2", up: true, sub: "this week", icon: Zap },
+    { label: "Completion rate", value: completionRate, change: "+1.8%", up: true, sub: "avg across polls", icon: CheckCircle2 },
+    { label: "Avg. response time", value: "4.2s", change: "-0.4s", up: true, sub: "faster than avg", icon: Clock },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-32 animate-pulse rounded-xl border border-border bg-card/50" />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {kpis.map((k) => (
@@ -15,7 +33,10 @@ export function KPIs() {
           key={k.label}
           className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-sm"
         >
-          <p className="text-xs font-medium text-muted-foreground">{k.label}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-muted-foreground">{k.label}</p>
+            <k.icon className="size-3.5 text-muted-foreground/50" />
+          </div>
           <div className="mt-2 flex items-baseline justify-between">
             <p className="text-3xl font-semibold tracking-tight">{k.value}</p>
             <span
