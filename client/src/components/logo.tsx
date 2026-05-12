@@ -54,12 +54,6 @@ export function Logo({ className = "", iconOnly = false }: { className?: string,
             <span className="text-2xl font-black tracking-tighter text-foreground group-hover:text-primary transition-colors duration-300">
               Pulse<span className="text-primary group-hover:text-foreground transition-colors duration-300">Loop</span>
             </span>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="h-[1px] w-5 bg-primary/40" />
-              <span className="text-[11px] font-bold uppercase tracking-[0.4em] text-muted-foreground/60">
-                Insights
-              </span>
-            </div>
           </div>
         )}
 

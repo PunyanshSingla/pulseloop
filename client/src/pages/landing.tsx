@@ -1,332 +1,403 @@
 import { Link } from "react-router-dom";
-import { 
-  ArrowRight, 
-  BarChart3, 
-  Clock, 
-  Link2, 
-  Shield, 
-  Users, 
+import {
+  ArrowRight,
+  BarChart3,
+  Check,
+  Copy,
+  GitBranch,
+  Plus,
+  ShieldCheck,
   Zap,
-  MousePointer2,
-  Sparkles,
-  PieChart
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/navbar";
-import { Badge } from "@/components/ui/badge";
 import Logo from "@/components/logo";
 
+// ─── Nav ───────────────────────────────────────────────────────────────────────
+function Nav() {
+  return (
+    <nav className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+        <div className="flex items-center gap-8">
+          <Logo />
+          <div className="hidden items-center gap-6 md:flex">
+            <a className="text-sm text-muted-foreground transition-colors hover:text-foreground" href="#product">Product</a>
+            <a className="text-sm text-muted-foreground transition-colors hover:text-foreground" href="#how">How it works</a>
+            <a className="text-sm text-muted-foreground transition-colors hover:text-foreground" href="#features">Features</a>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/sign-in"
+            className="hidden rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+          >
+            Sign in
+          </Link>
+          <Link
+            to="/sign-up"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm ring-1 ring-primary/30 transition-all hover:brightness-110"
+          >
+            Get started
+            <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+// ─── Poll Mockup ───────────────────────────────────────────────────────────────
+function PollMockup() {
+  const options = [
+    { label: "Real-time Analytics Dashboard", pct: 42, active: true },
+    { label: "Advanced Privacy Controls", pct: 28, active: false },
+    { label: "API & Webhooks Integration", pct: 30, active: false },
+  ];
+  return (
+    <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl bg-card p-8 shadow-2xl ring-1 ring-black/5 md:p-12">
+      <div className="mb-8">
+        <div className="mb-4 flex items-center gap-2">
+          <span className="rounded bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-foreground">
+            Live Poll
+          </span>
+          <span className="font-mono text-xs text-muted-foreground">
+            pulseloop.io/p/q3-roadmap
+          </span>
+        </div>
+        <h2 className="mb-6 max-w-[40ch] text-balance text-xl font-medium">
+          Which feature should we prioritize for the Q3 roadmap?
+        </h2>
+        <div className="space-y-4">
+          {options.map((o, i) => (
+            <div key={o.label}>
+              <div className="mb-2 flex items-center justify-between">
+                <span className={`text-sm font-medium ${o.active ? "" : "text-muted-foreground"}`}>
+                  {o.label}
+                </span>
+                <span className={`text-sm ${o.active ? "text-foreground" : "text-muted-foreground"}`}>
+                  {o.pct}%
+                </span>
+              </div>
+              <div className={`relative h-10 w-full overflow-hidden rounded-lg border ${o.active ? "border-border bg-muted" : "border-border/60 bg-muted/60"}`}>
+                <div
+                  className={`h-full transition-all duration-700 ${o.active ? "border-r border-primary bg-primary/20" : "bg-muted-foreground/15"}`}
+                  style={{ width: `${o.pct}%`, transitionDelay: `${i * 120}ms` }}
+                />
+                {o.active && (
+                  <div className="absolute inset-0 flex items-center px-4">
+                    <div className="mr-3 grid size-4 place-items-center rounded-full border-2 border-primary bg-card">
+                      <Check className="size-2 text-primary" strokeWidth={4} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center justify-between border-t border-border pt-6">
+        <div className="flex -space-x-2">
+          <div className="size-6 rounded-full border-2 border-card bg-zinc-200" />
+          <div className="size-6 rounded-full border-2 border-card bg-zinc-300" />
+          <div className="size-6 rounded-full border-2 border-card bg-zinc-400" />
+        </div>
+        <span className="text-xs text-muted-foreground">842 responses collected</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Hero ──────────────────────────────────────────────────────────────────────
+function Hero() {
+  return (
+    <section className="px-6 pt-24 pb-16">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-16 text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground shadow-sm">
+            <span className="size-1.5 animate-pulse rounded-full bg-primary" />
+            <span>Now in public beta</span>
+          </div>
+          <h1 className="mx-auto mb-6 max-w-[24ch] text-balance text-4xl font-semibold tracking-tight md:text-6xl">
+            Gather signals from the noise with precision
+          </h1>
+          <p className="mx-auto mb-10 max-w-[56ch] text-pretty text-base text-muted-foreground sm:text-lg">
+            Create friction-less polls that people actually enjoy answering.
+            Share via link, collect rich data, and make informed decisions faster.
+          </p>
+          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              to="/sign-up"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground ring-1 ring-primary/30 transition-all hover:brightness-110 sm:w-auto"
+            >
+              <Plus className="size-4" />
+              Create your first poll
+            </Link>
+            <Link
+              to="/sign-in"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-sm ring-1 ring-black/5 transition-all hover:ring-black/10 sm:w-auto"
+            >
+              View examples
+            </Link>
+          </div>
+        </div>
+        <PollMockup />
+      </div>
+    </section>
+  );
+}
+
+// ─── Share Strip ───────────────────────────────────────────────────────────────
+function ShareStrip() {
+  return (
+    <div className="bg-zinc-900 py-4">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-6">
+        <span className="text-xs font-medium uppercase tracking-widest text-zinc-400">
+          Shareable Link System
+        </span>
+        <div className="flex items-center gap-3 rounded-md bg-zinc-800 px-3 py-1.5 ring-1 ring-white/10">
+          <code className="text-sm text-emerald-400">pulseloop.io/s/6k2p9</code>
+          <button className="text-zinc-500 transition-colors hover:text-white" aria-label="Copy link">
+            <Copy className="size-4" />
+          </button>
+        </div>
+        <div className="hidden h-4 w-px bg-zinc-700 sm:block" />
+        <span className="text-sm text-zinc-400">
+          Instant delivery across Slack, Teams, and Email
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ─── How It Works ──────────────────────────────────────────────────────────────
+function HowItWorks() {
+  const steps = [
+    { n: "1", title: "Compose", desc: "Craft questions using our intuitive block editor. Add logic jumps and media effortlessly." },
+    { n: "2", title: "Distribute", desc: "Generate a unique link or embed the poll directly into your product or website." },
+    { n: "3", title: "Analyze", desc: "Watch responses roll in with real-time visualization and exportable CSV data." },
+  ];
+  return (
+    <section id="how" className="bg-card px-6 py-24">
+      <div className="mx-auto max-w-7xl">
+        <h2 className="mb-16 text-center text-3xl font-semibold tracking-tight">
+          Three steps to clarity
+        </h2>
+        <div className="grid gap-12 md:grid-cols-3">
+          {steps.map((s) => (
+            <div key={s.n} className="space-y-4">
+              <div className="grid size-10 place-items-center rounded-lg bg-accent font-semibold text-accent-foreground">
+                {s.n}
+              </div>
+              <h3 className="text-lg font-medium">{s.title}</h3>
+              <p className="max-w-[35ch] text-pretty text-sm text-muted-foreground">
+                {s.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Features ──────────────────────────────────────────────────────────────────
+function Features() {
+  const features = [
+    { icon: ShieldCheck, title: "Secure Identity", desc: "Optionally restrict polls to specific domains or require verified email logins." },
+    { icon: GitBranch, title: "Logic Jumps", desc: "Create personalized paths for respondents based on their previous answers." },
+    { icon: Zap, title: "Instant Results", desc: "Dynamic charts update the moment a submission is received. Zero delay." },
+  ];
+  return (
+    <section id="features" className="bg-secondary px-6 py-24">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {features.map(({ icon: Icon, title, desc }) => (
+            <div key={title} className="flex h-full flex-col rounded-xl bg-card p-8 ring-1 ring-black/5">
+              <div className="mb-6 grid size-9 place-items-center rounded bg-muted">
+                <Icon className="size-4 text-foreground" />
+              </div>
+              <h4 className="mb-2 font-medium">{title}</h4>
+              <p className="max-w-[35ch] text-pretty text-sm text-muted-foreground">
+                {desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Dashboard Mock ────────────────────────────────────────────────────────────
+function DashboardMock() {
+  const bars = [60, 35, 80, 45, 70, 25, 55];
+  return (
+    <div className="aspect-video w-full overflow-hidden rounded-xl bg-card p-6 ring-1 ring-black/5">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="size-4 text-primary" />
+          <span className="text-sm font-medium">Response Analytics</span>
+        </div>
+        <span className="rounded bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-foreground">
+          Live
+        </span>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-lg border border-border p-4">
+          <div className="text-xs text-muted-foreground">Total responses</div>
+          <div className="mt-1 text-2xl font-semibold">12,438</div>
+          <div className="mt-1 text-xs text-primary">+18.2%</div>
+        </div>
+        <div className="rounded-lg border border-border p-4">
+          <div className="text-xs text-muted-foreground">Completion</div>
+          <div className="mt-1 text-2xl font-semibold">94%</div>
+          <div className="mt-1 text-xs text-primary">+2.4%</div>
+        </div>
+        <div className="rounded-lg border border-border p-4">
+          <div className="text-xs text-muted-foreground">Avg. time</div>
+          <div className="mt-1 text-2xl font-semibold">38s</div>
+          <div className="mt-1 text-xs text-muted-foreground">stable</div>
+        </div>
+      </div>
+      <div className="mt-6 flex h-32 items-end gap-2 rounded-lg border border-border p-4">
+        {bars.map((h, i) => (
+          <div
+            key={i}
+            className={`flex-1 rounded-t ${i % 2 === 0 ? "bg-primary" : "bg-primary/40"}`}
+            style={{ height: `${h}%` }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Analytics ─────────────────────────────────────────────────────────────────
+function Analytics() {
+  return (
+    <section id="product" className="px-6 py-24">
+      <div className="mx-auto flex max-w-7xl flex-col items-center gap-16 lg:flex-row">
+        <div className="flex-1">
+          <h2 className="mb-6 max-w-[20ch] text-balance text-3xl font-semibold tracking-tight">
+            Professional analytics for every response
+          </h2>
+          <p className="mb-8 max-w-[48ch] text-base text-muted-foreground">
+            Deep dive into the data. Filter by respondent segments, identify
+            trends over time, and export production-ready charts for your next
+            presentation.
+          </p>
+          <div className="grid grid-cols-2 gap-8 border-t border-border pt-8">
+            <div>
+              <div className="text-2xl font-semibold">99.9%</div>
+              <div className="mt-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Uptime reliability
+              </div>
+            </div>
+            <div>
+              <div className="text-2xl font-semibold">1.2s</div>
+              <div className="mt-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Avg load time
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="w-full flex-1">
+          <DashboardMock />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── CTA ───────────────────────────────────────────────────────────────────────
+function CTA() {
+  return (
+    <section className="px-6 py-24">
+      <div className="mx-auto max-w-5xl rounded-2xl bg-primary p-12 text-center md:p-20">
+        <h2 className="mb-6 text-3xl font-semibold text-primary-foreground md:text-4xl">
+          Ready to start collecting?
+        </h2>
+        <p className="mx-auto mb-10 max-w-[48ch] text-lg text-primary-foreground/80">
+          Join over 10,000 product teams making data-driven decisions every day.
+        </p>
+        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <Link
+            to="/sign-up"
+            className="w-full rounded-lg bg-card px-8 py-3 text-sm font-medium text-primary shadow-xl ring-1 ring-white/10 sm:w-auto"
+          >
+            Create free account
+          </Link>
+          <Link
+            to="/sign-in"
+            className="w-full px-8 py-3 text-sm font-medium text-primary-foreground/80 transition-colors hover:text-primary-foreground sm:w-auto"
+          >
+            Sign in
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Footer ────────────────────────────────────────────────────────────────────
+function Footer() {
+  return (
+    <footer className="border-t border-border px-6 py-16">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-16 grid gap-12 md:grid-cols-3">
+          <div className="col-span-1">
+            <span className="mb-4 block text-lg font-semibold tracking-tight">PulseLoop</span>
+            <p className="max-w-[35ch] text-sm text-muted-foreground">
+              The polling platform built for modern product organizations and
+              independent creators.
+            </p>
+          </div>
+          <div className="col-span-1 grid grid-cols-2 gap-8 md:col-span-2">
+            <div className="space-y-4">
+              <h5 className="text-sm font-semibold">Resources</h5>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><a href="#" className="hover:text-foreground">Documentation</a></li>
+                <li><a href="#" className="hover:text-foreground">API Reference</a></li>
+                <li><a href="#" className="hover:text-foreground">Community</a></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h5 className="text-sm font-semibold">Company</h5>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><a href="#" className="hover:text-foreground">About</a></li>
+                <li><a href="#" className="hover:text-foreground">Privacy</a></li>
+                <li><a href="#" className="hover:text-foreground">Terms</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
+          <p className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} PulseLoop Inc. All rights reserved.
+          </p>
+          <div className="flex gap-6 text-xs text-muted-foreground">
+            <a href="#" className="hover:text-foreground">Twitter</a>
+            <a href="#" className="hover:text-foreground">GitHub</a>
+            <a href="#" className="hover:text-foreground">LinkedIn</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// ─── Page ──────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background selection:bg-primary/20 selection:text-primary">
-      {/* Background Noise & Dynamic Gradients */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.015] dark:opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-        <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-accent/15 rounded-full blur-[120px]" />
-      </div>
-
-      <Navbar />
-      
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative pt-20 pb-32 lg:pt-32 lg:pb-48 overflow-hidden">
-          <div className="container mx-auto px-6 sm:px-8 relative z-10">
-            <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-              <div className="flex-1 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-bold mb-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>The next generation of polling</span>
-                </div>
-                
-                <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-700">
-                  Capture the heartbeat <br />
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">of your audience.</span>
-                </h1>
-                
-                <p className="max-w-xl mx-auto lg:mx-0 text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed font-medium animate-in fade-in slide-in-from-bottom-5 duration-1000">
-                  Stop guessing. Start knowing. PulseLoop gives you the tools to create, share, and analyze feedback with effortless precision.
-                </p>
-                
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-                  <Link to="/sign-up">
-                    <Button size="lg" className="h-14 px-8 text-base font-bold rounded-2xl shadow-xl shadow-primary/10 hover:shadow-2xl hover:shadow-primary/20 transition-all active:scale-95 group">
-                      Get Started Free <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
-                  <Link to="/sign-in">
-                    <Button size="lg" variant="outline" className="h-14 px-8 text-base font-bold rounded-2xl border-2 hover:bg-muted transition-all active:scale-95">
-                      Live Preview
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              <div className="flex-1 w-full lg:w-auto relative animate-in fade-in slide-in-from-right-8 duration-1000">
-                <div className="relative group">
-                  {/* Main Card */}
-                  <div className="rounded-[32px] border border-border/50 bg-card/40 backdrop-blur-2xl p-2 shadow-2xl transition-all duration-700 group-hover:-translate-y-2">
-                    <div className="rounded-[24px] border border-border/50 bg-background/80 overflow-hidden shadow-inner">
-                      <div className="h-12 border-b border-border/40 bg-muted/20 flex items-center px-6 justify-between">
-                        <div className="flex gap-1.5">
-                          <div className="w-2.5 h-2.5 rounded-full bg-border" />
-                          <div className="w-2.5 h-2.5 rounded-full bg-border" />
-                          <div className="w-2.5 h-2.5 rounded-full bg-border" />
-                        </div>
-                        <div className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">Analytics Dashboard</div>
-                        <div className="w-8" />
-                      </div>
-                      <div className="p-8 space-y-8">
-                        <div>
-                          <h3 className="text-2xl font-bold tracking-tight mb-2">Event Satisfaction?</h3>
-                          <p className="text-sm text-muted-foreground/70 font-medium">Real-time feedback loop active.</p>
-                        </div>
-                        <div className="space-y-6">
-                          {[
-                            { label: "Exceeded Expectations", val: 78, color: "bg-primary" },
-                            { label: "Met Expectations", val: 18, color: "bg-muted-foreground/30" },
-                            { label: "Below Expectations", val: 4, color: "bg-destructive/40" }
-                          ].map((item, i) => (
-                            <div key={i} className="space-y-2">
-                              <div className="flex justify-between text-xs font-bold tracking-tight">
-                                <span className="opacity-60">{item.label}</span>
-                                <span>{item.val}%</span>
-                              </div>
-                              <div className="h-2 w-full bg-muted/20 rounded-full overflow-hidden">
-                                <div 
-                                  className={`h-full ${item.color} rounded-full transition-all duration-1000 ease-out`} 
-                                  style={{ width: `${item.val}%` }} 
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Floating Elements for depth */}
-                  <div className="absolute -top-12 -right-8 w-40 p-4 rounded-2xl bg-background/90 border border-border shadow-2xl backdrop-blur-xl animate-bounce duration-[4000ms]">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Users className="w-3.5 h-3.5 text-primary" />
-                      </div>
-                      <div className="text-[10px] font-bold uppercase opacity-40">Live</div>
-                    </div>
-                    <div className="text-xl font-bold tracking-tighter">2.4k</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section id="features" className="py-48 relative overflow-hidden">
-          <div className="container mx-auto px-6 sm:px-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-32 gap-12">
-              <div className="max-w-2xl">
-                <Badge variant="outline" className="mb-6 px-4 py-1 border-primary/20 text-primary bg-primary/5 text-[10px] font-bold uppercase tracking-widest">Capabilities</Badge>
-                <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1]">Powerful simplicity. <br />Designed for impact.</h2>
-              </div>
-              <p className="text-muted-foreground md:max-w-xs font-medium text-lg leading-relaxed opacity-70">
-                A comprehensive suite of tools designed to help you capture and understand the voice of your audience.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16">
-              {[
-                {
-                  icon: <Zap className="h-6 w-6" />,
-                  title: "Instant Setup",
-                  desc: "Zero friction. Go from idea to live poll in under 60 seconds."
-                },
-                {
-                  icon: <BarChart3 className="h-6 w-6" />,
-                  title: "Real-time Insights",
-                  desc: "Watch responses roll in and see beautiful live visualizations."
-                },
-                {
-                  icon: <Link2 className="h-6 w-6" />,
-                  title: "Smart Sharing",
-                  desc: "Unique URLs that look incredible on any platform or social network."
-                },
-                {
-                  icon: <Shield className="h-6 w-6" />,
-                  title: "Advanced Privacy",
-                  desc: "Choose between anonymous feedback or authenticated responses."
-                },
-                {
-                  icon: <Clock className="h-6 w-6" />,
-                  title: "Automated Control",
-                  desc: "Set expiry times to automatically close polls and publish results."
-                },
-                {
-                  icon: <MousePointer2 className="h-6 w-6" />,
-                  title: "Clean Experience",
-                  desc: "A focused voting interface that ensures high response rates."
-                }
-              ].map((feature, i) => (
-                <div key={i} className="group flex flex-col items-start gap-6">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 shadow-sm">
-                    {feature.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-3 tracking-tight">{feature.title}</h3>
-                    <p className="text-muted-foreground/70 leading-relaxed font-medium">{feature.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Process Section - Vertical Editorial Path */}
-        <section id="how-it-works" className="py-48 relative overflow-hidden bg-muted/5">
-          <div className="container mx-auto px-6 sm:px-8">
-            <div className="flex flex-col lg:flex-row gap-24">
-              <div className="lg:w-1/3 sticky top-32 h-fit">
-                <Badge variant="outline" className="mb-6 px-4 py-1 border-primary/20 text-primary bg-primary/5 text-[10px] font-bold uppercase tracking-widest">Workflow</Badge>
-                <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8 text-pretty leading-[1.1]">
-                  From curiosity <br />to clarity.
-                </h2>
-                <p className="text-muted-foreground font-medium text-lg leading-relaxed opacity-70">
-                  We’ve stripped away the complexity to leave you with a refined, three-step journey to audience insights.
-                </p>
-              </div>
-
-              <div className="lg:w-2/3 space-y-32 relative">
-                {/* Visual Path Line */}
-                <div className="absolute left-8 top-8 bottom-8 w-[1px] bg-gradient-to-b from-primary/50 via-border to-transparent hidden md:block" />
-
-                {[
-                  { 
-                    step: "01", 
-                    title: "Craft Your Narrative", 
-                    desc: "Our intuitive editor allows you to build multi-question polls that feel more like a conversation than a survey. Set logic, timing, and privacy with a single click.",
-                    icon: <Sparkles className="w-6 h-6" />
-                  },
-                  { 
-                    step: "02", 
-                    title: "Broadcast With Impact", 
-                    desc: "Deploy your unique PulseLoop link to any platform. Our responsive interface ensures a flawless experience whether your audience is on mobile, tablet, or desktop.",
-                    icon: <Link2 className="w-6 h-6" />
-                  },
-                  { 
-                    step: "03", 
-                    title: "Reveal The Heartbeat", 
-                    desc: "Watch sentiment shift in real-time. Our analytics dashboard doesn’t just show numbers; it reveals the underlying pulse of your community.",
-                    icon: <PieChart className="w-6 h-6" />
-                  }
-                ].map((item, i) => (
-                  <div key={i} className="relative pl-0 md:pl-24 group animate-in fade-in slide-in-from-bottom-8 duration-700" style={{ animationDelay: `${i * 200}ms` }}>
-                    {/* Step Number Bubble */}
-                    <div className="absolute -left-4 md:left-0 top-0 w-16 h-16 rounded-2xl bg-background border border-border flex items-center justify-center text-primary font-bold text-xl z-10 group-hover:border-primary group-hover:shadow-[0_12px_24px_-8px_rgba(var(--primary),0.3)] transition-all duration-500 transform group-hover:-translate-y-1">
-                      {item.step}
-                    </div>
-                    
-                    <div className="pt-2">
-                      <div className="inline-flex items-center gap-2 text-primary/40 mb-4 group-hover:text-primary transition-colors duration-500">
-                        {item.icon}
-                        <span className="text-xs font-bold uppercase tracking-widest">Step {item.step}</span>
-                      </div>
-                      <h3 className="text-2xl md:text-3xl font-bold tracking-tight mb-4 group-hover:text-foreground transition-colors">{item.title}</h3>
-                      <p className="text-muted-foreground/70 font-medium text-lg leading-relaxed max-w-2xl">
-                        {item.desc}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-32 lg:py-48 container mx-auto px-6 sm:px-8">
-          <div className="rounded-[48px] bg-gradient-to-br from-foreground to-foreground/90 text-background p-16 md:p-32 text-center relative overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] invert" />
-            <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/30 rounded-full blur-[120px]" />
-            <div className="relative z-10">
-              <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-none">Start the conversation today.</h2>
-              <p className="text-background/60 max-w-xl mx-auto mb-16 text-lg md:text-xl font-medium">
-                Join thousands of creators who trust PulseLoop to capture what matters most.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                <Link to="/sign-up">
-                  <Button size="lg" variant="secondary" className="h-16 px-12 text-lg font-bold rounded-2xl shadow-xl active:scale-95 transition-all">
-                    Get Started Free
-                  </Button>
-                </Link>
-                <Link to="/about">
-                  <Button size="lg" variant="ghost" className="h-16 px-12 text-lg font-bold rounded-2xl hover:bg-white/10 text-background">
-                    Learn More
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
+    <div className="min-h-screen bg-background text-foreground">
+      <Nav />
+      <main>
+        <Hero />
+        <ShareStrip />
+        <HowItWorks />
+        <Features />
+        <Analytics />
+        <CTA />
       </main>
-
-      <footer className="relative pt-32 pb-16 overflow-hidden bg-muted/20 border-t border-border/40">
-        <div className="container mx-auto px-6 sm:px-8 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-32">
-            <div className="lg:col-span-2 space-y-8">
-              <Logo />
-              <p className="text-muted-foreground max-w-sm font-medium leading-relaxed">
-                The next generation of audience intelligence. Refined polling for the modern era.
-              </p>
-              <div className="flex gap-6">
-                {['Twitter', 'GitHub', 'LinkedIn'].map((platform) => (
-                  <a 
-                    key={platform} 
-                    href="#" 
-                    aria-label={`Follow us on ${platform}`}
-                    className="text-muted-foreground/40 hover:text-primary transition-colors duration-300"
-                  >
-                    <span className="text-[10px] font-bold tracking-widest uppercase">{platform}</span>
-                  </a>
-                ))}
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-12 lg:col-span-2">
-              <div className="space-y-6">
-                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Platform</h4>
-                <ul className="space-y-4">
-                  <li><a href="#features" className="text-muted-foreground/60 hover:text-primary transition-all text-sm font-medium">Features</a></li>
-                  <li><a href="#how-it-works" className="text-muted-foreground/60 hover:text-primary transition-all text-sm font-medium">Workflow</a></li>
-                  <li><Link to="/sign-in" className="text-muted-foreground/60 hover:text-primary transition-all text-sm font-medium">Sign In</Link></li>
-                </ul>
-              </div>
-              <div className="space-y-6">
-                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Legal</h4>
-                <ul className="space-y-4">
-                  <li><a href="#" className="text-muted-foreground/60 hover:text-primary transition-all text-sm font-medium">Privacy Policy</a></li>
-                  <li><a href="#" className="text-muted-foreground/60 hover:text-primary transition-all text-sm font-medium">Terms of Service</a></li>
-                  <li><a href="#" className="text-muted-foreground/60 hover:text-primary transition-all text-sm font-medium">Cookie Settings</a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          
-          <div className="pt-16 border-t border-border/40 flex flex-col md:flex-row justify-between items-center gap-8">
-            <p className="text-muted-foreground/40 text-[10px] font-bold uppercase tracking-widest">
-              © {new Intl.DateTimeFormat('en-US', { year: 'numeric' }).format(new Date())} PulseLoop Inc. All rights reserved.
-            </p>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">System Status: All Systems Operational</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Massive Background Mark */}
-        <div className="absolute -bottom-24 -right-24 pointer-events-none select-none opacity-[0.03] dark:opacity-[0.05]">
-          <span className="text-[20rem] font-black tracking-tighter leading-none">PULSE</span>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
