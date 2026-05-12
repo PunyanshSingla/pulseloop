@@ -5,8 +5,8 @@ import { Link } from "react-router-dom";
 
 export function PollsTable() {
   const { data: pollsResponse, isLoading } = usePolls();
-  const polls = (pollsResponse as any)?.data?.slice(0, 5) || [];
-  const totalCount = (pollsResponse as any)?.data?.length || 0;
+  const polls = pollsResponse?.data?.slice(0, 5) || [];
+  const totalCount = pollsResponse?.data?.length || 0;
   return (
     <div className="rounded-xl border border-border bg-card">
       <div className="flex items-center justify-between border-b border-border px-5 py-4">
@@ -54,7 +54,7 @@ export function PollsTable() {
                       <BarChart3 className="size-4" />
                     </div>
                     <div>
-                      <p className="font-medium">{p.title}</p>
+                      <Link to={`/polls/${p._id}`} className="font-medium hover:text-primary transition-colors">{p.title}</Link>
                       <p className="text-xs text-muted-foreground truncate max-w-[150px]">pulseloop.io/p/{p._id}</p>
                     </div>
                   </div>

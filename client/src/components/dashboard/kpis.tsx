@@ -3,10 +3,10 @@ import { usePolls } from "@/hooks/use-polls";
 
 export function KPIs() {
   const { data: pollsResponse, isLoading } = usePolls();
-  const polls = (pollsResponse as any)?.data || [];
+  const polls = pollsResponse?.data || [];
   
-  const totalResponses = polls.reduce((acc: number, p: any) => acc + (p.responseCount || 0), 0);
-  const activePolls = polls.filter((p: any) => p.status === "active").length;
+  const totalResponses = polls.reduce((acc: number, p) => acc + (p.responseCount || 0), 0);
+  const activePolls = polls.filter((p) => p.status === "active").length;
   const completionRate = polls.length > 0 ? "92.4%" : "0%"; // Mocked for now until we have detailed response data
 
   const kpis = [

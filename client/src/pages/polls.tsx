@@ -29,7 +29,7 @@ export default function PollsPage() {
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
 
   const isPending = isSessionPending || isPollsLoading;
-  const polls = (pollsResponse as any)?.data || [];
+  const polls = pollsResponse?.data || [];
 
   if (isPending) {
     return (
@@ -149,9 +149,11 @@ export default function PollsPage() {
                           <BarChart3 className="size-5" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                            {poll.title}
-                          </h3>
+                          <Link to={`/polls/${poll._id}`}>
+                            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                              {poll.title}
+                            </h3>
+                          </Link>
                           <div className="flex items-center gap-2 mt-0.5">
                             <StatusPill status={poll.status.charAt(0).toUpperCase() + poll.status.slice(1)} />
                             <span className="text-xs text-muted-foreground">• {poll.visibility.charAt(0).toUpperCase() + poll.visibility.slice(1)}</span>
@@ -183,8 +185,8 @@ export default function PollsPage() {
                         <Clock className="size-3.5" />
                         Updated {formatDistanceToNow(new Date(poll.updatedAt))} ago
                       </span>
-                      <Link to={`/polls/${poll._id}/results`} className="inline-flex items-center gap-1 font-medium text-foreground hover:underline">
-                        View Results <ArrowUpRight className="size-3.5" />
+                      <Link to={`/polls/${poll._id}`} className="inline-flex items-center gap-1 font-medium text-foreground hover:underline">
+                        Manage Poll <ArrowUpRight className="size-3.5" />
                       </Link>
                     </div>
                   </div>
@@ -219,7 +221,9 @@ export default function PollsPage() {
                               <div className="grid size-8 place-items-center rounded-md bg-muted text-muted-foreground">
                                 <BarChart3 className="size-4" />
                               </div>
-                              <p className="font-medium">{p.title}</p>
+                              <Link to={`/polls/${p._id}`} className="font-medium hover:text-primary transition-colors">
+                                {p.title}
+                              </Link>
                             </div>
                           </td>
                           <td className="px-5 py-3.5">

@@ -2,16 +2,17 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { pollsApi } from "@/lib/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import type { Poll, PollResponse, PollsResponse } from "@/types/polls";
 
 export const usePolls = () => {
-  return useQuery({
+  return useQuery<PollsResponse>({
     queryKey: ["polls"],
     queryFn: pollsApi.getAll,
   });
 };
 
 export const usePoll = (id: string) => {
-  return useQuery({
+  return useQuery<PollResponse>({
     queryKey: ["poll", id],
     queryFn: () => pollsApi.getById(id),
     enabled: !!id,
@@ -23,7 +24,7 @@ export const useCreatePoll = () => {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: pollsApi.create,
+    mutationFn: (data: Partial<Poll>) => pollsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["polls"] });
       toast.success("Poll created successfully!");
