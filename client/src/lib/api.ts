@@ -39,8 +39,8 @@ export const pollsApi = {
   
   // Voting (To be implemented in backend later, but preparing the UI for it)
   vote: (pollId: string, questionId: string, optionId: string) => 
-    request(`/responses`, { 
+    request(`/polls/${pollId}/vote`, { 
       method: "POST", 
-      body: JSON.stringify({ pollId, questionId, selectedOptionId: optionId }) 
+      body: JSON.stringify({ questionId, selectedOptionId: optionId }) 
     }),
 };

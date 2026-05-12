@@ -172,7 +172,7 @@ export default function PollsPage() {
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Completion</p>
-                        <p className="mt-0.5 text-lg font-semibold">0%</p>
+                        <p className="mt-0.5 text-lg font-semibold">N/A</p>
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Created</p>
@@ -231,7 +231,7 @@ export default function PollsPage() {
                           </td>
                           <td className="px-5 py-3.5 text-xs text-muted-foreground">{p.visibility.charAt(0).toUpperCase() + p.visibility.slice(1)}</td>
                           <td className="px-5 py-3.5 text-right tabular-nums">{p.responseCount || 0}</td>
-                          <td className="px-5 py-3.5 text-right tabular-nums">0%</td>
+                          <td className="px-5 py-3.5 text-right tabular-nums">N/A</td>
                           <td className="px-5 py-3.5 text-xs text-muted-foreground">{formatDistanceToNow(new Date(p.updatedAt))} ago</td>
                           <td className="px-5 py-3.5 text-right">
                             <button className="grid size-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">

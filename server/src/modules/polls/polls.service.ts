@@ -1,6 +1,7 @@
 import Poll, { IPoll } from "../../models/Poll";
 import Question from "../../models/Question";
 import QuestionOption from "../../models/QuestionOption";
+import Response from "../../models/Response";
 import mongoose from "mongoose";
 import { CreatePollInput, UpdatePollInput } from "./poll.types";
 
@@ -43,7 +44,17 @@ export class PollsService {
   }
 
   async getPolls(filters: any = {}) {
-    return Poll.find(filters).sort({ createdAt: -1 });
+    const polls = await Poll.find(filters).sort({ createdAt: -1 }).lean();
+    
+    // Add response count for each poll
+    const pollsWithCounts = await Promise.all(
+      polls.map(async (poll) => {
+        const responseCount = await Response.countDocuments({ pollId: poll._id });
+        return { ...poll, responseCount };
+      })
+    );
+
+    return pollsWithCounts;
   }
 
   async getPollById(id: string) {
@@ -51,17 +62,41 @@ export class PollsService {
     if (!poll) return null;
 
     const questions = await Question.find({ pollId: id }).sort({ order: 1 }).lean();
+    const totalPollResponses = await Response.countDocuments({ pollId: id });
     
     const questionsWithOptions = await Promise.all(
       questions.map(async (q) => {
         const options = await QuestionOption.find({ questionId: q._id })
           .sort({ order: 1 })
           .lean();
-        return { ...q, options };
+
+        const optionsWithStats = await Promise.all(
+          options.map(async (o) => {
+            const count = await Response.countDocuments({ selectedOptionId: o._id });
+            const totalQuestionResponses = await Response.countDocuments({ questionId: q._id });
+            const percentage = totalQuestionResponses > 0 ? (count / totalQuestionResponses) * 100 : 0;
+            return { ...o, responseCount: count, percentage };
+          })
+        );
+
+        return { ...q, options: optionsWithStats };
       })
     );
 
-    return { ...poll, questions: questionsWithOptions };
+    return { ...poll, questions: questionsWithOptions, responseCount: totalPollResponses };
+  }
+
+  async castVote(pollId: string, questionId: string, optionId: string, userId?: string) {
+    const response = new Response({
+      pollId,
+      questionId,
+      selectedOptionId: optionId,
+      respondentId: userId || null,
+      isAnonymous: !userId,
+    });
+
+    await response.save();
+    return response;
   }
 
   async updatePoll(id: string, data: UpdatePollInput, userId: string) {

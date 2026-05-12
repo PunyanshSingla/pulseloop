@@ -134,9 +134,9 @@ export default function PollDetailsPage() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { label: "Total Responses", value: poll.responseCount || 0, icon: BarChart3, color: "text-primary" },
-                { label: "Completion Rate", value: "94.2%", icon: CheckCircle2, color: "text-emerald-500" },
-                { label: "Avg. Time", value: "42s", icon: Clock, color: "text-amber-500" },
-                { label: "Total Views", value: "1,240", icon: Eye, color: "text-blue-500" },
+                { label: "Completion Rate", value: poll.responseCount ? "100%" : "0%", icon: CheckCircle2, color: "text-emerald-500" },
+                { label: "Avg. Time", value: "N/A", icon: Clock, color: "text-amber-500" },
+                { label: "Total Views", value: "N/A", icon: Eye, color: "text-blue-500" },
               ].map((stat) => (
                 <div key={stat.label} className="rounded-xl border border-border bg-card p-5 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
@@ -192,9 +192,12 @@ export default function PollDetailsPage() {
                             <div className="grid gap-2 ml-9">
                               {q.options.map((o: any) => (
                                 <div key={o._id} className="group flex items-center justify-between rounded-lg border border-border/50 bg-muted/20 px-4 py-3">
-                                  <span className="text-sm">{o.text}</span>
+                                  <div className="flex flex-col">
+                                    <span className="text-sm">{o.text}</span>
+                                    <span className="text-[10px] text-muted-foreground">{o.responseCount || 0} votes</span>
+                                  </div>
                                   <span className="text-xs text-muted-foreground font-medium">
-                                    {Math.floor(Math.random() * 50)}%
+                                    {Math.round(o.percentage || 0)}%
                                   </span>
                                 </div>
                               ))}

@@ -59,6 +59,19 @@ export class PollsController {
       next(error);
     }
   }
+
+  async vote(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id: pollId } = req.params;
+      const { questionId, selectedOptionId } = req.body;
+      const userId = (req as any).user?.id;
+      
+      const response = await pollsService.castVote(pollId, questionId, selectedOptionId, userId);
+      res.status(201).json({ success: true, data: response });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const pollsController = new PollsController();
