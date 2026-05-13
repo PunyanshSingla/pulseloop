@@ -10,10 +10,11 @@ export class AnalyticsController {
       console.log("isAdmin", isAdmin)
       // If admin, we don't pass userId to get global stats
       const queryId = isAdmin ? undefined : user.id;
+      const days = parseInt(req.query.days as string) || 30;
       
       const [kpis, chartData, topPoll, activity] = await Promise.all([
         analyticsService.getKPIData(queryId),
-        analyticsService.getResponsesOverTime(queryId),
+        analyticsService.getResponsesOverTime(queryId, days),
         analyticsService.getTopPerformingPoll(queryId),
         analyticsService.getLatestActivity(queryId)
       ]);

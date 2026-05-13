@@ -46,5 +46,5 @@ export const pollsApi = {
 };
 
 export const analyticsApi = {
-  getDashboardData: () => request("/analytics/dashboard"),
+  getDashboardData: (days: number = 30) => request(`/analytics/dashboard?days=${days}`),
 };

@@ -1,86 +1,183 @@
 import { useDashboardData } from "@/hooks/use-analytics";
+import { useState, useMemo } from "react";
+import { format, subDays, eachDayOfInterval } from "date-fns";
 
 export function ResponsesChart() {
-  const { data: dashboardDataResponse, isLoading } = useDashboardData();
+  const [range, setRange] = useState(30);
+  const { data: dashboardDataResponse, isLoading } = useDashboardData(range);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  
   const rawData = dashboardDataResponse?.data?.chartData || [];
   
-  // Map real data to values, or use zeros if no data yet
-  const data = rawData.length > 0 
-    ? rawData.map((d: any) => d.count)
-    : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  // Fill in missing dates with zero counts
+  const chartData = useMemo(() => {
+    const end = new Date();
+    const start = subDays(end, range - 1);
+    const interval = eachDayOfInterval({ start, end });
+    
+    return interval.map(date => {
+      const dateStr = format(date, "yyyy-MM-dd");
+      const found = rawData.find((d: any) => d._id === dateStr);
+      return {
+        date: dateStr,
+        label: format(date, "MMM dd"),
+        count: found ? found.count : 0
+      };
+    });
+  }, [rawData, range]);
 
-  const max = Math.max(...data, 10); // Minimum scale of 10
-  const min = 0;
+  const data = chartData.map(d => d.count);
+  const max = Math.max(...data, 5); // Minimum scale
   const w = 600;
-  const h = 180;
+  const h = 200;
   const step = w / (data.length - 1 || 1);
+  
   const points = data
     .map((v: number, i: number) => {
       const x = i * step;
-      const y = h - (v / max) * (h - 20) - 10;
+      const y = h - (v / max) * (h - 40) - 20;
       return `${x},${y}`;
     })
     .join(" ");
+  
   const area = `0,${h} ${points} ${w},${h}`;
 
   if (isLoading) {
-    return <div className="h-[258px] animate-pulse rounded-xl border border-border bg-card/50" />;
+    return <div className="h-[280px] animate-pulse rounded-xl border border-border bg-card/50" />;
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
+    <div className="rounded-xl border border-border bg-card p-6">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-base font-semibold">Responses over time</p>
-          <p className="text-sm text-muted-foreground">Last 17 days</p>
+          <p className="text-base font-bold text-foreground">Responses over time</p>
+          <p className="text-sm text-muted-foreground font-medium">Last {range} days</p>
         </div>
         <div className="flex items-center gap-1 rounded-lg border border-border bg-background p-1 text-sm">
-          {["7d", "30d", "90d"].map((p, i) => (
+          {[
+            { label: "7d", value: 7 },
+            { label: "30d", value: 30 },
+            { label: "90d", value: 90 },
+          ].map((r) => (
             <button
-              key={p}
-              className={`rounded-md px-3 py-1.5 font-semibold transition-colors ${
-                i === 1 ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+              key={r.label}
+              onClick={() => setRange(r.value)}
+              className={`rounded-md px-3 py-1.5 font-bold transition-all ${
+                range === r.value 
+                  ? "bg-foreground text-background shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
             >
-              {p}
+              {r.label}
             </button>
           ))}
         </div>
       </div>
-      <div className="mt-4">
-        <svg viewBox={`0 0 ${w} ${h}`} className="h-44 w-full overflow-visible">
+
+      <div className="relative mt-8 group/chart">
+        {/* Tooltip */}
+        {hoveredIndex !== null && (
+          <div 
+            className="absolute z-10 pointer-events-none rounded-lg bg-foreground px-3 py-2 text-xs font-bold text-background shadow-xl -translate-x-1/2 -translate-y-full transition-all duration-200"
+            style={{ 
+              left: `${(hoveredIndex * step) / w * 100}%`,
+              top: `${h - (data[hoveredIndex] / max) * (h - 40) - 35}px`
+            }}
+          >
+            <div className="text-[10px] opacity-70 mb-0.5">{chartData[hoveredIndex].label}</div>
+            <div>{chartData[hoveredIndex].count} responses</div>
+            <div className="absolute left-1/2 bottom-0 h-2 w-2 -translate-x-1/2 translate-y-1/2 rotate-45 bg-foreground" />
+          </div>
+        )}
+
+        <svg 
+          viewBox={`0 0 ${w} ${h}`} 
+          className="h-52 w-full overflow-visible"
+          onMouseLeave={() => setHoveredIndex(null)}
+        >
           <defs>
             <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.25" />
+              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.2" />
               <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
             </linearGradient>
           </defs>
-          {[0, 1, 2, 3].map((i) => (
+          
+          {/* Grid lines */}
+          {[0, 1, 2].map((i) => (
             <line
               key={i}
               x1="0"
               x2={w}
-              y1={(h / 3) * i}
-              y2={(h / 3) * i}
+              y1={(h / 2) * i}
+              y2={(h / 2) * i}
               stroke="var(--border)"
-              strokeDasharray="3 4"
+              strokeDasharray="4 4"
+              strokeWidth="1"
             />
           ))}
-          <polygon points={area} fill="url(#chartFill)" />
+
+          <polygon points={area} fill="url(#chartFill)" className="transition-all duration-500" />
+          
           <polyline
             points={points}
             fill="none"
             stroke="var(--primary)"
-            strokeWidth="2.5"
+            strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
+            className="transition-all duration-500"
           />
+
           {data.map((v, i) => {
             const x = i * step;
-            const y = h - ((v - min) / (max - min)) * (h - 20) - 10;
-            return <circle key={i} cx={x} cy={y} r="2" fill="var(--background)" stroke="var(--primary)" strokeWidth="2" />;
+            const y = h - (v / max) * (h - 40) - 20;
+            const isHovered = hoveredIndex === i;
+            
+            return (
+              <g key={i} onMouseEnter={() => setHoveredIndex(i)}>
+                {/* Invisible larger hit area for hover */}
+                <rect
+                  x={x - step / 2}
+                  y={0}
+                  width={step}
+                  height={h}
+                  fill="transparent"
+                  className="cursor-pointer"
+                />
+                
+                {/* Vertical hover line */}
+                {isHovered && (
+                  <line
+                    x1={x}
+                    x2={x}
+                    y1={0}
+                    y2={h}
+                    stroke="var(--primary)"
+                    strokeWidth="1"
+                    strokeDasharray="4 4"
+                    className="pointer-events-none"
+                  />
+                )}
+
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={isHovered ? "5" : "3"}
+                  fill="var(--background)"
+                  stroke="var(--primary)"
+                  strokeWidth={isHovered ? "3" : "2"}
+                  className="transition-all duration-200 pointer-events-none"
+                />
+              </g>
+            );
           })}
         </svg>
+      </div>
+
+      <div className="mt-6 flex justify-between px-1 text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
+        <span>{chartData[0].label}</span>
+        <span>{chartData[Math.floor(chartData.length / 2)].label}</span>
+        <span>{chartData[chartData.length - 1].label}</span>
       </div>
     </div>
   );
