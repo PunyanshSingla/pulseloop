@@ -46,11 +46,18 @@ export class PollsService {
   async getPolls(filters: any = {}) {
     const polls = await Poll.find(filters).sort({ createdAt: -1 }).lean();
     
-    // Add response count for each poll
+    // Add analytics for each poll
     const pollsWithCounts = await Promise.all(
       polls.map(async (poll) => {
-        const responseCount = await Response.countDocuments({ pollId: poll._id });
-        return { ...poll, responseCount };
+        const questionCount = await Question.countDocuments({ pollId: poll._id });
+        const responses = await Response.find({ pollId: poll._id }).distinct("respondentId");
+        
+        // For anonymous responses, we might need a different way to count unique participants
+        // but for now, let's use the raw count divided by questions as a proxy if respondentId is missing
+        const totalResponses = await Response.countDocuments({ pollId: poll._id });
+        const responseCount = questionCount > 0 ? Math.ceil(totalResponses / questionCount) : totalResponses;
+        
+        return { ...poll, responseCount, questionCount };
       })
     );
 

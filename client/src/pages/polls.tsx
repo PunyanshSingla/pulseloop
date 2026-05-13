@@ -27,9 +27,16 @@ export default function PollsPage() {
   const { data: pollsResponse, isLoading: isPollsLoading, error: pollsError } = usePolls();
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const isPending = isSessionPending || isPollsLoading;
   const polls = pollsResponse?.data || [];
+
+  const filteredPolls = polls.filter((poll: any) => 
+    poll.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    poll.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    poll.visibility.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (isPending) {
     return (
@@ -125,23 +132,35 @@ export default function PollsPage() {
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 placeholder="Search polls by name, type or status..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-10 w-full rounded-lg border border-border bg-background pl-10 pr-4 text-sm outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/15"
               />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
             </div>
 
             {/* Polls List */}
             {viewMode === "cards" ? (
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                {polls.length === 0 ? (
+                {filteredPolls.length === 0 ? (
                   <div className="lg:col-span-2 flex flex-col items-center justify-center rounded-xl border border-dashed border-border p-12 text-center">
                     <div className="grid size-12 place-items-center rounded-full bg-muted text-muted-foreground mb-4">
                       <BarChart3 className="size-6" />
                     </div>
-                    <h3 className="font-semibold">No polls found</h3>
-                    <p className="text-sm text-muted-foreground mt-1 mb-4">Create your first poll to start gathering insights.</p>
-                    <Button onClick={() => navigate("/polls/create")}>Create Poll</Button>
+                    <h3 className="font-semibold">{searchQuery ? "No matching polls" : "No polls found"}</h3>
+                    <p className="text-sm text-muted-foreground mt-1 mb-4">
+                      {searchQuery ? "Try adjusting your search terms." : "Create your first poll to start gathering insights."}
+                    </p>
+                    {!searchQuery && <Button onClick={() => navigate("/polls/create")}>Create Poll</Button>}
                   </div>
-                ) : polls.map((poll: any) => (
+                ) : filteredPolls.map((poll: any) => (
                   <div key={poll._id} className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-all hover:shadow-sm">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
@@ -172,7 +191,11 @@ export default function PollsPage() {
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Completion</p>
-                        <p className="mt-0.5 text-lg font-semibold">N/A</p>
+                        <p className="mt-0.5 text-lg font-semibold">
+                          {poll.viewCount > 0 
+                            ? `${Math.min(100, Math.round((poll.responseCount / poll.viewCount) * 100))}%` 
+                            : "0%"}
+                        </p>
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Created</p>
@@ -208,13 +231,13 @@ export default function PollsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {polls.length === 0 ? (
+                      {filteredPolls.length === 0 ? (
                         <tr>
                           <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground">
-                            No polls found. Create your first poll to start gathering insights.
+                            {searchQuery ? "No polls match your search." : "No polls found. Create your first poll to start gathering insights."}
                           </td>
                         </tr>
-                      ) : polls.map((p: any) => (
+                      ) : filteredPolls.map((p: any) => (
                         <tr key={p._id} className="border-b border-border/70 last:border-0 transition-colors hover:bg-muted/40">
                           <td className="px-5 py-3.5">
                             <div className="flex items-center gap-3">
@@ -231,7 +254,11 @@ export default function PollsPage() {
                           </td>
                           <td className="px-5 py-3.5 text-xs text-muted-foreground">{p.visibility.charAt(0).toUpperCase() + p.visibility.slice(1)}</td>
                           <td className="px-5 py-3.5 text-right tabular-nums">{p.responseCount || 0}</td>
-                          <td className="px-5 py-3.5 text-right tabular-nums">N/A</td>
+                          <td className="px-5 py-3.5 text-right tabular-nums">
+                            {p.viewCount > 0 
+                              ? `${Math.min(100, Math.round((p.responseCount / p.viewCount) * 100))}%` 
+                              : "0%"}
+                          </td>
                           <td className="px-5 py-3.5 text-xs text-muted-foreground">{formatDistanceToNow(new Date(p.updatedAt))} ago</td>
                           <td className="px-5 py-3.5 text-right">
                             <button className="grid size-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
