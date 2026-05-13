@@ -1,9 +1,23 @@
 import Logo from "@/components/logo"
 import { SignupForm } from "@/components/signup-form"
 import { useTheme } from "next-themes"
+import { authClient } from "@/lib/auth-client"
+import { Navigate, useSearchParams } from "react-router-dom"
 
 export default function SignupPage() {
   const theme = useTheme()
+  const { data: session, isPending } = authClient.useSession()
+  const [searchParams] = useSearchParams()
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+
+  if (isPending) {
+    return null
+  }
+
+  if (session) {
+    return <Navigate to={callbackUrl} replace />
+  }
+
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-2 p-4 md:p-8">

@@ -298,7 +298,7 @@ export default function PublicPollPage() {
                 </div>
                 
                 <div className="flex flex-col items-center gap-3 mt-12">
-                  <Logo className="scale-75 opacity-50 hover:opacity-100 transition-opacity" />
+                  <Logo className="scale-75 opacity-70 hover:opacity-100 dark:opacity-50 transition-opacity" />
                 </div>
               </motion.div>
             )}
