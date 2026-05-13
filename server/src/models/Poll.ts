@@ -7,6 +7,7 @@ export interface IPoll extends Document {
   status: "draft" | "active" | "closed";
   allowAnonymous: boolean;
   resultsPublished: boolean;
+  allowMultipleSubmissions: boolean;
   viewCount: number;
   expiresAt: Date | null;
   createdBy: mongoose.Types.ObjectId;
@@ -45,6 +46,10 @@ const pollSchema = new Schema<IPoll>(
     },
 
     resultsPublished: {
+      type: Boolean,
+      default: false,
+    },
+    allowMultipleSubmissions: {
       type: Boolean,
       default: false,
     },

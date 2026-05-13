@@ -69,18 +69,15 @@ export const useDeletePoll = () => {
 
 export const useVote = (pollId: string) => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: ({ questionId, optionId, timeTaken }: { questionId: string; optionId: string; timeTaken?: number }) => 
-      pollsApi.vote(pollId, questionId, optionId, timeTaken),
+    mutationFn: (data: any) => pollsApi.vote(pollId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["poll", pollId] });
-      toast.success("Vote cast successfully!");
-      navigate(`/polls/${pollId}/results`);
+      toast.success("Vote recorded!");
     },
     onError: (error: any) => {
-      toast.error(error.message || "Failed to cast vote");
+      toast.error(error.message || "Failed to record vote");
     },
   });
 };

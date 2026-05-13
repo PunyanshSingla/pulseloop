@@ -38,10 +38,10 @@ export const pollsApi = {
   delete: (id: string) => request(`/polls/${id}`, { method: "DELETE" }),
   
   // Voting (To be implemented in backend later, but preparing the UI for it)
-  vote: (pollId: string, questionId: string, optionId: string, timeTaken?: number) => 
+  vote: (pollId: string, data: any) => 
     request(`/polls/${pollId}/vote`, { 
       method: "POST", 
-      body: JSON.stringify({ questionId, selectedOptionId: optionId, timeTaken }) 
+      body: JSON.stringify(data) 
     }),
 };
 

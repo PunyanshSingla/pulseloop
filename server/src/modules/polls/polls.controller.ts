@@ -68,23 +68,34 @@ export class PollsController {
   async vote(req: Request, res: Response, next: NextFunction) {
     try {
       const pollId = req.params.id as string;
-      const { questionId, selectedOptionId, timeTaken } = req.body;
+      const { responses, timeTaken: totalTimeTaken } = req.body; // Can be array or legacy single format
       const user = (req as any).user;
       const userId = user?.id;
 
-      console.log("request came at vote", pollId, questionId, selectedOptionId, user)
-      const response = await pollsService.castVote(pollId, questionId, selectedOptionId, userId, timeTaken);
+      let results = [];
+      
+      if (Array.isArray(responses)) {
+        for (const resp of responses) {
+          const { questionId, selectedOptionId, timeTaken } = resp;
+          const result = await pollsService.castVote(pollId, questionId, selectedOptionId, userId, timeTaken);
+          results.push(result);
+        }
+      } else {
+        // Legacy single format support
+        const { questionId, selectedOptionId, timeTaken } = req.body;
+        const result = await pollsService.castVote(pollId, questionId, selectedOptionId, userId, timeTaken);
+        results.push(result);
+      }
 
       // Get updated poll data for real-time broadcast
       const updatedPoll = await pollsService.getPollById(pollId);
       socketService.emitToPoll(pollId, "poll:updated", updatedPoll);
       socketService.emitToPoll(pollId, "vote:cast", {
         userName: user?.name || "A participant",
-        questionId,
-        optionId: selectedOptionId
+        pollId
       });
 
-      res.status(201).json({ success: true, data: response });
+      res.status(201).json({ success: true, data: results });
     } catch (error) {
       next(error);
     }
