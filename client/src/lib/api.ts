@@ -43,6 +43,7 @@ export const pollsApi = {
       method: "POST", 
       body: JSON.stringify(data) 
     }),
+  getResponses: (pollId: string) => request(`/polls/${pollId}/responses`),
 };
 
 export const analyticsApi = {

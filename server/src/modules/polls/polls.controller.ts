@@ -100,6 +100,16 @@ export class PollsController {
       next(error);
     }
   }
+
+  async getResponses(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const responses = await pollsService.getPollResponses(id as string);
+      res.status(200).json({ success: true, data: responses });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const pollsController = new PollsController();

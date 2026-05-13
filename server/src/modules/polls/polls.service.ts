@@ -124,6 +124,28 @@ export class PollsService {
     return response;
   }
 
+  async getPollResponses(pollId: string) {
+    const responses = await Response.find({ pollId })
+      .populate("respondentId", "name email")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Map responses to include question and option text for easier display
+    const detailedResponses = await Promise.all(
+      responses.map(async (r) => {
+        const question = await Question.findById(r.questionId).select("text").lean();
+        const option = await QuestionOption.findById(r.selectedOptionId).select("text").lean();
+        return {
+          ...r,
+          questionText: question?.text || "Unknown Question",
+          optionText: option?.text || "Unknown Option",
+        };
+      })
+    );
+
+    return detailedResponses;
+  }
+
   async updatePoll(id: string, data: UpdatePollInput, userId: string) {
     const poll = await Poll.findOne({ _id: id, createdBy: userId });
     if (!poll) throw new Error("Poll not found or unauthorized");

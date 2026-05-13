@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
-import { usePoll, useUpdatePoll, useDeletePoll } from "@/hooks/use-polls";
+import { usePoll, useUpdatePoll, useDeletePoll, usePollResponses } from "@/hooks/use-polls";
 import { 
   ArrowLeft, 
   BarChart3, 
@@ -21,7 +21,8 @@ import {
   ExternalLink,
   Loader2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Search
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
@@ -36,6 +37,14 @@ export default function PollDetailsPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"overview" | "responses" | "settings">("overview");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const { data: responsesData, isLoading: isResponsesLoading } = usePollResponses(id!);
+
+  // Responses Tab State
+  const [responseSearch, setResponseSearch] = useState("");
+  const [selectedQuestionFilter, setSelectedQuestionFilter] = useState<string>("all");
+  const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   if (isSessionPending || isPollLoading) {
     return (
@@ -94,7 +103,7 @@ export default function PollDetailsPage() {
         <Topbar userName={session.user.name} />
         
         <main className="flex-1 px-6 py-6 overflow-y-auto">
-          <div className="mx-auto max-w-5xl space-y-8">
+          <div className="mx-auto space-y-8">
             {/* Breadcrumbs / Back */}
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <Link to="/polls" className="hover:text-foreground transition-colors">Polls</Link>
@@ -306,14 +315,190 @@ export default function PollDetailsPage() {
               )}
 
               {activeTab === "responses" && (
-                <div className="rounded-xl border border-border bg-card p-12 text-center shadow-sm">
-                  <div className="grid size-12 place-items-center rounded-full bg-muted text-muted-foreground mx-auto mb-4">
-                    <BarChart3 className="size-6" />
+                <div className="space-y-6">
+                  {/* Filters Bar */}
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4 bg-card border border-border rounded-xl shadow-sm">
+                    <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:items-center">
+                      <div className="relative flex-1 max-w-sm">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                        <input
+                          placeholder="Search respondents..."
+                          value={responseSearch}
+                          onChange={(e) => {
+                            setResponseSearch(e.target.value);
+                            setCurrentPage(1);
+                          }}
+                          className="h-10 w-full rounded-lg border border-border bg-background pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary/10"
+                        />
+                      </div>
+                      <select 
+                        value={selectedQuestionFilter}
+                        onChange={(e) => {
+                          setSelectedQuestionFilter(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="h-10 px-3 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/10"
+                      >
+                        <option value="all">All Questions</option>
+                        {poll.questions.map((q: any) => (
+                          <option key={q._id} value={q._id}>{q.text}</option>
+                        ))}
+                      </select>
+                      <select 
+                        value={selectedTypeFilter}
+                        onChange={(e) => {
+                          setSelectedTypeFilter(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="h-10 px-3 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/10"
+                      >
+                        <option value="all">All Types</option>
+                        <option value="authenticated">Authenticated</option>
+                        <option value="anonymous">Anonymous</option>
+                      </select>
+                    </div>
+                    { (responseSearch || selectedQuestionFilter !== "all" || selectedTypeFilter !== "all") && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => {
+                          setResponseSearch("");
+                          setSelectedQuestionFilter("all");
+                          setSelectedTypeFilter("all");
+                          setCurrentPage(1);
+                        }}
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Clear Filters
+                      </Button>
+                    )}
                   </div>
-                  <h3 className="font-semibold text-lg">Detailed Analytics Coming Soon</h3>
-                  <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
-                    We're building a powerful response viewer that will help you export data, filter by respondents, and visualize trends.
-                  </p>
+
+                  <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border bg-muted/20 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold">Individual Submissions</h3>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-border text-left text-xs text-muted-foreground bg-muted/5">
+                            <th className="px-6 py-4 font-medium uppercase tracking-wider">Respondent</th>
+                            <th className="px-6 py-4 font-medium uppercase tracking-wider">Question</th>
+                            <th className="px-6 py-4 font-medium uppercase tracking-wider">Answer</th>
+                            <th className="px-6 py-4 font-medium uppercase tracking-wider text-right">Time Taken</th>
+                            <th className="px-6 py-4 font-medium uppercase tracking-wider text-right">Submitted</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/50">
+                          {isResponsesLoading ? (
+                            <tr>
+                              <td colSpan={5} className="px-6 py-12 text-center">
+                                <Loader2 className="size-6 animate-spin mx-auto text-primary opacity-50" />
+                              </td>
+                            </tr>
+                          ) : (() => {
+                            const filtered = (responsesData?.data || []).filter((resp: any) => {
+                              const matchesSearch = !responseSearch || 
+                                resp.respondentId?.name?.toLowerCase().includes(responseSearch.toLowerCase()) ||
+                                resp.respondentId?.email?.toLowerCase().includes(responseSearch.toLowerCase()) ||
+                                (responseSearch.toLowerCase() === "anonymous" && !resp.respondentId);
+                              
+                              const matchesQuestion = selectedQuestionFilter === "all" || resp.questionId === selectedQuestionFilter;
+                              
+                              const matchesType = selectedTypeFilter === "all" || 
+                                (selectedTypeFilter === "authenticated" && !!resp.respondentId) ||
+                                (selectedTypeFilter === "anonymous" && !resp.respondentId);
+                              
+                              return matchesSearch && matchesQuestion && matchesType;
+                            });
+
+                            const totalFiltered = filtered.length;
+                            const totalPages = Math.ceil(totalFiltered / itemsPerPage);
+                            const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+                            if (totalFiltered === 0) {
+                              return (
+                                <tr>
+                                  <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                                    No responses match your filters.
+                                  </td>
+                                </tr>
+                              );
+                            }
+
+                            return (
+                              <>
+                                {paginated.map((resp: any) => (
+                                  <tr key={resp._id} className="hover:bg-muted/30 transition-colors">
+                                    <td className="px-6 py-4">
+                                      <div className="flex flex-col">
+                                        <span className="font-medium text-foreground">
+                                          {resp.respondentId?.name || "Anonymous User"}
+                                        </span>
+                                        <span className="text-[10px] text-muted-foreground">
+                                          {resp.respondentId?.email || "No email available"}
+                                        </span>
+                                      </div>
+                                    </td>
+                                    <td className="px-6 py-4 max-w-[200px] truncate font-medium text-slate-500 dark:text-slate-400">
+                                      {resp.questionText}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                      <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary border border-primary/20">
+                                        {resp.optionText}
+                                      </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-right tabular-nums text-muted-foreground">
+                                      {resp.timeTaken}s
+                                    </td>
+                                    <td className="px-6 py-4 text-right tabular-nums text-muted-foreground">
+                                      {formatDistanceToNow(new Date(resp.createdAt))} ago
+                                    </td>
+                                  </tr>
+                                ))}
+                                
+                                {/* Pagination Footer */}
+                                {totalPages > 1 && (
+                                  <tr>
+                                    <td colSpan={5} className="px-6 py-4 bg-muted/5">
+                                      <div className="flex items-center justify-between">
+                                        <p className="text-xs text-muted-foreground">
+                                          Showing <span className="font-medium text-foreground">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-medium text-foreground">{Math.min(currentPage * itemsPerPage, totalFiltered)}</span> of <span className="font-medium text-foreground">{totalFiltered}</span> results
+                                        </p>
+                                        <div className="flex items-center gap-2">
+                                          <Button 
+                                            variant="outline" 
+                                            size="icon" 
+                                            className="size-8"
+                                            disabled={currentPage === 1}
+                                            onClick={() => setCurrentPage(prev => prev - 1)}
+                                          >
+                                            <ChevronLeft className="size-4" />
+                                          </Button>
+                                          <span className="text-xs font-medium px-2">
+                                            {currentPage} / {totalPages}
+                                          </span>
+                                          <Button 
+                                            variant="outline" 
+                                            size="icon" 
+                                            className="size-8"
+                                            disabled={currentPage === totalPages}
+                                            onClick={() => setCurrentPage(prev => prev + 1)}
+                                          >
+                                            <ChevronRight className="size-4" />
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
               )}
 

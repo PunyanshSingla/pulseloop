@@ -81,3 +81,10 @@ export const useVote = (pollId: string) => {
     },
   });
 };
+export const usePollResponses = (id: string) => {
+  return useQuery({
+    queryKey: ["poll-responses", id],
+    queryFn: () => pollsApi.getResponses(id),
+    enabled: !!id,
+  });
+};
