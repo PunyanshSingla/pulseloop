@@ -7,8 +7,8 @@ export function ShareLinkCard() {
   const latestPoll = pollsResponse?.data?.[0];
   
   const shareLink = latestPoll 
-    ? `${import.meta.env.VITE_APP_ORIGIN}/p/${latestPoll._id}`
-    : `${import.meta.env.VITE_APP_ORIGIN.replace(/^https?:\/\//, "")}/p/your-poll`;
+    ? `${import.meta.env.VITE_APP_ORIGIN}/vote/${latestPoll._id}`
+    : `${import.meta.env.VITE_APP_ORIGIN.replace(/^https?:\/\//, "")}/vote/your-poll`;
 
   const copyLink = () => {
     if (!latestPoll) return;

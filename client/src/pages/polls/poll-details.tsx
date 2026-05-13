@@ -64,7 +64,7 @@ export default function PollDetailsPage() {
   }
 
   const copyLink = () => {
-    const url = `${import.meta.env.VITE_APP_ORIGIN}/p/${poll._id}`;
+    const url = `${import.meta.env.VITE_APP_ORIGIN}/vote/${poll._id}`;
     navigator.clipboard.writeText(url);
     toast.success("Link copied to clipboard!");
   };
@@ -119,7 +119,7 @@ export default function PollDetailsPage() {
                   Share
                 </Button>
                 <Button size="sm" className="gap-2" asChild>
-                  <a href={`${import.meta.env.VITE_APP_ORIGIN}/p/${poll._id}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`${import.meta.env.VITE_APP_ORIGIN}/vote/${poll._id}`} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="size-4" />
                     Live Preview
                   </a>
@@ -214,7 +214,7 @@ export default function PollDetailsPage() {
                       <h3 className="text-sm font-semibold mb-4">Quick Share</h3>
                       <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-2.5">
                         <code className="flex-1 text-xs text-muted-foreground truncate">
-                          {import.meta.env.VITE_APP_ORIGIN.replace(/^https?:\/\//, "")}/p/{poll._id}
+                          {import.meta.env.VITE_APP_ORIGIN.replace(/^https?:\/\//, "")}/vote/{poll._id}
                         </code>
                         <button onClick={copyLink} className="p-2 hover:bg-muted rounded-md transition-colors">
                           <Copy className="size-4" />

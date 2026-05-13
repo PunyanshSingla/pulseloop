@@ -56,7 +56,7 @@ export function PollsTable() {
                     <div>
                       <Link to={`/polls/${p._id}`} className="text-base font-semibold hover:text-primary transition-colors">{p.title}</Link>
                       <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                        {import.meta.env.VITE_APP_ORIGIN.replace(/^https?:\/\//, "")}/p/{p._id}
+                        {import.meta.env.VITE_APP_ORIGIN.replace(/^https?:\/\//, "")}/vote/{p._id}
                       </p>
                     </div>
                   </div>
