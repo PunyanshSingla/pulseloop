@@ -4,6 +4,7 @@ import Question from "../../models/Question";
 import QuestionOption from "../../models/QuestionOption";
 import Response from "../../models/Response";
 import User from "../../models/User";
+import PollView from "../../models/PollView";
 import { CreatePollInput, UpdatePollInput } from "./poll.types";
 
 export class PollsService {
@@ -66,7 +67,7 @@ export class PollsService {
   }
 
   async getPollById(id: string, requesterInfo?: { userId?: string; fingerprint?: string; ipAddress?: string }) {
-    const poll = await Poll.findByIdAndUpdate(id, { $inc: { viewCount: 1 } }, { new: true }).lean();
+    const poll = await Poll.findById(id).lean();
     if (!poll) return null;
 
     const questions = await Question.find({ pollId: id }).sort({ order: 1 }).lean();
@@ -246,6 +247,25 @@ export class PollsService {
     await Poll.deleteOne({ _id: id });
 
     return { success: true };
+  }
+
+  async trackPollView(id: string, viewerInfo: { viewerId: string; fingerprint?: string; ipAddress?: string }) {
+    try {
+      const { viewerId, fingerprint, ipAddress } = viewerInfo;
+      
+      await PollView.create({
+        pollId: id,
+        viewerId,
+        fingerprint,
+        ipAddress
+      });
+
+      await Poll.findByIdAndUpdate(id, { $inc: { viewCount: 1 } });
+      return true;
+    } catch (error: any) {
+      if (error.code === 11000) return false;
+      throw error;
+    }
   }
 }
 

@@ -8,6 +8,7 @@ const router = Router();
 // Public routes
 router.get("/", pollsController.getAll);
 router.get("/:id", optionalAuthMiddleware, pollsController.getById);
+router.post("/:id/view", optionalAuthMiddleware, pollsController.trackView);
 
 // Protected routes
 router.post("/", authMiddleware, pollsController.create);

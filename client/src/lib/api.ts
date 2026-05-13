@@ -35,6 +35,8 @@ export const pollsApi = {
   create: (data: any) => request("/polls", { method: "POST", body: JSON.stringify(data) }),
   getAll: () => request("/polls"),
   getById: (id: string) => request(`/polls/${id}`),
+  trackView: (id: string, data: { fingerprint: string }) => 
+    request(`/polls/${id}/view`, { method: "POST", body: JSON.stringify(data) }),
   update: (id: string, data: any) => request(`/polls/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
   delete: (id: string) => request(`/polls/${id}`, { method: "DELETE" }),
   

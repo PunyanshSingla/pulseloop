@@ -8,6 +8,7 @@ import { Loader2, Check, ChevronLeft } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { VotingOption } from "@/components/polls/voting-option";
 import confetti from "canvas-confetti";
+import { pollsApi } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/logo";
 
@@ -44,6 +45,15 @@ export default function PublicPollPage() {
 
     setFingerprint(getFingerprint());
   }, []);
+
+  // Track unique view
+  useEffect(() => {
+    if (id && fingerprint) {
+      pollsApi.trackView(id, { fingerprint }).catch(err => {
+        console.error("Failed to track view:", err);
+      });
+    }
+  }, [id, fingerprint]);
 
   useEffect(() => {
     if (isSuccess) {

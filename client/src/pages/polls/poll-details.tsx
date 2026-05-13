@@ -19,10 +19,17 @@ import {
   Copy,
   Settings2,
   ExternalLink,
+  ShieldCheck,
   Loader2,
   ChevronLeft,
   ChevronRight,
-  Search
+  Search,
+  Download,
+  Filter,
+  RefreshCcw,
+  Smartphone,
+  Monitor,
+  Languages,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
@@ -174,6 +181,7 @@ export default function PollDetailsPage() {
                 {[
                   { id: "overview", label: "Overview" },
                   { id: "responses", label: "Responses" },
+                  { id: "audience", label: "Audience" },
                   { id: "settings", label: "Settings" },
                 ].map((tab) => (
                   <button
@@ -499,6 +507,133 @@ export default function PollDetailsPage() {
                       </table>
                     </div>
                   </div>
+                </div>
+              )}
+
+               {activeTab === "audience" && (
+                <div className="space-y-8">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold tracking-tight">Participant Profiles</h3>
+                      <p className="text-sm text-muted-foreground mt-1">Detailed technical and network identities for all respondents</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" className="gap-2">
+                        <RefreshCcw className="size-3.5" />
+                        Refresh Data
+                      </Button>
+                    </div>
+                  </div>
+
+                  {isResponsesLoading ? (
+                    <div className="flex flex-col items-center justify-center py-20 bg-muted/10 rounded-2xl border-2 border-dashed border-border">
+                      <Loader2 className="size-8 animate-spin text-primary opacity-50 mb-4" />
+                      <p className="text-sm font-medium text-muted-foreground">Analyzing audience data...</p>
+                    </div>
+                  ) : (responsesData?.data || []).length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20 bg-muted/10 rounded-2xl border-2 border-dashed border-border text-center px-6">
+                      <div className="size-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                        <Smartphone className="size-6 text-muted-foreground" />
+                      </div>
+                      <h4 className="text-lg font-semibold mb-1">No Audience Profiles Yet</h4>
+                      <p className="text-sm text-muted-foreground max-w-xs">Technical data will appear here as soon as participants start voting.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {(responsesData?.data || []).map((resp: any) => (
+                        <div key={resp._id} className="group relative rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:border-primary/20">
+                          {/* Header: Identity */}
+                          <div className="flex items-start justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                              <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                {resp.respondentId?.name?.[0] || "?"}
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-foreground leading-none">{resp.respondentId?.name || "Anonymous User"}</h4>
+                                <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1.5 uppercase font-semibold tracking-wider">
+                                  {resp.isAnonymous ? (
+                                    <span className="px-1.5 py-0.5 rounded bg-muted">Guest Voter</span>
+                                  ) : (
+                                    <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary">Registered</span>
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                                <ShieldCheck className="size-3.5" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Verified</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Grid Details */}
+                          <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div className="space-y-1">
+                              <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-tight">Network Identity</p>
+                              <div className="flex items-center gap-2">
+                                <Globe className="size-3 text-blue-500" />
+                                <span className="text-xs font-mono font-medium">{resp.ipAddress}</span>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-tight">Display Specs</p>
+                              <div className="flex items-center gap-2">
+                                <Monitor className="size-3 text-purple-500" />
+                                <span className="text-xs font-medium">{resp.deviceInfo?.screenResolution || "Unknown"}</span>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-tight">Environment</p>
+                              <div className="flex items-center gap-2">
+                                <Settings2 className="size-3 text-amber-500" />
+                                <span className="text-xs font-medium">{resp.deviceInfo?.os} • {resp.deviceInfo?.browser}</span>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-tight">Language</p>
+                              <div className="flex items-center gap-2">
+                                <Languages className="size-3 text-emerald-500" />
+                                <span className="text-xs font-medium uppercase">{resp.deviceInfo?.language || "N/A"}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Advanced Specs: User Agent */}
+                          <div className="space-y-2 mb-6">
+                            <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-tight">System Signature (User Agent)</p>
+                            <div className="p-3 rounded-xl bg-muted/30 border border-border/50 text-[10px] font-mono leading-relaxed text-muted-foreground break-all line-clamp-2 group-hover:line-clamp-none transition-all">
+                              {resp.deviceInfo?.userAgent}
+                            </div>
+                          </div>
+
+                          {/* Security Infrastructure */}
+                          <div className="space-y-3 pt-4 border-t border-border/50">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-muted-foreground font-medium uppercase">Voter ID</span>
+                              <span className="font-mono text-foreground font-bold">{resp.voterId?.slice(0, 16)}...</span>
+                            </div>
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-muted-foreground font-medium uppercase">Fingerprint</span>
+                              <span className="font-mono text-foreground font-bold truncate max-w-[150px]">{resp.fingerprint}</span>
+                            </div>
+                          </div>
+
+                          {/* Footer: Date */}
+                          <div className="mt-6 flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                              <Clock className="size-3" />
+                              <span>Joined {formatDistanceToNow(new Date(resp.createdAt))} ago</span>
+                            </div>
+                            <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] gap-1 hover:bg-primary/5 hover:text-primary">
+                              Audit Profile
+                              <ExternalLink className="size-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 

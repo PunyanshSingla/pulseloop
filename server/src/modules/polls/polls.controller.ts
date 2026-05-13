@@ -176,6 +176,34 @@ export class PollsController {
       next(error);
     }
   }
+
+  async trackView(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { fingerprint } = req.body;
+      const voterId = (req.headers["x-voter-id"] || "").toString();
+      const ipAddress = (req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").toString();
+      const userId = (req as any).user?.id;
+
+      // Use userId if available, otherwise fallback to voterId
+      const viewerId = userId || voterId;
+
+      if (!viewerId) {
+        res.status(400).json({ success: false, message: "Missing viewer identification" });
+        return;
+      }
+
+      const isNewView = await pollsService.trackPollView(id as string, { 
+        viewerId, 
+        fingerprint, 
+        ipAddress 
+      });
+
+      res.status(200).json({ success: true, isNewView });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const pollsController = new PollsController();

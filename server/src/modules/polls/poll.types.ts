@@ -6,6 +6,7 @@ export const pollSchema = z.object({
   visibility: z.enum(["public", "private"]).optional(),
   status: z.enum(["draft", "active", "closed"]).optional(),
   allowAnonymous: z.boolean().optional(),
+  allowMultipleSubmissions: z.boolean().optional(),
   resultsPublished: z.boolean().optional(),
   expiresAt: z.preprocess(
     (arg) => (typeof arg === "string" ? new Date(arg) : arg),
