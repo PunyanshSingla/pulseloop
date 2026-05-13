@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { pollsService } from "./polls.service";
 import { pollSchema } from "./poll.types";
+import { socketService } from "../../services/socket.service";
 
 export class PollsController {
   async create(req: Request, res: Response, next: NextFunction) {
@@ -43,6 +44,10 @@ export class PollsController {
       const validatedData = pollSchema.partial().parse(req.body);
       const userId = (req as any).user.id;
       const poll = await pollsService.updatePoll(id as string, validatedData, userId);
+      
+      // Notify participants about poll updates (e.g. title/options changed)
+      socketService.emitToPoll(id as string, "poll:updated", poll);
+      
       res.status(200).json({ success: true, data: poll });
     } catch (error) {
       next(error);
@@ -64,9 +69,19 @@ export class PollsController {
     try {
       const { id: pollId } = req.params;
       const { questionId, selectedOptionId } = req.body;
-      const userId = (req as any).user?.id;
+      const user = (req as any).user;
       
-      const response = await pollsService.castVote(pollId, questionId, selectedOptionId, userId);
+      const response = await pollsService.castVote(pollId, questionId, selectedOptionId, user?.id);
+      
+      // Get updated poll data for real-time broadcast
+      const updatedPoll = await pollsService.getPollById(pollId);
+      socketService.emitToPoll(pollId, "poll:updated", updatedPoll);
+      socketService.emitToPoll(pollId, "vote:cast", { 
+        userName: user?.name || "A participant",
+        questionId, 
+        optionId: selectedOptionId 
+      });
+
       res.status(201).json({ success: true, data: response });
     } catch (error) {
       next(error);
