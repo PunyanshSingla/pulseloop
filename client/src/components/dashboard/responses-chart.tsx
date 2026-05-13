@@ -1,18 +1,31 @@
+import { useDashboardData } from "@/hooks/use-analytics";
+
 export function ResponsesChart() {
-  const data = [12, 18, 14, 22, 28, 24, 31, 36, 30, 41, 48, 44, 52, 60, 55, 68, 72];
-  const max = Math.max(...data);
-  const min = Math.min(...data);
+  const { data: dashboardDataResponse, isLoading } = useDashboardData();
+  const rawData = dashboardDataResponse?.data?.chartData || [];
+  
+  // Map real data to values, or use zeros if no data yet
+  const data = rawData.length > 0 
+    ? rawData.map((d: any) => d.count)
+    : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+  const max = Math.max(...data, 10); // Minimum scale of 10
+  const min = 0;
   const w = 600;
   const h = 180;
-  const step = w / (data.length - 1);
+  const step = w / (data.length - 1 || 1);
   const points = data
-    .map((v, i) => {
+    .map((v: number, i: number) => {
       const x = i * step;
-      const y = h - ((v - min) / (max - min)) * (h - 20) - 10;
+      const y = h - (v / max) * (h - 20) - 10;
       return `${x},${y}`;
     })
     .join(" ");
   const area = `0,${h} ${points} ${w},${h}`;
+
+  if (isLoading) {
+    return <div className="h-[258px] animate-pulse rounded-xl border border-border bg-card/50" />;
+  }
 
   return (
     <div className="rounded-xl border border-border bg-card p-5">

@@ -44,3 +44,7 @@ export const pollsApi = {
       body: JSON.stringify({ questionId, selectedOptionId: optionId }) 
     }),
 };
+
+export const analyticsApi = {
+  getDashboardData: () => request("/analytics/dashboard"),
+};

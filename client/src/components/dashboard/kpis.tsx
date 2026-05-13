@@ -1,19 +1,44 @@
 import { ArrowUpRight, ArrowDownRight, BarChart3, Clock, CheckCircle2, Zap } from "lucide-react";
-import { usePolls } from "@/hooks/use-polls";
+import { useDashboardData } from "@/hooks/use-analytics";
 
 export function KPIs() {
-  const { data: pollsResponse, isLoading } = usePolls();
-  const polls = pollsResponse?.data || [];
+  const { data: dashboardDataResponse, isLoading } = useDashboardData();
+  const data = dashboardDataResponse?.data;
+  const kpisData = data?.kpis;
   
-  const totalResponses = polls.reduce((acc: number, p) => acc + (p.responseCount || 0), 0);
-  const activePolls = polls.filter((p) => p.status === "active").length;
-  const completionRate = polls.length > 0 ? "92.4%" : "0%"; // Mocked for now until we have detailed response data
-
   const kpis = [
-    { label: "Total responses", value: totalResponses.toLocaleString(), change: "+12.4%", up: true, sub: "vs last 30 days", icon: BarChart3 },
-    { label: "Active polls", value: activePolls.toString(), change: "+2", up: true, sub: "this week", icon: Zap },
-    { label: "Completion rate", value: completionRate, change: "+1.8%", up: true, sub: "avg across polls", icon: CheckCircle2 },
-    { label: "Avg. response time", value: "4.2s", change: "-0.4s", up: true, sub: "faster than avg", icon: Clock },
+    { 
+      label: "Total responses", 
+      value: kpisData?.totalResponses?.toLocaleString() || "0", 
+      change: kpisData?.totalResponsesGrowth ? `${kpisData.totalResponsesGrowth > 0 ? "+" : ""}${kpisData.totalResponsesGrowth}%` : "0%", 
+      up: (kpisData?.totalResponsesGrowth || 0) >= 0, 
+      sub: "vs last 30 days", 
+      icon: BarChart3 
+    },
+    { 
+      label: "Active polls", 
+      value: kpisData?.activePolls?.toString() || "0", 
+      change: "0", // Could calculate growth for this too
+      up: true, 
+      sub: "currently live", 
+      icon: Zap 
+    },
+    { 
+      label: "Completion rate", 
+      value: kpisData?.completionRate || "N/A", 
+      change: "0%", 
+      up: true, 
+      sub: "avg across polls", 
+      icon: CheckCircle2 
+    },
+    { 
+      label: "Avg. response time", 
+      value: kpisData?.avgResponseTime || "N/A", 
+      change: "0s", 
+      up: true, 
+      sub: "avg per respondent", 
+      icon: Clock 
+    },
   ];
 
   if (isLoading) {

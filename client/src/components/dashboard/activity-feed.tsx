@@ -1,11 +1,22 @@
+import { useDashboardData } from "@/hooks/use-analytics";
+import { formatDistanceToNow } from "date-fns";
+
 export function ActivityFeed() {
-  const events = [
-    { who: "Mira K.", what: "voted on", poll: "Pricing tier preference", when: "just now" },
-    { who: "Anonymous", what: "submitted feedback to", poll: "Q3 roadmap", when: "2m ago" },
-    { who: "Jonas R.", what: "voted on", poll: "Onboarding A/B", when: "8m ago" },
-    { who: "Anonymous", what: "voted on", poll: "Pricing tier preference", when: "12m ago" },
-    { who: "Priya S.", what: "shared", poll: "Conference topics", when: "1h ago" },
-  ];
+  const { data: dashboardDataResponse, isLoading } = useDashboardData();
+  const events = dashboardDataResponse?.data?.activity || [];
+
+  if (isLoading) {
+    return <div className="h-[300px] animate-pulse rounded-xl border border-border bg-card/50" />;
+  }
+
+  if (events.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-5 text-center flex flex-col items-center justify-center h-[300px]">
+        <p className="text-sm font-medium text-muted-foreground">No recent activity</p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-center justify-between">
@@ -19,10 +30,10 @@ export function ActivityFeed() {
         </span>
       </div>
       <ul className="mt-4 space-y-4">
-        {events.map((e, i) => (
+        {events.map((e: any, i: number) => (
           <li key={i} className="flex items-start gap-3">
             <div className="mt-0.5 grid size-7 place-items-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
-              {e.who.split(" ").map((s) => s[0]).join("").slice(0, 2)}
+              {e.who.split(" ").map((s: string) => s[0]).join("").slice(0, 2)}
             </div>
             <div className="min-w-0 flex-1 text-sm">
               <p className="leading-snug">
@@ -30,7 +41,7 @@ export function ActivityFeed() {
                 <span className="text-muted-foreground">{e.what}</span>{" "}
                 <span className="font-medium">{e.poll}</span>
               </p>
-              <p className="text-xs text-muted-foreground">{e.when}</p>
+              <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(e.when))} ago</p>
             </div>
           </li>
         ))}

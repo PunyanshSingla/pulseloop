@@ -62,13 +62,10 @@ export function PollsTable() {
                 <td className="px-5 py-3.5">
                   <StatusPill status={p.status.charAt(0).toUpperCase() + p.status.slice(1)} />
                 </td>
-                <td className="px-5 py-3.5 text-right tabular-nums">{p.responseCount || 0}</td>
+                <td className="px-5 py-3.5 text-right tabular-nums font-medium">{p.responseCount || 0}</td>
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-2">
-                    <div className="h-1.5 w-24 overflow-hidden rounded-full bg-muted">
-                      <div className="h-full bg-primary" style={{ width: `0%` }} />
-                    </div>
-                    <span className="text-xs tabular-nums text-muted-foreground">0%</span>
+                    <span className="text-xs text-muted-foreground">Responses collected</span>
                   </div>
                 </td>
                 <td className="px-5 py-3.5 text-xs text-muted-foreground">{formatDistanceToNow(new Date(p.createdAt))} ago</td>
