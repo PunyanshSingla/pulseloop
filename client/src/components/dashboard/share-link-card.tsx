@@ -7,8 +7,8 @@ export function ShareLinkCard() {
   const latestPoll = pollsResponse?.data?.[0];
   
   const shareLink = latestPoll 
-    ? `${window.location.origin}/vote/${latestPoll._id}`
-    : "pulseloop.io/vote/your-poll";
+    ? `${import.meta.env.VITE_APP_ORIGIN}/p/${latestPoll._id}`
+    : `${import.meta.env.VITE_APP_ORIGIN.replace(/^https?:\/\//, "")}/p/your-poll`;
 
   const copyLink = () => {
     if (!latestPoll) return;
@@ -17,25 +17,25 @@ export function ShareLinkCard() {
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
+    <div className="rounded-xl border border-border bg-card p-6">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium">Quick share</p>
-        <Globe className="size-4 text-muted-foreground" />
+        <p className="text-base font-semibold">Quick share</p>
+        <Globe className="size-5 text-muted-foreground" />
       </div>
-      <p className="mt-1 text-xs text-muted-foreground">
+      <p className="mt-1.5 text-sm text-muted-foreground">
         {latestPoll ? `Share your latest poll: ${latestPoll.title}` : "Send your latest poll anywhere."}
       </p>
-      <div className="mt-3 flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/40 px-3 py-2 font-mono text-[10px]">
+      <div className="mt-4 flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/40 px-3.5 py-2.5 font-mono text-xs">
         <span className="truncate">{shareLink.replace(/^https?:\/\//, "")}</span>
         <button 
           onClick={copyLink}
           disabled={!latestPoll}
-          className="ml-auto inline-flex items-center gap-1 rounded-md bg-foreground px-2 py-1 text-[10px] font-medium text-background hover:opacity-90 disabled:opacity-50"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-foreground px-2.5 py-1.5 text-xs font-medium text-background hover:opacity-90 disabled:opacity-50"
         >
-          <Copy className="size-3" /> Copy
+          <Copy className="size-3.5" /> Copy
         </button>
       </div>
-      <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
+      <div className="mt-5 grid grid-cols-3 gap-3 text-center text-sm">
         {["Slack", "Email", "X / Twitter"].map((c) => (
           <button
             key={c}

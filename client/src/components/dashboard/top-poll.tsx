@@ -25,30 +25,30 @@ export function TopPoll() {
   const options = firstQuestion?.options || [];
   
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
+    <div className="rounded-xl border border-border bg-card p-6">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium">Top performing poll</p>
-          <p className="text-xs text-muted-foreground">Across the last 30 days</p>
+          <p className="text-base font-bold text-foreground">Top performing poll</p>
+          <p className="text-sm text-muted-foreground font-medium">Across the last 30 days</p>
         </div>
-        <span className="inline-flex items-center gap-1 rounded-md bg-accent px-1.5 py-0.5 text-xs font-medium text-accent-foreground">
-          <TrendingUp className="size-3" />
+        <span className="inline-flex items-center gap-1 rounded-md bg-accent px-2 py-0.5 text-xs font-bold text-accent-foreground">
+          <TrendingUp className="size-3.5" />
           Trending
         </span>
       </div>
-      <h3 className="mt-4 text-base font-semibold tracking-tight">
+      <h3 className="mt-5 text-xl font-extrabold tracking-tight text-foreground">
         {poll.title}
       </h3>
-      <div className="mt-4 space-y-3">
+      <div className="mt-5 space-y-4">
         {options.map((o: any, i: number) => (
           <div key={o._id}>
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-medium">{o.text}</span>
-              <span className="text-muted-foreground tabular-nums">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-semibold text-foreground/90">{o.text}</span>
+              <span className="text-muted-foreground font-bold tabular-nums">
                 {Math.round(o.percentage || 0)}% · {o.responseCount || 0}
               </span>
             </div>
-            <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
+            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-muted">
               <div
                 className={i === 0 ? "h-full bg-primary" : "h-full bg-foreground/25"}
                 style={{ width: `${o.percentage || 0}%` }}
@@ -57,12 +57,12 @@ export function TopPoll() {
           </div>
         ))}
       </div>
-      <div className="mt-5 flex items-center justify-between border-t border-border pt-4 text-xs text-muted-foreground">
+      <div className="mt-6 flex items-center justify-between border-t border-border pt-4 text-sm text-muted-foreground font-semibold">
         <span className="inline-flex items-center gap-1.5">
-          <Eye className="size-3.5" /> {poll.responseCount || 0} responses
+          <Eye className="size-4" /> {poll.responseCount || 0} responses
         </span>
-        <Link to={`/polls/${poll._id}`} className="inline-flex items-center gap-1 font-medium text-foreground hover:underline">
-          View report <ArrowUpRight className="size-3.5" />
+        <Link to={`/polls/${poll._id}`} className="inline-flex items-center gap-1 font-bold text-foreground hover:underline">
+          View report <ArrowUpRight className="size-4" />
         </Link>
       </div>
     </div>

@@ -31,14 +31,14 @@ export function ResponsesChart() {
     <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium">Responses over time</p>
-          <p className="text-xs text-muted-foreground">Last 17 days</p>
+          <p className="text-base font-semibold">Responses over time</p>
+          <p className="text-sm text-muted-foreground">Last 17 days</p>
         </div>
-        <div className="flex items-center gap-1 rounded-lg border border-border bg-background p-0.5 text-xs">
+        <div className="flex items-center gap-1 rounded-lg border border-border bg-background p-1 text-sm">
           {["7d", "30d", "90d"].map((p, i) => (
             <button
               key={p}
-              className={`rounded-md px-2.5 py-1 font-medium transition-colors ${
+              className={`rounded-md px-3 py-1.5 font-semibold transition-colors ${
                 i === 1 ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
               }`}
             >

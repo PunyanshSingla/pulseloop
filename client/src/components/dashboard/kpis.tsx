@@ -59,21 +59,21 @@ export function KPIs() {
           className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-sm"
         >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-muted-foreground">{k.label}</p>
-            <k.icon className="size-3.5 text-muted-foreground/50" />
+            <p className="text-sm font-semibold text-muted-foreground">{k.label}</p>
+            <k.icon className="size-4.5 text-muted-foreground/50" />
           </div>
-          <div className="mt-2 flex items-baseline justify-between">
-            <p className="text-3xl font-semibold tracking-tight">{k.value}</p>
+          <div className="mt-2.5 flex items-baseline justify-between">
+            <p className="text-4xl font-bold tracking-tight">{k.value}</p>
             <span
-              className={`inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-xs font-medium ${
+              className={`inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-sm font-medium ${
                 k.up ? "bg-accent text-accent-foreground" : "bg-destructive/10 text-destructive"
               }`}
             >
-              {k.up ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
+              {k.up ? <ArrowUpRight className="size-3.5" /> : <ArrowDownRight className="size-3.5" />}
               {k.change}
             </span>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">{k.sub}</p>
+          <p className="mt-1.5 text-sm text-muted-foreground/80 font-medium">{k.sub}</p>
           <div className="absolute -bottom-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
         </div>
       ))}

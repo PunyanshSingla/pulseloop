@@ -50,10 +50,10 @@ export default function DashboardPage() {
           <div className="mx-auto max-w-7xl space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground/70">
                   Last 30 days
                 </p>
-                <h2 className="mt-1 text-2xl font-semibold tracking-tight">Performance at a glance</h2>
+                <h2 className="mt-2 text-3xl font-extrabold tracking-tight">Performance at a glance</h2>
               </div>
               <div className="flex items-center gap-4">
                 <Link

@@ -54,8 +54,10 @@ export function PollsTable() {
                       <BarChart3 className="size-4" />
                     </div>
                     <div>
-                      <Link to={`/polls/${p._id}`} className="font-medium hover:text-primary transition-colors">{p.title}</Link>
-                      <p className="text-xs text-muted-foreground truncate max-w-[150px]">pulseloop.io/p/{p._id}</p>
+                      <Link to={`/polls/${p._id}`} className="text-base font-semibold hover:text-primary transition-colors">{p.title}</Link>
+                      <p className="text-sm text-muted-foreground truncate max-w-[200px]">
+                        {import.meta.env.VITE_APP_ORIGIN.replace(/^https?:\/\//, "")}/p/{p._id}
+                      </p>
                     </div>
                   </div>
                 </td>
