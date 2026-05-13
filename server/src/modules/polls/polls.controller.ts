@@ -77,8 +77,21 @@ export class PollsController {
       const { responses, timeTaken: totalTimeTaken, fingerprint, deviceInfo } = req.body; 
       const user = (req as any).user;
       const userId = user?.id;
-      const ipAddress = (req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").toString();
+      let ipAddress = (req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").toString();
       const voterId = (req.headers["x-voter-id"] || "").toString();
+
+      // Local development workaround: Fetch real public IP if voting from localhost
+      if (ipAddress === "::1" || ipAddress === "127.0.0.1" || ipAddress.startsWith("192.168.")) {
+        try {
+          const publicIpRes = await fetch("https://api.ipify.org?format=json");
+          const publicIpData = await publicIpRes.json();
+          if (publicIpData?.ip) {
+            ipAddress = publicIpData.ip;
+          }
+        } catch (e) {
+          console.error("Failed to fetch public IP for local dev", e);
+        }
+      }
 
       // Check if the poll exists and allows multiple submissions
       const poll = await Poll.findById(pollId);
@@ -182,8 +195,21 @@ export class PollsController {
       const { id } = req.params;
       const { fingerprint } = req.body;
       const voterId = (req.headers["x-voter-id"] || "").toString();
-      const ipAddress = (req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").toString();
+      let ipAddress = (req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").toString();
       const userId = (req as any).user?.id;
+
+      // Local development workaround: Fetch real public IP if viewing from localhost
+      if (ipAddress === "::1" || ipAddress === "127.0.0.1" || ipAddress.startsWith("192.168.")) {
+        try {
+          const publicIpRes = await fetch("https://api.ipify.org?format=json");
+          const publicIpData = await publicIpRes.json();
+          if (publicIpData?.ip) {
+            ipAddress = publicIpData.ip;
+          }
+        } catch (e) {
+          console.error("Failed to fetch public IP for local dev", e);
+        }
+      }
 
       // Use userId if available, otherwise fallback to voterId
       const viewerId = userId || voterId;

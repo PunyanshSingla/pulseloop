@@ -90,7 +90,12 @@ export const usePollResponses = (id: string) => {
 };
 
 export const usePollAnalytics = (id: string) => {
-  return useQuery({
+  return useQuery<{
+    devices: { name: string; value: number }[];
+    browsers: { name: string; value: number }[];
+    os: { name: string; value: number }[];
+    countries: { name: string; value: number }[];
+  }>({
     queryKey: ["poll-analytics", id],
     queryFn: () => pollsApi.getAnalytics(id),
     enabled: !!id,

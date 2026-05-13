@@ -6,6 +6,7 @@ import Response from "../../models/Response";
 import User from "../../models/User";
 import PollView from "../../models/PollView";
 import { CreatePollInput, UpdatePollInput } from "./poll.types";
+import geoip from "geoip-lite";
 
 export class PollsService {
   async createPoll(data: CreatePollInput, userId: string) {
@@ -338,6 +339,53 @@ export class PollsService {
       { $group: { _id: "$deviceInfo.os", count: { $sum: 1 } } }
     ]);
 
+    // 4.5 Country Breakdown
+    const countryBreakdown = await Response.aggregate([
+      { $match: { pollId } },
+      { $group: { _id: "$ipAddress", count: { $sum: 1 } } }
+    ]);
+
+    const countriesMap: Record<string, number> = {};
+    const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+
+    for (const item of countryBreakdown) {
+      if (item._id) {
+        let ipToLookup = item._id;
+        console.log(ipToLookup,"ip to look up") 
+        // Fallback for local development and existing seeded private IPs
+        if (ipToLookup === "::1" || ipToLookup === "127.0.0.1" || ipToLookup.startsWith("192.168.") || ipToLookup.startsWith("10.")) {
+          ipToLookup = "8.8.8.8"; // Default to US
+        }
+        const geo = geoip.lookup(ipToLookup);
+        
+        let locName = "Unknown";
+        if (geo && geo.country) {
+          let countryName = geo.country;
+          console.log(geo,"geo")
+          try {
+            countryName = regionNames.of(geo.country) || geo.country;
+          } catch (e) {}
+
+          if (geo.city && geo.region) {
+            locName = `${geo.city}, ${geo.region}, ${countryName}`;
+          } else if (geo.region) {
+            locName = `${geo.region}, ${countryName}`;
+          } else {
+            locName = countryName;
+          }
+        }
+        
+        countriesMap[locName] = (countriesMap[locName] || 0) + item.count;
+      } else {
+        countriesMap["Unknown"] = (countriesMap["Unknown"] || 0) + item.count;
+      }
+    }
+
+    const countries = Object.keys(countriesMap)
+      .map(key => ({ name: key, value: countriesMap[key] }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+
     // 5. Voting Trends (Last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -382,7 +430,8 @@ export class PollsService {
       demographics: {
         devices: deviceBreakdown.map(d => ({ name: d._id || "Desktop", value: d.count })),
         browsers: browserBreakdown.map(b => ({ name: b._id || "Unknown", value: b.count })),
-        os: osBreakdown.map(o => ({ name: o._id || "Unknown", value: o.count }))
+        os: osBreakdown.map(o => ({ name: o._id || "Unknown", value: o.count })),
+        countries
       },
       timeline: timeline.map(t => ({ date: t._id, votes: t.votes }))
     };

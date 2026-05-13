@@ -543,6 +543,42 @@ export default function PollDetailsPage() {
                             </ResponsiveContainer>
                           </div>
                         </div>
+
+                        <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
+                          <div className="mb-6">
+                            <h3 className="text-sm font-bold">Top Locations</h3>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">Where your respondents are located</p>
+                          </div>
+                          <div className="h-[180px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart data={analytics?.demographics.countries?.map((c: any) => ({
+                                name: c.name,
+                                value: c.value
+                              })) || []} layout="vertical" margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+                                <XAxis type="number" hide />
+                                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--foreground)" }} width={100} />
+                                <Tooltip 
+                                  contentStyle={{ 
+                                    backgroundColor: "hsl(var(--card))", 
+                                    borderRadius: "12px", 
+                                    border: "1px solid hsl(var(--border))",
+                                    boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+                                    fontSize: "12px",
+                                    color: "hsl(var(--foreground))"
+                                  }}
+                                  itemStyle={{ color: "hsl(var(--foreground))" }}
+                                  cursor={{ fill: 'transparent' }}
+                                  formatter={(value: number) => [`${value} users`, "Count"]}
+                                />
+                                <Bar dataKey="value" fill="#f59e0b" radius={[0, 4, 4, 0]} barSize={12}>
+                                  {analytics?.demographics.countries?.map((entry: any, index: number) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[(index + 3) % COLORS.length]} />
+                                  ))}
+                                </Bar>
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </motion.div>
