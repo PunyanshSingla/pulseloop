@@ -14,7 +14,8 @@ import {
   Settings2,
   Globe,
   Lock,
-  MessageSquare
+  MessageSquare,
+  CheckCircle2
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCreatePoll } from "@/hooks/use-polls";
@@ -29,6 +30,9 @@ export default function CreatePollPage() {
   const [questions, setQuestions] = useState([
     { id: 1, text: "", options: ["", ""] }
   ]);
+  const [visibility, setVisibility] = useState<"public" | "private">("public");
+  const [allowAnonymous, setAllowAnonymous] = useState(true);
+  const [allowMultipleSubmissions, setAllowMultipleSubmissions] = useState(false);
 
   if (isSessionPending) {
     return (
@@ -89,6 +93,9 @@ export default function CreatePollPage() {
       title,
       description,
       status: "active",
+      visibility,
+      allowAnonymous,
+      allowMultipleSubmissions,
       questions: formattedQuestions,
     });
   };
@@ -217,29 +224,38 @@ export default function CreatePollPage() {
                         <Globe className="size-3.5 text-muted-foreground" />
                         Public access
                       </div>
-                      <div className="h-4 w-8 rounded-full bg-primary p-0.5">
-                        <div className="h-3 w-3 translate-x-4 rounded-full bg-white shadow-sm" />
-                      </div>
+                      <button 
+                        onClick={() => setVisibility(visibility === "public" ? "private" : "public")}
+                        className={`h-4 w-8 rounded-full p-0.5 transition-colors ${visibility === "public" ? "bg-primary" : "bg-muted"}`}
+                      >
+                        <div className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${visibility === "public" ? "translate-x-4" : ""}`} />
+                      </button>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-xs font-medium">
                         <Lock className="size-3.5 text-muted-foreground" />
-                        Require login
+                        Allow Guest Voting
                       </div>
-                      <div className="h-4 w-8 rounded-full bg-muted p-0.5">
-                        <div className="h-3 w-3 rounded-full bg-white shadow-sm" />
-                      </div>
+                      <button 
+                        onClick={() => setAllowAnonymous(!allowAnonymous)}
+                        className={`h-4 w-8 rounded-full p-0.5 transition-colors ${allowAnonymous ? "bg-primary" : "bg-muted"}`}
+                      >
+                        <div className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${allowAnonymous ? "translate-x-4" : ""}`} />
+                      </button>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-xs font-medium">
-                        <MessageSquare className="size-3.5 text-muted-foreground" />
-                        Allow comments
+                        <CheckCircle2 className="size-3.5 text-muted-foreground" />
+                        Multi-Submission
                       </div>
-                      <div className="h-4 w-8 rounded-full bg-primary p-0.5">
-                        <div className="h-3 w-3 translate-x-4 rounded-full bg-white shadow-sm" />
-                      </div>
+                      <button 
+                        onClick={() => setAllowMultipleSubmissions(!allowMultipleSubmissions)}
+                        className={`h-4 w-8 rounded-full p-0.5 transition-colors ${allowMultipleSubmissions ? "bg-primary" : "bg-muted"}`}
+                      >
+                        <div className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${allowMultipleSubmissions ? "translate-x-4" : ""}`} />
+                      </button>
                     </div>
                   </div>
 
@@ -251,9 +267,6 @@ export default function CreatePollPage() {
                     >
                       {isCreating ? "Creating..." : "Create Poll"}
                     </Button>
-                    <p className="mt-3 text-center text-[10px] text-muted-foreground">
-                      By creating a poll, you agree to our terms of service.
-                    </p>
                   </div>
                 </div>
 
@@ -263,7 +276,7 @@ export default function CreatePollPage() {
                     Pro Tip
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Add images to your options to increase engagement by up to 40%.
+                    Allowing Guest Voting (Anonymous) usually increases response rates by over 50%.
                   </p>
                 </div>
               </div>

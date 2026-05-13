@@ -107,19 +107,23 @@ export default function PublicPollPage() {
     );
   }
 
-  if (!session) {
-    return <Navigate to={`/sign-in?callbackUrl=/vote/${id}`} replace />;
+  if (!poll || !currentQuestion) {
+    if (!isPollLoading && !poll) {
+      return (
+        <div className="container mx-auto py-20 text-center bg-slate-50 dark:bg-slate-950 min-h-screen flex flex-col items-center justify-center">
+          <h2 className="text-2xl font-black tracking-tight">Poll not found</h2>
+          <Button asChild variant="outline" className="mt-6 rounded-full font-bold">
+            <Link to="/">Back to Home</Link>
+          </Button>
+        </div>
+      );
+    }
+    return null; // Should be covered by loader, but safety first
   }
 
-  if (!poll || !currentQuestion) {
-    return (
-      <div className="container mx-auto py-20 text-center bg-slate-50 dark:bg-slate-950 min-h-screen flex flex-col items-center justify-center">
-        <h2 className="text-2xl font-black tracking-tight">Poll not found</h2>
-        <Button asChild variant="outline" className="mt-6 rounded-full font-bold">
-          <Link to="/">Back to Home</Link>
-        </Button>
-      </div>
-    );
+  // Only redirect to sign-in if the poll specifically DISALLOWS anonymous voting
+  if (!session && !poll.allowAnonymous) {
+    return <Navigate to={`/sign-in?callbackUrl=/vote/${id}`} replace />;
   }
 
   const isLastStep = currentStep === totalSteps - 1;

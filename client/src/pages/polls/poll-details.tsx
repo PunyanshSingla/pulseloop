@@ -511,11 +511,32 @@ export default function PollDetailsPage() {
                     </h3>
                     <div className="space-y-6 pt-4">
                       {[
-                        { icon: Globe, label: "Public Access", desc: "Anyone with the link can view and vote.", active: poll.visibility === "public" },
-                        { icon: Lock, label: "Require Login", desc: "Respondents must be signed in to vote.", active: !poll.allowAnonymous },
-                        { icon: CheckCircle2, label: "One vote per user", desc: "Prevents multiple submissions from the same IP/account.", active: true },
+                        { 
+                          id: "visibility",
+                          icon: Globe, 
+                          label: "Public Access", 
+                          desc: "Anyone with the link can view and vote.", 
+                          active: poll.visibility === "public",
+                          onToggle: () => updatePoll({ visibility: poll.visibility === "public" ? "private" : "public" })
+                        },
+                        { 
+                          id: "allowAnonymous",
+                          icon: Lock, 
+                          label: "Allow Guest Voting", 
+                          desc: "Respondents don't need to be signed in to vote.", 
+                          active: poll.allowAnonymous,
+                          onToggle: () => updatePoll({ allowAnonymous: !poll.allowAnonymous })
+                        },
+                        { 
+                          id: "allowMultipleSubmissions",
+                          icon: CheckCircle2, 
+                          label: "Allow Multiple Submissions", 
+                          desc: "Participants can vote more than once on this poll.", 
+                          active: poll.allowMultipleSubmissions,
+                          onToggle: () => updatePoll({ allowMultipleSubmissions: !poll.allowMultipleSubmissions })
+                        },
                       ].map((s) => (
-                        <div key={s.label} className="flex items-start justify-between">
+                        <div key={s.id} className="flex items-start justify-between">
                           <div className="flex gap-3">
                             <div className="mt-0.5 grid size-8 place-items-center rounded-lg bg-muted">
                               <s.icon className="size-4 text-muted-foreground" />
@@ -525,9 +546,12 @@ export default function PollDetailsPage() {
                               <p className="text-xs text-muted-foreground">{s.desc}</p>
                             </div>
                           </div>
-                          <div className={`h-5 w-10 rounded-full p-0.5 transition-colors ${s.active ? "bg-primary" : "bg-muted"}`}>
+                          <button 
+                            onClick={s.onToggle}
+                            className={`h-5 w-10 rounded-full p-0.5 transition-colors ${s.active ? "bg-primary" : "bg-muted"}`}
+                          >
                             <div className={`h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${s.active ? "translate-x-5" : ""}`} />
-                          </div>
+                          </button>
                         </div>
                       ))}
                     </div>
