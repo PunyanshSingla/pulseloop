@@ -252,18 +252,35 @@ export class PollsService {
   async trackPollView(id: string, viewerInfo: { viewerId: string; fingerprint?: string; ipAddress?: string }) {
     try {
       const { viewerId, fingerprint, ipAddress } = viewerInfo;
+      console.log(`[TrackView] Attempting view for poll: ${id}, Viewer: ${viewerId}`);
       
-      await PollView.create({
-        pollId: id,
-        viewerId,
-        fingerprint,
-        ipAddress
-      });
+      // Atomically find or create the view record
+      // We use the viewerId as the unique key for this poll
+      const result = await PollView.findOneAndUpdate(
+        { pollId: id, viewerId },
+        { 
+          $setOnInsert: { 
+            fingerprint, 
+            ipAddress,
+            createdAt: new Date()
+          } 
+        },
+        { upsert: true, new: true, includeResultMetadata: true }
+      );
 
-      await Poll.findByIdAndUpdate(id, { $inc: { viewCount: 1 } });
-      return true;
-    } catch (error: any) {
-      if (error.code === 11000) return false;
+      // If a NEW document was created (not updated), it means this is a unique view
+      const isNewView = !result.lastErrorObject?.updatedExisting;
+
+      if (isNewView) {
+        console.log(`[TrackView] UNIQUE VIEW detected for poll ${id}. Incrementing count.`);
+        await Poll.findByIdAndUpdate(id, { $inc: { viewCount: 1 } });
+        return true;
+      } else {
+        console.log(`[TrackView] DUPLICATE VIEW ignored for poll ${id}.`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`[TrackView] Error tracking unique view:`, error);
       throw error;
     }
   }
