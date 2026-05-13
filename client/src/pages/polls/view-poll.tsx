@@ -52,9 +52,51 @@ export default function ViewPollPage() {
     );
   }
 
+  const getDeviceInfo = () => {
+    const ua = navigator.userAgent;
+    let browser = "Unknown";
+    let os = "Unknown";
+    let device = "Desktop";
+
+    // Simple Browser Detection
+    if (ua.includes("Firefox")) browser = "Firefox";
+    else if (ua.includes("Chrome")) browser = "Chrome";
+    else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
+    else if (ua.includes("Edge")) browser = "Edge";
+
+    // Simple OS Detection
+    if (ua.includes("Win")) os = "Windows";
+    else if (ua.includes("Mac")) os = "MacOS";
+    else if (ua.includes("Linux")) os = "Linux";
+    else if (ua.includes("Android")) os = "Android";
+    else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+
+    // Simple Device Detection
+    if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) device = "Tablet";
+    else if (/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|NetFront|Silk-Accelerated|(hpw|web)OS|Fennec|Minimo|Opera M(obi|ini)|Blazer|Dolfin|Dolphin|Skyfire|Zune/.test(ua)) device = "Mobile";
+
+    return {
+      browser,
+      os,
+      device,
+      userAgent: ua,
+      screenResolution: `${window.screen.width}x${window.screen.height}`,
+      language: navigator.language
+    };
+  };
+
   const handleVote = () => {
     const poll = response?.data;
     if (!poll) return;
+
+    // Get security tokens from localStorage
+    let voterId = localStorage.getItem("voterId");
+    if (!voterId) {
+      voterId = `voter_${Math.random().toString(36).substring(7)}`;
+      localStorage.setItem("voterId", voterId);
+    }
+
+    const fingerprint = `fp_${Math.random().toString(36).substring(7)}`; // In real app, use a lib like FingerprintJS
 
     const responses = Object.entries(selectedOptions).map(([questionId, optionId]) => ({
       questionId,
@@ -63,7 +105,12 @@ export default function ViewPollPage() {
     }));
 
     if (responses.length > 0) {
-      vote({ responses });
+      vote({ 
+        responses,
+        voterId,
+        fingerprint,
+        deviceInfo: getDeviceInfo()
+      });
     }
   };
 

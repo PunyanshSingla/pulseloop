@@ -88,3 +88,11 @@ export const usePollResponses = (id: string) => {
     enabled: !!id,
   });
 };
+
+export const usePollAnalytics = (id: string) => {
+  return useQuery({
+    queryKey: ["poll-analytics", id],
+    queryFn: () => pollsApi.getAnalytics(id),
+    enabled: !!id,
+  });
+};

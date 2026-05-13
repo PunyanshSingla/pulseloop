@@ -284,6 +284,109 @@ export class PollsService {
       throw error;
     }
   }
+
+  async getPollAnalytics(id: string) {
+    console.log("request coming at poll analytics", id)
+    const pollId = new mongoose.Types.ObjectId(id);
+    const poll = await Poll.findById(id).lean();
+    console.log("poll from analytics", poll)
+    if (!poll) throw new Error("Poll not found");
+
+    // 1. Question Results
+    const questions = await Question.find({ pollId: id }).lean();
+    const responses = await Response.find({ pollId: id }).lean();
+    console.log("question and responses lenght", questions.length, responses.length)
+    const results = await Promise.all(questions.map(async (q) => {
+      const options = await QuestionOption.find({ questionId: q._id }).lean();
+      console.log("options", options.length)
+      const questionResponses = responses.filter(r => r.questionId?.toString() === q._id.toString());
+      console.log("question responses", questionResponses.length)
+      const optionStats = options.map(o => {
+        const count = questionResponses.filter(r => r.selectedOptionId?.toString() === o._id.toString()).length;
+        return {
+          id: o._id,
+          text: o.text,
+          count,
+          percentage: questionResponses.length > 0 ? (count / questionResponses.length) * 100 : 0
+        };
+      });
+
+      return {
+        id: q._id,
+        text: q.text,
+        totalVotes: questionResponses.length,
+        options: optionStats
+      };
+    }));
+    console.log("results", results)
+    // 2. Device Breakdown
+    const deviceBreakdown = await Response.aggregate([
+      { $match: { pollId } },
+      { $group: { _id: "$deviceInfo.device", count: { $sum: 1 } } }
+    ]);
+    console.log("device breakdown", deviceBreakdown)
+
+    // 3. Browser Breakdown
+    const browserBreakdown = await Response.aggregate([
+      { $match: { pollId } },
+      { $group: { _id: "$deviceInfo.browser", count: { $sum: 1 } } }
+    ]);
+
+    // 4. OS Breakdown
+    const osBreakdown = await Response.aggregate([
+      { $match: { pollId } },
+      { $group: { _id: "$deviceInfo.os", count: { $sum: 1 } } }
+    ]);
+
+    // 5. Voting Trends (Last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const timeline = await Response.aggregate([
+      { 
+        $match: { 
+          pollId,
+          createdAt: { $gte: sevenDaysAgo }
+        } 
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          votes: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
+
+    // 6. Summary Stats
+    const totalResponses = await Response.countDocuments({ pollId: pollId });
+    const uniqueViews = poll.viewCount || 0;
+    const completionRate = uniqueViews > 0 ? (totalResponses / uniqueViews) * 100 : 0;
+
+    const avgTimeResult = await Response.aggregate([
+      { $match: { pollId } },
+      { $group: { _id: null, avg: { $avg: "$timeTaken" } } }
+    ]);
+    const avgTimeTaken = Math.round(avgTimeResult[0]?.avg || 0);
+    console.log("poll view count " , uniqueViews)
+    return {
+      poll: {
+        title: poll.title,
+        status: poll.status,
+        viewCount: uniqueViews,
+        responseCount: totalResponses,
+        completionRate,
+        avgTimeTaken
+      },
+      results,
+      demographics: {
+        devices: deviceBreakdown.map(d => ({ name: d._id || "Desktop", value: d.count })),
+        browsers: browserBreakdown.map(b => ({ name: b._id || "Unknown", value: b.count })),
+        os: osBreakdown.map(o => ({ name: o._id || "Unknown", value: o.count }))
+      },
+      timeline: timeline.map(t => ({ date: t._id, votes: t.votes }))
+    };
+  }
 }
 
 export const pollsService = new PollsService();

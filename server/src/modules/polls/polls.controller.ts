@@ -204,6 +204,16 @@ export class PollsController {
       next(error);
     }
   }
+
+  async getAnalytics(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const analytics = await pollsService.getPollAnalytics(id as string);
+      res.status(200).json({ success: true, data: analytics });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const pollsController = new PollsController();

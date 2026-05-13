@@ -16,5 +16,6 @@ router.post("/:id/vote", optionalAuthMiddleware, pollsController.vote);
 router.patch("/:id", authMiddleware, pollsController.update);
 router.delete("/:id", authMiddleware, pollsController.delete);
 router.get("/:id/responses", authMiddleware, pollsController.getResponses);
+router.get("/:id/analytics", authMiddleware, pollsController.getAnalytics);
 
 export default router;
