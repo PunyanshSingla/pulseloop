@@ -34,6 +34,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 export const pollsApi = {
   create: (data: any) => request("/polls", { method: "POST", body: JSON.stringify(data) }),
   getAll: () => request("/polls"),
+  getPublic: () => request("/polls?type=public"),
   getById: (id: string) => request(`/polls/${id}`),
   trackView: (id: string, data: { fingerprint: string }) => 
     request(`/polls/${id}/view`, { method: "POST", body: JSON.stringify(data) }),

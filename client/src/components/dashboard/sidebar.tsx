@@ -1,4 +1,4 @@
-import { LayoutGrid, BarChart3, Users, Link2, Settings, Sparkles } from "lucide-react";
+import { LayoutGrid, BarChart3, Users, Link2, Settings, Sparkles, Compass } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Link, useLocation } from "react-router-dom";
 
@@ -15,6 +15,7 @@ export function Sidebar({ user }: SidebarProps) {
   const nav = [
     { icon: LayoutGrid, label: "Overview", href: "/dashboard" },
     { icon: BarChart3, label: "Polls", href: "/polls" },
+    { icon: Compass, label: "Explore", href: "/explore" },
     { icon: Users, label: "Audience", href: "#" },
     { icon: Link2, label: "Share links", href: "#" },
     { icon: Settings, label: "Settings", href: "#" },

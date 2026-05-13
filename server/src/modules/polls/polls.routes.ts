@@ -6,7 +6,7 @@ import { optionalAuthMiddleware } from "../../middlewares/optional-auth.middlewa
 const router = Router();
 
 // Public routes
-router.get("/", pollsController.getAll);
+router.get("/", optionalAuthMiddleware, pollsController.getAll);
 router.get("/:id", optionalAuthMiddleware, pollsController.getById);
 router.post("/:id/view", optionalAuthMiddleware, pollsController.trackView);
 

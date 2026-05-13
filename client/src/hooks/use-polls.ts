@@ -11,6 +11,13 @@ export const usePolls = () => {
   });
 };
 
+export const usePublicPolls = () => {
+  return useQuery<PollsResponse>({
+    queryKey: ["public-polls"],
+    queryFn: pollsApi.getPublic,
+  });
+};
+
 export const usePoll = (id: string) => {
   return useQuery<PollResponse>({
     queryKey: ["poll", id],

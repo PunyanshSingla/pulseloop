@@ -19,7 +19,21 @@ export class PollsController {
 
   async getAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const polls = await pollsService.getPolls();
+      const isPublic = req.query.type === "public";
+      let filters: any = {};
+      
+      if (isPublic) {
+        filters = { visibility: "public", status: "active" };
+      } else {
+        const userId = (req as any).user?.id;
+        if (!userId) {
+          res.status(401).json({ success: false, message: "Unauthorized to view dashboard polls" });
+          return;
+        }
+        filters = { createdBy: userId };
+      }
+      
+      const polls = await pollsService.getPolls(filters);
       res.status(200).json({ success: true, data: polls });
     } catch (error) {
       next(error);

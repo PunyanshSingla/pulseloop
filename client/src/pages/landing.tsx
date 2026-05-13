@@ -23,7 +23,7 @@ function Nav() {
           <div className="hidden items-center gap-6 md:flex">
             <a className="text-sm text-muted-foreground transition-colors hover:text-foreground" href="#product">Product</a>
             <a className="text-sm text-muted-foreground transition-colors hover:text-foreground" href="#how">How it works</a>
-            <a className="text-sm text-muted-foreground transition-colors hover:text-foreground" href="#features">Features</a>
+            <Link className="text-sm text-muted-foreground transition-colors hover:text-foreground" to="/explore">Explore</Link>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -134,10 +134,10 @@ function Hero() {
               Create your first poll
             </Link>
             <Link
-              to="/sign-in"
+              to="/explore"
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-sm ring-1 ring-black/5 transition-all hover:ring-black/10 sm:w-auto"
             >
-              View examples
+              Explore public polls
             </Link>
           </div>
         </div>
