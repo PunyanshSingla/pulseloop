@@ -1,4 +1,5 @@
 import { Search, Bell, Plus } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface TopbarProps {
   userName?: string;
@@ -27,6 +28,7 @@ export function Topbar({ userName }: TopbarProps) {
         <button className="grid size-9 place-items-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
           <Bell className="size-4" />
         </button>
+        <ThemeToggle />
         <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground shadow-sm ring-1 ring-primary/30 transition-all hover:brightness-110">
           <Plus className="size-4" />
           New poll

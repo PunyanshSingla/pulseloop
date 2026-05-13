@@ -10,6 +10,7 @@ import {
   Zap,
 } from "lucide-react";
 import Logo from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 // ─── Nav ───────────────────────────────────────────────────────────────────────
 function Nav() {
@@ -31,6 +32,7 @@ function Nav() {
           >
             Sign in
           </Link>
+          <ThemeToggle />
           <Link
             to="/sign-up"
             className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm ring-1 ring-primary/30 transition-all hover:brightness-110"
