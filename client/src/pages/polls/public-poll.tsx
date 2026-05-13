@@ -103,6 +103,41 @@ export default function PublicPollPage() {
   const handleVote = async () => {
     if (!poll) return;
 
+    // Get basic device info
+    const getDeviceInfo = () => {
+      const ua = navigator.userAgent;
+      let browser = "Unknown";
+      let os = "Unknown";
+      let device = "Desktop";
+
+      if (ua.includes("Firefox")) browser = "Firefox";
+      else if (ua.includes("Chrome")) browser = "Chrome";
+      else if (ua.includes("Safari")) browser = "Safari";
+      else if (ua.includes("Edge")) browser = "Edge";
+
+      if (ua.includes("Windows")) os = "Windows";
+      else if (ua.includes("Mac OS")) os = "macOS";
+      else if (ua.includes("Linux")) os = "Linux";
+      else if (ua.includes("Android")) os = "Android";
+      else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+
+      if (/Mobile|Android|iPhone|iPad/i.test(ua)) device = "Mobile";
+
+      const screenResolution = `${window.screen.width}x${window.screen.height}`;
+      const language = navigator.language;
+
+      return { 
+        browser, 
+        os, 
+        device, 
+        userAgent: ua, 
+        screenResolution, 
+        language 
+      };
+    };
+
+    const deviceInfo = getDeviceInfo();
+
     const responses = Object.entries(selectedOptions).map(([questionId, optionId]) => ({
       questionId,
       selectedOptionId: optionId,
@@ -110,7 +145,7 @@ export default function PublicPollPage() {
     }));
 
     if (responses.length > 0) {
-      vote({ responses, fingerprint });
+      vote({ responses, fingerprint, deviceInfo });
     }
   };
 

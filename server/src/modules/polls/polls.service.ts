@@ -139,7 +139,15 @@ export class PollsService {
     timeTaken: number = 0,
     fingerprint?: string,
     ipAddress?: string,
-    voterId?: string
+    voterId?: string,
+    deviceInfo?: { 
+      browser: string; 
+      os: string; 
+      device: string; 
+      userAgent: string; 
+      screenResolution: string; 
+      language: string; 
+    }
   ) {
     const response = new Response({
       pollId,
@@ -150,6 +158,7 @@ export class PollsService {
       fingerprint,
       ipAddress,
       voterId,
+      deviceInfo,
       timeTaken,
     });
 

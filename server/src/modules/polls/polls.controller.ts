@@ -74,7 +74,7 @@ export class PollsController {
   async vote(req: Request, res: Response, next: NextFunction) {
     try {
       const pollId = req.params.id as string;
-      const { responses, timeTaken: totalTimeTaken, fingerprint } = req.body; 
+      const { responses, timeTaken: totalTimeTaken, fingerprint, deviceInfo } = req.body; 
       const user = (req as any).user;
       const userId = user?.id;
       const ipAddress = (req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").toString();
@@ -84,7 +84,7 @@ export class PollsController {
       const poll = await Poll.findById(pollId);
       if (!poll) throw new Error("Poll not found");
 
-      console.log(`[Vote Attempt] Poll: ${poll.title}, User: ${userId || "Guest"}, Fingerprint: ${fingerprint || "None"}, VoterID: ${voterId}, IP: ${ipAddress}`);
+      console.log(`[Vote Attempt] Poll: ${poll.title}, User: ${userId || "Guest"}, Device: ${deviceInfo?.os}/${deviceInfo?.browser}`);
 
       if (!poll.allowMultipleSubmissions) {
         // Build a robust query to catch duplicates across all 3 layers
@@ -131,7 +131,8 @@ export class PollsController {
             timeTaken, 
             fingerprint, 
             ipAddress,
-            voterId
+            voterId,
+            deviceInfo
           );
           results.push(result);
         }
@@ -146,7 +147,8 @@ export class PollsController {
           timeTaken, 
           fingerprint, 
           ipAddress,
-          voterId
+          voterId,
+          deviceInfo
         );
         results.push(result);
       }

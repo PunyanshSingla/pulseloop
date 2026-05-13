@@ -9,6 +9,14 @@ export interface IResponse extends Document {
   fingerprint: string | null;
   voterId: string | null;
   ipAddress: string | null;
+  deviceInfo: {
+    browser: string;
+    os: string;
+    device: string;
+    userAgent: string;
+    screenResolution: string;
+    language: string;
+  } | null;
   timeTaken: number; // in seconds
   submittedAt: Date;
   createdAt: Date;
@@ -59,6 +67,15 @@ const responseSchema = new Schema<IResponse>(
     ipAddress: {
       type: String,
       default: null,
+    },
+
+    deviceInfo: {
+      browser: String,
+      os: String,
+      device: String,
+      userAgent: String,
+      screenResolution: String,
+      language: String,
     },
     
     timeTaken: {
