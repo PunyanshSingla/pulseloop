@@ -5,6 +5,7 @@ import {
   Check,
   Copy,
   GitBranch,
+  Lock,
   Plus,
   ShieldCheck,
   Zap,
@@ -272,6 +273,58 @@ function DashboardMock() {
   );
 }
 
+// ─── Security ──────────────────────────────────────────────────────────────────
+function SecuritySection() {
+  const securityLayers = [
+    { 
+      title: "Device Fingerprinting", 
+      desc: "We analyze over 20 unique browser attributes to create a digital signature that prevents vote manipulation even without an account.",
+      icon: ShieldCheck,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10"
+    },
+    { 
+      title: "Persistence Layer", 
+      desc: "Encrypted local tokens and secure cookies ensure that once a vote is cast, it's locked in for that specific session and device.",
+      icon: Lock,
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10"
+    },
+    { 
+      title: "Smart IP Tracking", 
+      desc: "Automated monitoring of submission patterns identifies and blocks rapid-fire voting attempts from the same network.",
+      icon: Zap,
+      color: "text-amber-500",
+      bg: "bg-amber-500/10"
+    },
+  ];
+
+  return (
+    <section className="bg-slate-50 dark:bg-slate-900/50 px-6 py-24 border-y border-border">
+      <div className="mx-auto max-w-7xl">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-bold tracking-tight mb-4">Zero-Trust Polling Infrastructure</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Integrity is our top priority. We use a multi-layered security stack to ensure that your data is clean, accurate, and free from duplicates.
+          </p>
+        </div>
+        
+        <div className="grid gap-8 md:grid-cols-3">
+          {securityLayers.map((layer) => (
+            <div key={layer.title} className="bg-card p-8 rounded-2xl border border-border shadow-sm hover:shadow-md transition-shadow">
+              <div className={`size-12 rounded-xl ${layer.bg} ${layer.color} flex items-center justify-center mb-6`}>
+                <layer.icon className="size-6" />
+              </div>
+              <h3 className="text-lg font-semibold mb-3">{layer.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{layer.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Analytics ─────────────────────────────────────────────────────────────────
 function Analytics() {
   return (
@@ -396,6 +449,7 @@ export default function LandingPage() {
         <ShareStrip />
         <HowItWorks />
         <Features />
+        <SecuritySection />
         <Analytics />
         <CTA />
       </main>

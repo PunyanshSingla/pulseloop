@@ -65,12 +65,32 @@ export class PollsService {
     return pollsWithCounts;
   }
 
-  async getPollById(id: string) {
+  async getPollById(id: string, requesterInfo?: { userId?: string; fingerprint?: string; ipAddress?: string }) {
     const poll = await Poll.findByIdAndUpdate(id, { $inc: { viewCount: 1 } }, { new: true }).lean();
     if (!poll) return null;
 
     const questions = await Question.find({ pollId: id }).sort({ order: 1 }).lean();
     const questionCount = questions.length;
+    
+    // Check if requester has already voted
+    let userHasVoted = false;
+    if (requesterInfo) {
+      const { userId, fingerprint, ipAddress } = requesterInfo;
+      const query: any = { pollId: id };
+      
+      if (userId) {
+        query.respondentId = userId;
+      } else if (fingerprint || ipAddress) {
+        query.$or = [];
+        if (fingerprint) query.$or.push({ fingerprint });
+        if (ipAddress) query.$or.push({ ipAddress });
+      }
+
+      if (Object.keys(query).length > 1) {
+        const existingResponse = await Response.findOne(query);
+        userHasVoted = !!existingResponse;
+      }
+    }
     const totalRawResponses = await Response.countDocuments({ pollId: id });
     const totalPollResponses = questionCount > 0 ? Math.ceil(totalRawResponses / questionCount) : totalRawResponses;
     const avgTimeResult = await Response.aggregate([
@@ -106,17 +126,30 @@ export class PollsService {
       ...poll, 
       questions: questionsWithOptions, 
       responseCount: totalPollResponses,
-      avgTimeTaken
+      avgTimeTaken,
+      hasVoted: userHasVoted
     };
   }
 
-  async castVote(pollId: string, questionId: string, optionId: string, userId?: string, timeTaken: number = 0) {
+  async castVote(
+    pollId: string, 
+    questionId: string, 
+    optionId: string, 
+    userId?: string, 
+    timeTaken: number = 0,
+    fingerprint?: string,
+    ipAddress?: string,
+    voterId?: string
+  ) {
     const response = new Response({
       pollId,
       questionId,
       selectedOptionId: optionId,
       respondentId: userId || null,
       isAnonymous: !userId,
+      fingerprint,
+      ipAddress,
+      voterId,
       timeTaken,
     });
 

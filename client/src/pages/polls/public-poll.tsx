@@ -11,6 +11,13 @@ import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/logo";
 
+// Initialize voter ID early for API consistency
+if (typeof window !== "undefined") {
+  if (!localStorage.getItem("pl_voter_id")) {
+    localStorage.setItem("pl_voter_id", crypto.randomUUID());
+  }
+}
+
 export default function PublicPollPage() {
   const { id } = useParams<{ id: string }>();
   const { data: session, isPending: isAuthPending } = authClient.useSession();
@@ -22,6 +29,21 @@ export default function PublicPollPage() {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [hasVoted, setHasVoted] = useState(false);
   const [startTime] = useState<number>(Date.now());
+  const [fingerprint, setFingerprint] = useState<string>("");
+
+  useEffect(() => {
+    // Generate a simple browser fingerprint
+    const getFingerprint = () => {
+      const { userAgent, language, platform } = navigator;
+      const { width, height, colorDepth } = window.screen;
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const voterId = localStorage.getItem("pl_voter_id");
+
+      return btoa(`${userAgent}-${language}-${platform}-${width}x${height}-${colorDepth}-${timezone}-${voterId}`).slice(0, 64);
+    };
+
+    setFingerprint(getFingerprint());
+  }, []);
 
   useEffect(() => {
     if (isSuccess) {
@@ -88,7 +110,7 @@ export default function PublicPollPage() {
     }));
 
     if (responses.length > 0) {
-      vote({ responses });
+      vote({ responses, fingerprint });
     }
   };
 

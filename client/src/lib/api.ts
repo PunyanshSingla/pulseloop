@@ -7,6 +7,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     ...options,
     headers: {
       "Content-Type": "application/json",
+      "x-voter-id": localStorage.getItem("pl_voter_id") || "",
       ...options.headers,
     },
     credentials: "include", // Important for cookies
