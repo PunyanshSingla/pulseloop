@@ -9,6 +9,9 @@ import DashboardPage from "./pages/dashboard.tsx";
 import PollsPage from "./pages/polls.tsx";
 import CreatePollPage from "./pages/polls/create-poll.tsx";
 import PollDetailsPage from "./pages/polls/poll-details.tsx";
+import PublicPollPage from "./pages/polls/public-poll.tsx";
+import AuthCallbackPage from "./pages/auth-callback.tsx";
+import { AdminGuard } from "./components/auth/admin-guard";
 import { Toaster } from "@/components/ui/sonner";
 
 export default function App() {
@@ -16,10 +19,17 @@ export default function App() {
     <>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/polls" element={<PollsPage />} />
-        <Route path="/polls/create" element={<CreatePollPage />} />
-        <Route path="/polls/:id" element={<PollDetailsPage />} />
+        
+        {/* Admin Routes */}
+        <Route path="/dashboard" element={<AdminGuard><DashboardPage /></AdminGuard>} />
+        <Route path="/polls" element={<AdminGuard><PollsPage /></AdminGuard>} />
+        <Route path="/polls/create" element={<AdminGuard><CreatePollPage /></AdminGuard>} />
+        <Route path="/polls/:id" element={<AdminGuard><PollDetailsPage /></AdminGuard>} />
+        
+        {/* Public Voting Route */}
+        <Route path="/vote/:id" element={<PublicPollPage />} />
+        
+        <Route path="/auth-callback" element={<AuthCallbackPage />} />
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />

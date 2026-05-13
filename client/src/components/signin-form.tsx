@@ -26,33 +26,39 @@ export function LoginForm({
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    
     const { error } = await authClient.signIn.email({
       email,
       password,
-      callbackURL: appUrl("/dashboard"),
     })
-    setLoading(false)
+    
     if (error) {
+      setLoading(false)
       toast.error(error.message || "An error occurred during sign in")
+      return
+    }
+
+    // Fetch session manually to determine role immediately after sign-in
+    const { data: session } = await authClient.useSession.getState()
+    const user = session?.user as any
+    
+    setLoading(false)
+    toast.success("Signed in successfully")
+    
+    if (user?.role === "admin") {
+      navigate("/dashboard")
     } else {
-      toast.success("Signed in successfully")
       navigate("/")
     }
   }
 
   const handleSocialSignIn = async (provider: "google") => {
       setLoading(true)
-      const { error } = await authClient.signIn.social({
+      await authClient.signIn.social({
           provider,
-          callbackURL: appUrl("/dashboard"),
+          callbackURL: appUrl("/auth-callback"),
           errorCallbackURL: appUrl("/sign-in"),
       })
-      setLoading(false)
-      if (error) {
-
-          console.error(error)
-          toast.error(error.message || `An error occurred during ${provider} sign in`)
-      }
   }
 
   return (
