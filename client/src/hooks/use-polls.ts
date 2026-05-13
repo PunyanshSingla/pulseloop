@@ -72,8 +72,8 @@ export const useVote = (pollId: string) => {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: ({ questionId, optionId }: { questionId: string; optionId: string }) => 
-      pollsApi.vote(pollId, questionId, optionId),
+    mutationFn: ({ questionId, optionId, timeTaken }: { questionId: string; optionId: string; timeTaken?: number }) => 
+      pollsApi.vote(pollId, questionId, optionId, timeTaken),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["poll", pollId] });
       toast.success("Vote cast successfully!");

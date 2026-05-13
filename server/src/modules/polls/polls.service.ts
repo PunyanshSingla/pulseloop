@@ -86,13 +86,14 @@ export class PollsService {
     return { ...poll, questions: questionsWithOptions, responseCount: totalPollResponses };
   }
 
-  async castVote(pollId: string, questionId: string, optionId: string, userId?: string) {
+  async castVote(pollId: string, questionId: string, optionId: string, userId?: string, timeTaken: number = 0) {
     const response = new Response({
       pollId,
       questionId,
       selectedOptionId: optionId,
       respondentId: userId || null,
       isAnonymous: !userId,
+      timeTaken,
     });
 
     await response.save();

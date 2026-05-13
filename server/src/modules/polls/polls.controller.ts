@@ -68,12 +68,12 @@ export class PollsController {
   async vote(req: Request, res: Response, next: NextFunction) {
     try {
       const pollId = req.params.id as string;
-      const { questionId, selectedOptionId } = req.body;
+      const { questionId, selectedOptionId, timeTaken } = req.body;
       const user = (req as any).user;
-      const userId = user.id;
+      const userId = user?.id;
 
       console.log("request came at vote", pollId, questionId, selectedOptionId, user)
-      const response = await pollsService.castVote(pollId, questionId, selectedOptionId, userId);
+      const response = await pollsService.castVote(pollId, questionId, selectedOptionId, userId, timeTaken);
 
       // Get updated poll data for real-time broadcast
       const updatedPoll = await pollsService.getPollById(pollId);

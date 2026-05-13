@@ -31,12 +31,24 @@ export class AnalyticsService {
     } else if (currentPeriodResponses > 0) {
       growth = 100;
     }
+
+    // Calculate average response time
+    const avgResponseTimeData = await Response.aggregate([
+      { $match: { pollId: { $in: pollIds } } },
+      { $group: { _id: null, avgTime: { $avg: "$timeTaken" } } }
+    ]);
+
+    const avgTimeSeconds = avgResponseTimeData.length > 0 ? Math.round(avgResponseTimeData[0].avgTime) : 0;
+    const formattedAvgTime = avgTimeSeconds > 60 
+      ? `${Math.floor(avgTimeSeconds / 60)}m ${avgTimeSeconds % 60}s` 
+      : `${avgTimeSeconds}s`;
+
     return {
       totalResponses,
       activePolls,
       totalResponsesGrowth: growth.toFixed(1),
       completionRate: totalResponses > 0 ? "100%" : "0%", // Simplified for now
-      avgResponseTime: "N/A"
+      avgResponseTime: avgTimeSeconds > 0 ? formattedAvgTime : "N/A"
     };
   }
 

@@ -6,6 +6,7 @@ export interface IResponse extends Document {
   selectedOptionId: mongoose.Types.ObjectId;
   respondentId: mongoose.Types.ObjectId | null;
   isAnonymous: boolean;
+  timeTaken: number; // in seconds
   submittedAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -40,6 +41,11 @@ const responseSchema = new Schema<IResponse>(
     isAnonymous: {
       type: Boolean,
       default: false,
+    },
+    
+    timeTaken: {
+      type: Number,
+      default: 0,
     },
 
     submittedAt: {

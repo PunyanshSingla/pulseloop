@@ -21,6 +21,7 @@ export default function PublicPollPage() {
   
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [hasVoted, setHasVoted] = useState(false);
+  const [startTime] = useState<number>(Date.now());
 
   useEffect(() => {
     if (!id) return;
@@ -55,9 +56,10 @@ export default function PublicPollPage() {
 
     const questionId = poll.questions[0]?._id;
     const optionId = selectedOptions[questionId];
+    const timeTaken = Math.round((Date.now() - startTime) / 1000);
 
     if (questionId && optionId) {
-      vote({ questionId, optionId }, {
+      vote({ questionId, optionId, timeTaken }, {
         onSuccess: () => {
           setHasVoted(true);
           confetti({

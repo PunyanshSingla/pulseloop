@@ -13,6 +13,7 @@ export default function ViewPollPage() {
   const { mutate: vote, isPending } = useVote(id!);
   
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [startTime] = useState<number>(Date.now());
 
   if (isLoading) {
     return (
@@ -40,9 +41,10 @@ export default function ViewPollPage() {
     // A more complex UI would handle multiple questions
     const questionId = poll.questions[0]?._id;
     const optionId = selectedOptions[questionId];
+    const timeTaken = Math.round((Date.now() - startTime) / 1000);
     
     if (questionId && optionId) {
-      vote({ questionId, optionId });
+      vote({ questionId, optionId, timeTaken });
     }
   };
 
