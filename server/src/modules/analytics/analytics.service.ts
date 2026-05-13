@@ -43,11 +43,15 @@ export class AnalyticsService {
       ? `${Math.floor(avgTimeSeconds / 60)}m ${avgTimeSeconds % 60}s` 
       : `${avgTimeSeconds}s`;
 
+    const totalViews = polls.reduce((sum, p) => sum + (p.viewCount || 0), 0);
+    const completionRateVal = totalViews > 0 ? (totalResponses / totalViews) * 100 : 0;
+    const formattedCompletionRate = completionRateVal > 100 ? "100%" : completionRateVal.toFixed(1) + "%";
+
     return {
       totalResponses,
       activePolls,
       totalResponsesGrowth: growth.toFixed(1),
-      completionRate: totalResponses > 0 ? "100%" : "0%", // Simplified for now
+      completionRate: totalViews > 0 ? formattedCompletionRate : "0%",
       avgResponseTime: avgTimeSeconds > 0 ? formattedAvgTime : "N/A"
     };
   }

@@ -7,6 +7,7 @@ export interface IPoll extends Document {
   status: "draft" | "active" | "closed";
   allowAnonymous: boolean;
   resultsPublished: boolean;
+  viewCount: number;
   expiresAt: Date | null;
   createdBy: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -46,6 +47,11 @@ const pollSchema = new Schema<IPoll>(
     resultsPublished: {
       type: Boolean,
       default: false,
+    },
+
+    viewCount: {
+      type: Number,
+      default: 0,
     },
 
     expiresAt: {

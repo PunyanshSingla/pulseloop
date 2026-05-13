@@ -58,7 +58,7 @@ export class PollsService {
   }
 
   async getPollById(id: string) {
-    const poll = await Poll.findById(id).lean();
+    const poll = await Poll.findByIdAndUpdate(id, { $inc: { viewCount: 1 } }, { new: true }).lean();
     if (!poll) return null;
 
     const questions = await Question.find({ pollId: id }).sort({ order: 1 }).lean();
