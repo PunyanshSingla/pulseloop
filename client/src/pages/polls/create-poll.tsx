@@ -28,7 +28,7 @@ export default function CreatePollPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [questions, setQuestions] = useState([
-    { id: 1, text: "", options: ["", ""] }
+    { id: 1, text: "", options: ["", ""], isMandatory: true }
   ]);
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [allowAnonymous, setAllowAnonymous] = useState(true);
@@ -51,7 +51,7 @@ export default function CreatePollPage() {
   }
 
   const addQuestion = () => {
-    setQuestions([...questions, { id: Date.now(), text: "", options: ["", ""] }]);
+    setQuestions([...questions, { id: Date.now(), text: "", options: ["", ""], isMandatory: true }]);
   };
 
   const removeQuestion = (id: number) => {
@@ -62,6 +62,10 @@ export default function CreatePollPage() {
 
   const handleQuestionChange = (id: number, text: string) => {
     setQuestions(questions.map(q => q.id === id ? { ...q, text } : q));
+  };
+
+  const toggleMandatory = (id: number) => {
+    setQuestions(questions.map(q => q.id === id ? { ...q, isMandatory: !q.isMandatory } : q));
   };
 
   const handleOptionChange = (qId: number, oIdx: number, text: string) => {
@@ -86,6 +90,7 @@ export default function CreatePollPage() {
     
     const formattedQuestions = questions.map(q => ({
       text: q.text,
+      isMandatory: q.isMandatory,
       options: q.options.map(o => ({ text: o }))
     }));
 
@@ -150,9 +155,24 @@ export default function CreatePollPage() {
                   {questions.map((q, idx) => (
                     <div key={q.id} className="relative space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:border-primary/20">
                       <div className="flex items-center justify-between">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
-                          {idx + 1}
-                        </span>
+                        <div className="flex items-center gap-4">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                            {idx + 1}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mr-1">Required</Label>
+                            <button
+                              onClick={() => toggleMandatory(q.id)}
+                              className={`relative h-5 w-9 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+                                q.isMandatory ? "bg-primary" : "bg-muted"
+                              }`}
+                            >
+                              <div className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                                q.isMandatory ? "translate-x-4" : ""
+                              }`} />
+                            </button>
+                          </div>
+                        </div>
                         {questions.length > 1 && (
                           <button 
                             onClick={() => removeQuestion(q.id)}

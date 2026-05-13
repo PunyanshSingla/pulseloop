@@ -9,6 +9,10 @@ import { CreatePollInput, UpdatePollInput } from "./poll.types";
 import geoip from "geoip-lite";
 
 export class PollsService {
+  async getQuestionsByPollId(pollId: string) {
+    return Question.find({ pollId }).sort({ order: 1 }).lean();
+  }
+
   async createPoll(data: CreatePollInput, userId: string) {
     const { questions, ...pollData } = data;
 

@@ -99,8 +99,14 @@ export default function PublicPollPage() {
   };
 
   const handleSkip = () => {
+    if (!currentQuestion) return;
+    if (currentQuestion.isMandatory) return; // Should not be possible via UI but safety first
+
     if (currentStep < totalSteps - 1) {
       setCurrentStep(prev => prev + 1);
+    } else {
+      // If it's the last step and optional, skip means submit with whatever we have
+      handleVote();
     }
   };
 
@@ -154,7 +160,18 @@ export default function PublicPollPage() {
       timeTaken: Math.round((Date.now() - startTime) / 1000 / totalSteps),
     }));
 
-    if (responses.length > 0) {
+    // Frontend validation: Check if all mandatory questions are answered
+    const unansweredMandatoryQuestions = poll.questions.filter((q: any) => 
+      q.isMandatory && !selectedOptions[q._id]
+    );
+
+    if (unansweredMandatoryQuestions.length > 0) {
+      const firstUnansweredIdx = poll.questions.findIndex((q: any) => q._id === unansweredMandatoryQuestions[0]._id);
+      setCurrentStep(firstUnansweredIdx);
+      return;
+    }
+
+    if (responses.length >= 0) { // Allow 0 responses if all were optional and skipped
       vote({ responses, fingerprint, deviceInfo });
     }
   };
@@ -229,11 +246,16 @@ export default function PublicPollPage() {
                     <span className="text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                       Step {currentStep + 1} <span className="mx-1 opacity-40">/</span> {totalSteps}
                     </span>
-                    {!currentQuestion.isMandatory && (
-                      <div className="size-1 rounded-full bg-slate-300 dark:bg-slate-600" />
-                    )}
-                    {!currentQuestion.isMandatory && (
-                      <span className="text-[10px] font-black uppercase tracking-widest text-primary/70">Optional</span>
+                    {currentQuestion.isMandatory ? (
+                      <>
+                        <div className="size-1.5 rounded-full bg-primary animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-primary">Mandatory</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="size-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500/70">Optional</span>
+                      </>
                     )}
                   </div>
                   <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white leading-tight px-4">
@@ -284,10 +306,10 @@ export default function PublicPollPage() {
                       <Button 
                         className="flex-1 h-16 text-lg font-black rounded-2xl shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all duration-300 bg-slate-900 dark:bg-white dark:text-slate-900 hover:bg-black dark:hover:bg-slate-100 disabled:opacity-50"
                         size="lg"
-                        disabled={isVoting || !hasAnsweredCurrent}
+                        disabled={isVoting || (currentQuestion.isMandatory && !hasAnsweredCurrent)}
                         onClick={handleVote}
                       >
-                        {isVoting ? <Loader2 className="size-5 animate-spin" /> : "Submit Vote"}
+                        {isVoting ? <Loader2 className="size-5 animate-spin" /> : (hasAnsweredCurrent ? "Submit Vote" : "Skip & Submit")}
                       </Button>
                     )}
                   </div>

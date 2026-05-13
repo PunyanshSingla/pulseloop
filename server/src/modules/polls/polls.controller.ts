@@ -145,6 +145,20 @@ export class PollsController {
         }
       }
 
+      // Backend Validation: Mandatory Questions
+      const questions = await pollsService.getQuestionsByPollId(pollId);
+      const mandatoryQuestionIds = questions.filter(q => q.isMandatory).map(q => q._id.toString());
+      const answeredQuestionIds = responses.map((r: any) => r.questionId);
+
+      const missingMandatory = mandatoryQuestionIds.filter(id => !answeredQuestionIds.includes(id));
+      if (missingMandatory.length > 0) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Please answer all mandatory questions before submitting." 
+        });
+        return;
+      }
+
       let results = [];
       
       if (Array.isArray(responses)) {
