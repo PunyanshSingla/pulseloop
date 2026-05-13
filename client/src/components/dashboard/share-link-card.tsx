@@ -7,8 +7,8 @@ export function ShareLinkCard() {
   const latestPoll = pollsResponse?.data?.[0];
   
   const shareLink = latestPoll 
-    ? `${window.location.origin}/p/${latestPoll._id}`
-    : "pulseloop.io/p/your-poll";
+    ? `${window.location.origin}/vote/${latestPoll._id}`
+    : "pulseloop.io/vote/your-poll";
 
   const copyLink = () => {
     if (!latestPoll) return;
