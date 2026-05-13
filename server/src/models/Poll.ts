@@ -10,6 +10,7 @@ export interface IPoll extends Document {
   allowMultipleSubmissions: boolean;
   viewCount: number;
   expiresAt: Date | null;
+  startsAt: Date | null;
   createdBy: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -60,6 +61,10 @@ const pollSchema = new Schema<IPoll>(
     },
 
     expiresAt: {
+      type: Date,
+      default: null,
+    },
+    startsAt: {
       type: Date,
       default: null,
     },

@@ -33,6 +33,8 @@ export default function CreatePollPage() {
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [allowAnonymous, setAllowAnonymous] = useState(true);
   const [allowMultipleSubmissions, setAllowMultipleSubmissions] = useState(false);
+  const [startsAt, setStartsAt] = useState<string>("");
+  const [expiresAt, setExpiresAt] = useState<string>("");
 
   if (isSessionPending) {
     return (
@@ -86,13 +88,49 @@ export default function CreatePollPage() {
   };
 
   const handleCreate = () => {
-    if (!title.trim()) return toast.error("Please enter a poll title");
+    // 1. Basic Title Validation
+    if (!title.trim()) return toast.error("Poll title is required");
     
-    const formattedQuestions = questions.map(q => ({
-      text: q.text,
-      isMandatory: q.isMandatory,
-      options: q.options.map(o => ({ text: o }))
-    }));
+    // 2. Date Validation
+    if (!startsAt) return toast.error("Please set a start date and time");
+    if (!expiresAt) return toast.error("Please set an end date and time");
+    
+    const start = new Date(startsAt);
+    const end = new Date(expiresAt);
+    
+    if (end <= start) {
+      return toast.error("End date must be after the start date");
+    }
+
+    // 3. Questions Validation
+    if (questions.length === 0) {
+      return toast.error("At least one question is required");
+    }
+
+    const formattedQuestions = [];
+    
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      if (!q.text.trim()) {
+        return toast.error(`Question ${i + 1} text is required`);
+      }
+      
+      if (q.options.length < 2) {
+        return toast.error(`Question ${i + 1} needs at least 2 options`);
+      }
+      
+      for (let j = 0; j < q.options.length; j++) {
+        if (!q.options[j].trim()) {
+          return toast.error(`Option ${j + 1} in Question ${i + 1} is required`);
+        }
+      }
+      
+      formattedQuestions.push({
+        text: q.text,
+        isMandatory: q.isMandatory,
+        options: q.options.map(o => ({ text: o }))
+      });
+    }
 
     createPoll({
       title,
@@ -102,6 +140,8 @@ export default function CreatePollPage() {
       allowAnonymous,
       allowMultipleSubmissions,
       questions: formattedQuestions,
+      startsAt: start.toISOString(),
+      expiresAt: end.toISOString(),
     });
   };
 
@@ -276,6 +316,28 @@ export default function CreatePollPage() {
                       >
                         <div className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${allowMultipleSubmissions ? "translate-x-4" : ""}`} />
                       </button>
+                    </div>
+
+                    <div className="space-y-2 pt-2 border-t border-border mt-2">
+                      <Label htmlFor="startsAt" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Start Date</Label>
+                      <Input 
+                        id="startsAt"
+                        type="datetime-local"
+                        className="h-9 text-xs bg-muted/20"
+                        value={startsAt}
+                        onChange={(e) => setStartsAt(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="expiresAt" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">End Date</Label>
+                      <Input 
+                        id="expiresAt"
+                        type="datetime-local"
+                        className="h-9 text-xs bg-muted/20"
+                        value={expiresAt}
+                        onChange={(e) => setExpiresAt(e.target.value)}
+                      />
                     </div>
                   </div>
 

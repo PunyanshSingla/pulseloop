@@ -4,7 +4,7 @@ import { authClient } from "@/lib/auth-client";
 import { usePoll, useVote } from "@/hooks/use-polls";
 import { socketClient } from "@/lib/socket";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, ChevronLeft } from "lucide-react";
+import { Loader2, Check, ChevronLeft, Clock, Lock } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { VotingOption } from "@/components/polls/voting-option";
 import confetti from "canvas-confetti";
@@ -27,10 +27,15 @@ export default function PublicPollPage() {
   const queryClient = useQueryClient();
   
   const [currentStep, setCurrentStep] = useState(0);
+  const poll = response?.data;
+  const totalSteps = poll?.questions?.length || 0;
+  const currentQuestion = poll?.questions?.[currentStep];
+
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [hasVoted, setHasVoted] = useState(false);
   const [startTime] = useState<number>(Date.now());
   const [fingerprint, setFingerprint] = useState<string>("");
+  const [timeLeftToStart, setTimeLeftToStart] = useState<{ d: number, h: number, m: number, s: number } | null>(null);
 
   useEffect(() => {
     // Generate a simple browser fingerprint
@@ -45,6 +50,30 @@ export default function PublicPollPage() {
 
     setFingerprint(getFingerprint());
   }, []);
+
+  // Countdown timer logic
+  useEffect(() => {
+    if (!poll?.startsAt) return;
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const start = new Date(poll.startsAt).getTime();
+      const diff = start - now;
+
+      if (diff > 0) {
+        setTimeLeftToStart({
+          d: Math.floor(diff / (1000 * 60 * 60 * 24)),
+          h: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          m: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+          s: Math.floor((diff % (1000 * 60)) / 1000)
+        });
+      } else {
+        setTimeLeftToStart(null);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [poll?.startsAt]);
 
   // Track unique view
   useEffect(() => {
@@ -79,10 +108,6 @@ export default function PublicPollPage() {
       socket?.off("poll:updated");
     };
   }, [id, queryClient]);
-
-  const poll = response?.data;
-  const totalSteps = poll?.questions?.length || 0;
-  const currentQuestion = poll?.questions?.[currentStep];
 
   const handleOptionSelect = (optionId: string) => {
     if (!currentQuestion) return;
@@ -192,17 +217,90 @@ export default function PublicPollPage() {
   }
 
   if (!poll || !currentQuestion) {
-    if (!isPollLoading && !poll) {
-      return (
-        <div className="container mx-auto py-20 text-center bg-slate-50 dark:bg-slate-950 min-h-screen flex flex-col items-center justify-center">
-          <h2 className="text-2xl font-black tracking-tight">Poll not found</h2>
-          <Button asChild variant="outline" className="mt-6 rounded-full font-bold">
-            <Link to="/">Back to Home</Link>
-          </Button>
-        </div>
-      );
-    }
     return null; // Should be covered by loader, but safety first
+  }
+
+  // Check Poll Timing
+  const now = new Date();
+  const startsAt = poll.startsAt ? new Date(poll.startsAt) : null;
+  const expiresAt = poll.expiresAt ? new Date(poll.expiresAt) : null;
+  
+  const isPending = startsAt && now < startsAt;
+  const isExpired = expiresAt && now > expiresAt;
+
+  if (isPending) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-full max-w-md space-y-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-[10px] font-black uppercase tracking-widest border border-amber-500/20">
+              <Clock className="size-3" />
+              Not Started Yet
+            </div>
+            <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+              This poll is <span className="text-amber-500">Scheduled</span>
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 font-medium">
+              The organizer has scheduled this poll to start soon. Come back when the timer hits zero!
+            </p>
+          </div>
+
+          <div className="grid grid-cols-4 gap-4">
+            {[
+              { label: "Days", value: timeLeftToStart?.d || 0 },
+              { label: "Hours", value: timeLeftToStart?.h || 0 },
+              { label: "Mins", value: timeLeftToStart?.m || 0 },
+              { label: "Secs", value: timeLeftToStart?.s || 0 },
+            ].map((t) => (
+              <div key={t.label} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+                <div className="text-2xl font-black text-slate-900 dark:text-white">{t.value.toString().padStart(2, '0')}</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-8 flex justify-center">
+            <Logo className="scale-75 opacity-50" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isExpired) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-full max-w-md space-y-6">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-500 text-[10px] font-black uppercase tracking-widest border border-rose-500/20">
+              <Lock className="size-3" />
+              Poll Expired
+            </div>
+            <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+              Poll has <span className="text-rose-500">Ended</span>
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 font-medium">
+              This poll has reached its expiry date and is no longer accepting responses.
+            </p>
+          </div>
+
+          <div className="pt-8 flex flex-col gap-4">
+            {poll.resultsPublished && (
+              <Button asChild size="lg" className="h-14 rounded-2xl text-base font-black shadow-lg">
+                <Link to={`/vote/${poll._id}/results`}>View Final Results</Link>
+              </Button>
+            )}
+            <Button asChild variant="outline" size="lg" className="h-14 rounded-2xl font-bold">
+              <Link to="/explore">Explore other polls</Link>
+            </Button>
+          </div>
+
+          <div className="pt-8 flex justify-center">
+            <Logo className="scale-75 opacity-50" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Only redirect to sign-in if the poll specifically DISALLOWS anonymous voting

@@ -10,7 +10,11 @@ export const pollSchema = z.object({
   resultsPublished: z.boolean().optional(),
   expiresAt: z.preprocess(
     (arg) => (typeof arg === "string" ? new Date(arg) : arg),
-    z.date().nullable().optional()
+    z.date({ required_error: "End date is required" })
+  ),
+  startsAt: z.preprocess(
+    (arg) => (typeof arg === "string" ? new Date(arg) : arg),
+    z.date({ required_error: "Start date is required" })
   ),
   questions: z
     .array(

@@ -38,7 +38,19 @@ export const useCreatePoll = () => {
       navigate("/polls");
     },
     onError: (error: any) => {
-      toast.error(error.message || "Failed to create poll");
+      let message = error.message || "Failed to create poll";
+      
+      // Handle Zod error arrays if they come back as JSON
+      try {
+        const parsed = JSON.parse(message);
+        if (Array.isArray(parsed) && parsed[0]?.message) {
+          message = parsed.map((err: any) => err.message).join(", ");
+        }
+      } catch (e) {
+        // Not JSON, keep original message
+      }
+
+      toast.error(message);
     },
   });
 };
