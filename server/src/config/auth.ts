@@ -1,22 +1,19 @@
 import { betterAuth } from "better-auth";
-import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { env } from "./env";
 import { sendResetPasswordEmail, sendVerificationEmail } from "../shared/email/email.service";
-
-const client = new MongoClient(env.MONGODB_URI);
-const db = client.db(env.DATABASE_NAME);
-
+import { getClient } from "./db";
+const db =  await getClient()
+if (!db) throw new Error("MongoDB connection not found");
 export const auth = betterAuth({
-    database: mongodbAdapter(db, {
-        client
-    }),
+    database: mongodbAdapter(db),
     user: {
+        modelName: "users",
         additionalFields: {
             role: {
                 type: "string",
-                defaultValue: "voter",
-            },
+                defaultValue: "user",
+            }
         },
     },
     account: {

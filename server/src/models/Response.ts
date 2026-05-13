@@ -52,4 +52,12 @@ const responseSchema = new Schema<IResponse>(
   }
 );
 
-export default mongoose.model<IResponse>("Response", responseSchema);
+// Indexes for performance
+responseSchema.index({ pollId: 1, createdAt: -1 });
+responseSchema.index({ respondentId: 1 });
+
+const Response =
+  mongoose.models.Response ||
+  mongoose.model<IResponse>("Response", responseSchema);
+
+export default Response;

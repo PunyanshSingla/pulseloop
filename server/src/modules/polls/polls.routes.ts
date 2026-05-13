@@ -7,10 +7,10 @@ const router = Router();
 // Public routes
 router.get("/", pollsController.getAll);
 router.get("/:id", pollsController.getById);
-router.post("/:id/vote", pollsController.vote);
 
 // Protected routes
 router.post("/", authMiddleware, pollsController.create);
+router.post("/:id/vote", authMiddleware, pollsController.vote);
 router.patch("/:id", authMiddleware, pollsController.update);
 router.delete("/:id", authMiddleware, pollsController.delete);
 

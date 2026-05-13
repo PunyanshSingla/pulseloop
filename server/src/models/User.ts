@@ -35,4 +35,6 @@ const userSchema = new mongoose.Schema(
 const User =
   mongoose.models.User || mongoose.model("User", userSchema);
 
+console.log("User model registered:", !!mongoose.models.User);
+
 export default User;

@@ -64,4 +64,5 @@ const pollSchema = new Schema<IPoll>(
   }
 );
 
-export default mongoose.model<IPoll>("Poll", pollSchema);
+const Poll = mongoose.models.Poll || mongoose.model<IPoll>("Poll", pollSchema);
+export default Poll;

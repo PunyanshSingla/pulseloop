@@ -2,7 +2,7 @@ import Poll, { IPoll } from "../../models/Poll";
 import Question from "../../models/Question";
 import QuestionOption from "../../models/QuestionOption";
 import Response from "../../models/Response";
-import mongoose from "mongoose";
+import User from "../../models/User";
 import { CreatePollInput, UpdatePollInput } from "./poll.types";
 
 export class PollsService {

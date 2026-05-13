@@ -32,7 +32,8 @@ const questionOptionSchema = new Schema<IQuestionOption>(
   }
 );
 
-export default mongoose.model<IQuestionOption>(
+const QuestionOption = mongoose.models.QuestionOption || mongoose.model<IQuestionOption>(
   "QuestionOption",
   questionOptionSchema
 );
+export default QuestionOption;

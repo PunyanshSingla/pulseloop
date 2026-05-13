@@ -44,10 +44,10 @@ export class PollsController {
       const validatedData = pollSchema.partial().parse(req.body);
       const userId = (req as any).user.id;
       const poll = await pollsService.updatePoll(id as string, validatedData, userId);
-      
+
       // Notify participants about poll updates (e.g. title/options changed)
       socketService.emitToPoll(id as string, "poll:updated", poll);
-      
+
       res.status(200).json({ success: true, data: poll });
     } catch (error) {
       next(error);
@@ -67,19 +67,21 @@ export class PollsController {
 
   async vote(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id: pollId } = req.params;
+      const pollId = req.params.id as string;
       const { questionId, selectedOptionId } = req.body;
       const user = (req as any).user;
-      
-      const response = await pollsService.castVote(pollId, questionId, selectedOptionId, user?.id);
-      
+      const userId = user.id;
+
+      console.log("request came at vote", pollId, questionId, selectedOptionId, user)
+      const response = await pollsService.castVote(pollId, questionId, selectedOptionId, userId);
+
       // Get updated poll data for real-time broadcast
       const updatedPoll = await pollsService.getPollById(pollId);
       socketService.emitToPoll(pollId, "poll:updated", updatedPoll);
-      socketService.emitToPoll(pollId, "vote:cast", { 
+      socketService.emitToPoll(pollId, "vote:cast", {
         userName: user?.name || "A participant",
-        questionId, 
-        optionId: selectedOptionId 
+        questionId,
+        optionId: selectedOptionId
       });
 
       res.status(201).json({ success: true, data: response });

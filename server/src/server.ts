@@ -5,6 +5,7 @@ import { auth } from "./config/auth";
 import { toNodeHandler } from "better-auth/node";
 import { createServer } from "http";
 import { socketService } from "./services/socket.service";
+import { connectDB } from "./config/db";
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
@@ -16,10 +17,7 @@ socketService.initialize(httpServer, env.CLIENT_URL);
 
 async function startServer() {
   try {
-    await mongoose.connect(env.MONGODB_URI, {
-      dbName: env.DATABASE_NAME,
-    });
-    console.log("📦 Connected to MongoDB");
+    await connectDB()
 
     httpServer.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
