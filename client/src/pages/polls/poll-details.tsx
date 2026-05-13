@@ -19,10 +19,13 @@ import {
   Copy,
   Settings2,
   ExternalLink,
-  Loader2
+  Loader2,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function PollDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -32,6 +35,7 @@ export default function PollDetailsPage() {
   const { mutate: deletePoll } = useDeletePoll();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"overview" | "responses" | "settings">("overview");
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   if (isSessionPending || isPollLoading) {
     return (
@@ -134,9 +138,16 @@ export default function PollDetailsPage() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { label: "Total Responses", value: poll.responseCount || 0, icon: BarChart3, color: "text-primary" },
-                { label: "Completion Rate", value: poll.responseCount ? "100%" : "0%", icon: CheckCircle2, color: "text-emerald-500" },
-                { label: "Avg. Time", value: "N/A", icon: Clock, color: "text-amber-500" },
-                { label: "Total Views", value: "N/A", icon: Eye, color: "text-blue-500" },
+                { 
+                  label: "Completion Rate", 
+                  value: poll.viewCount > 0 
+                    ? `${Math.min(100, Math.round((poll.responseCount / poll.viewCount) * 100))}%` 
+                    : "0%", 
+                  icon: CheckCircle2, 
+                  color: "text-emerald-500" 
+                },
+                { label: "Avg. Time", value: `${poll.avgTimeTaken || 0}s`, icon: Clock, color: "text-amber-500" },
+                { label: "Total Views", value: poll.viewCount || 0, icon: Eye, color: "text-blue-500" },
               ].map((stat) => (
                 <div key={stat.label} className="rounded-xl border border-border bg-card p-5 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
@@ -179,30 +190,85 @@ export default function PollDetailsPage() {
                   {/* Left Column: Questions Preview */}
                   <div className="lg:col-span-2 space-y-6">
                     <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-                      <h3 className="text-lg font-semibold mb-6">Poll Questions</h3>
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold">Poll Questions</h3>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="size-8"
+                            disabled={currentQuestionIndex === 0}
+                            onClick={() => setCurrentQuestionIndex(prev => prev - 1)}
+                          >
+                            <ChevronLeft className="size-4" />
+                          </Button>
+                          <span className="text-xs font-medium text-muted-foreground w-12 text-center">
+                            {currentQuestionIndex + 1} / {poll.questions.length}
+                          </span>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="size-8"
+                            disabled={currentQuestionIndex === poll.questions.length - 1}
+                            onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
+                          >
+                            <ChevronRight className="size-4" />
+                          </Button>
+                        </div>
+                      </div>
+
                       <div className="space-y-8">
                         {poll.questions.map((q: any, idx: number) => (
-                          <div key={q._id} className="space-y-4">
-                            <div className="flex items-center gap-3">
-                              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-[10px] font-bold text-primary">
-                                {idx + 1}
-                              </span>
-                              <h4 className="font-medium">{q.text}</h4>
-                            </div>
-                            <div className="grid gap-2 ml-9">
-                              {q.options.map((o: any) => (
-                                <div key={o._id} className="group flex items-center justify-between rounded-lg border border-border/50 bg-muted/20 px-4 py-3">
-                                  <div className="flex flex-col">
-                                    <span className="text-sm">{o.text}</span>
-                                    <span className="text-[10px] text-muted-foreground">{o.responseCount || 0} votes</span>
+                          idx === currentQuestionIndex && (
+                            <motion.div 
+                              key={q._id} 
+                              initial={{ opacity: 0, x: 20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              className="space-y-4"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-[10px] font-bold text-primary">
+                                  {idx + 1}
+                                </span>
+                                <h4 className="font-medium">{q.text}</h4>
+                              </div>
+                              <div className="grid gap-2 ml-9">
+                                {q.options.map((o: any) => (
+                                  <div key={o._id} className="group flex items-center justify-between rounded-lg border border-border/50 bg-muted/20 px-4 py-3 transition-colors hover:bg-muted/40">
+                                    <div className="flex flex-col">
+                                      <span className="text-sm font-medium">{o.text}</span>
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <div className="h-1.5 w-24 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                                          <motion.div 
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${o.percentage || 0}%` }}
+                                            className="h-full bg-primary"
+                                          />
+                                        </div>
+                                        <span className="text-[10px] text-muted-foreground">{o.responseCount || 0} votes</span>
+                                      </div>
+                                    </div>
+                                    <span className="text-xs font-bold text-primary">
+                                      {Math.round(o.percentage || 0)}%
+                                    </span>
                                   </div>
-                                  <span className="text-xs text-muted-foreground font-medium">
-                                    {Math.round(o.percentage || 0)}%
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )
+                        ))}
+                      </div>
+
+                      {/* Question Navigation Dots */}
+                      <div className="mt-8 flex justify-center gap-1.5">
+                        {poll.questions.map((_: any, idx: number) => (
+                          <button
+                            key={idx}
+                            onClick={() => setCurrentQuestionIndex(idx)}
+                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                              idx === currentQuestionIndex ? "w-6 bg-primary" : "w-1.5 bg-border hover:bg-muted-foreground/30"
+                            }`}
+                          />
                         ))}
                       </div>
                     </div>

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Poll, { IPoll } from "../../models/Poll";
 import Question from "../../models/Question";
 import QuestionOption from "../../models/QuestionOption";
@@ -69,7 +70,18 @@ export class PollsService {
     if (!poll) return null;
 
     const questions = await Question.find({ pollId: id }).sort({ order: 1 }).lean();
-    const totalPollResponses = await Response.countDocuments({ pollId: id });
+    const questionCount = questions.length;
+    const totalRawResponses = await Response.countDocuments({ pollId: id });
+    const totalPollResponses = questionCount > 0 ? Math.ceil(totalRawResponses / questionCount) : totalRawResponses;
+    const avgTimeResult = await Response.aggregate([
+      { $match: { pollId: new mongoose.Types.ObjectId(id) } },
+      { $group: { _id: null, avgTime: { $avg: "$timeTaken" } } }
+    ]);
+    
+    // Total avg time for the whole poll is the average time per question multiplied by number of questions
+    const avgTimeTaken = avgTimeResult.length > 0 
+      ? Math.round(avgTimeResult[0].avgTime * questionCount) 
+      : 0;
     
     const questionsWithOptions = await Promise.all(
       questions.map(async (q) => {
@@ -90,7 +102,12 @@ export class PollsService {
       })
     );
 
-    return { ...poll, questions: questionsWithOptions, responseCount: totalPollResponses };
+    return { 
+      ...poll, 
+      questions: questionsWithOptions, 
+      responseCount: totalPollResponses,
+      avgTimeTaken
+    };
   }
 
   async castVote(pollId: string, questionId: string, optionId: string, userId?: string, timeTaken: number = 0) {
