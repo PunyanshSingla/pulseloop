@@ -17,11 +17,11 @@ export function ResponsesChart() {
     
     return interval.map(date => {
       const dateStr = format(date, "yyyy-MM-dd");
-      const found = rawData.find((d: any) => d._id === dateStr);
+      const found = rawData.find((d: any) => d.date === dateStr);
       return {
         date: dateStr,
         label: format(date, "MMM dd"),
-        count: found ? found.count : 0
+        count: found ? found.total : 0
       };
     });
   }, [rawData, range]);
@@ -182,3 +182,4 @@ export function ResponsesChart() {
     </div>
   );
 }
+

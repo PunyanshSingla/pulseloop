@@ -501,6 +501,120 @@ export default function PollDetailsPage() {
                       </div>
                     </div>
 
+                    {/* New Detailed Analytics Row */}
+                    <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                      <div className="lg:col-span-2 rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
+                        <div className="flex items-center justify-between mb-6">
+                          <div>
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Submission Timeline Breakdown</h3>
+                            <p className="text-xs text-muted-foreground mt-1">Comparing logged-in vs anonymous activity</p>
+                          </div>
+                        </div>
+                        <div className="h-[250px] w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={analytics?.timeline || []}>
+                              <defs>
+                                <linearGradient id="colorLoggedIn" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                </linearGradient>
+                                <linearGradient id="colorAnonymous" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
+                                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+                              <XAxis 
+                                dataKey="date" 
+                                axisLine={false} 
+                                tickLine={false} 
+                                tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+                                dy={10}
+                              />
+                              <YAxis 
+                                axisLine={false} 
+                                tickLine={false} 
+                                tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+                                dx={-10}
+                              />
+                              <Tooltip content={<CustomTooltip />} />
+                              <Area 
+                                type="monotone" 
+                                dataKey="loggedIn" 
+                                name="Logged-in"
+                                stroke="#10b981" 
+                                strokeWidth={3}
+                                fillOpacity={1} 
+                                fill="url(#colorLoggedIn)" 
+                                activeDot={{ r: 6, strokeWidth: 0, fill: "#10b981" }}
+                                stackId="1"
+                              />
+                              <Area 
+                                type="monotone" 
+                                dataKey="anonymous" 
+                                name="Anonymous"
+                                stroke="#10b981" 
+                                strokeWidth={2}
+                                strokeDasharray="4 4"
+                                fillOpacity={1} 
+                                fill="url(#colorAnonymous)" 
+                                activeDot={{ r: 4, strokeWidth: 0, fill: "#10b981" }}
+                                stackId="1"
+                              />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
+                        <div className="mb-6">
+                          <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Audience Type</h3>
+                          <p className="text-xs text-muted-foreground mt-1">Identity distribution</p>
+                        </div>
+                        <div className="h-[200px] relative">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={[
+                                  { name: "Logged-in", value: analytics?.poll.loggedInResponses || 0 },
+                                  { name: "Anonymous", value: analytics?.poll.anonymousResponses || 0 }
+                                ]}
+                                innerRadius={50}
+                                outerRadius={70}
+                                paddingAngle={8}
+                                dataKey="value"
+                                stroke="none"
+                              >
+                                <Cell fill={COLORS[0]} />
+                                <Cell fill="var(--muted)" />
+                              </Pie>
+                              <Tooltip content={<CustomTooltip label="" suffix="users" />} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <p className="text-xl font-bold">{analytics?.poll.responseCount || 0}</p>
+                            <p className="text-[8px] font-bold text-muted-foreground uppercase">Votes</p>
+                          </div>
+                        </div>
+                        <div className="mt-4 space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <div className="size-2 rounded-full" style={{ backgroundColor: COLORS[0] }} />
+                              <span className="text-muted-foreground">Logged-in</span>
+                            </div>
+                            <span className="font-bold">{analytics?.poll.loggedInResponses || 0}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <div className="size-2 rounded-full bg-muted" />
+                              <span className="text-muted-foreground">Anonymous</span>
+                            </div>
+                            <span className="font-bold">{analytics?.poll.anonymousResponses || 0}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                       <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
                         <div className="mb-6">

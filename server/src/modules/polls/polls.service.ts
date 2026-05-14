@@ -392,7 +392,7 @@ export class PollsService {
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
 
-    // 5. Voting Trends (Last 7 days)
+    // 5. Voting Trends (Last 7 days) with breakdown
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
@@ -405,15 +405,33 @@ export class PollsService {
       },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          _id: {
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            isAnonymous: { $cond: [{ $ifNull: ["$respondentId", false] }, false, true] }
+          },
           votes: { $sum: 1 }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.date",
+          anonymous: {
+            $sum: { $cond: ["$_id.isAnonymous", "$votes", 0] }
+          },
+          loggedIn: {
+            $sum: { $cond: ["$_id.isAnonymous", 0, "$votes"] }
+          },
+          total: { $sum: "$votes" }
         }
       },
       { $sort: { "_id": 1 } }
     ]);
 
-    // 6. Summary Stats
+    // 6. Summary Stats with User Breakdown
     const totalResponses = await Response.countDocuments({ pollId: pollId });
+    const anonymousResponses = await Response.countDocuments({ pollId: pollId, respondentId: null });
+    const loggedInResponses = totalResponses - anonymousResponses;
+    
     const uniqueViews = poll.viewCount || 0;
     const completionRate = uniqueViews > 0 ? (totalResponses / uniqueViews) * 100 : 0;
 
@@ -422,7 +440,7 @@ export class PollsService {
       { $group: { _id: null, avg: { $avg: "$timeTaken" } } }
     ]);
     const avgTimeTaken = Math.round(avgTimeResult[0]?.avg || 0);
-    console.log("poll view count " , uniqueViews)
+
     return {
       poll: {
         title: poll.title,
@@ -430,7 +448,9 @@ export class PollsService {
         viewCount: uniqueViews,
         responseCount: totalResponses,
         completionRate,
-        avgTimeTaken
+        avgTimeTaken,
+        anonymousResponses,
+        loggedInResponses
       },
       results,
       demographics: {
@@ -439,7 +459,12 @@ export class PollsService {
         os: osBreakdown.map(o => ({ name: o._id || "Unknown", value: o.count })),
         countries
       },
-      timeline: timeline.map(t => ({ date: t._id, votes: t.votes }))
+      timeline: timeline.map(t => ({ 
+        date: t._id, 
+        votes: t.total,
+        anonymous: t.anonymous,
+        loggedIn: t.loggedIn
+      }))
     };
   }
 }

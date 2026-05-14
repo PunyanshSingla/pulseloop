@@ -94,6 +94,13 @@ export class AnalyticsService {
       activePollsGrowth = ((currentActivePolls - previousActivePolls) / previousActivePolls) * 100;
     }
 
+    // Anonymous vs Logged-in breakdown
+    const anonymousResponses = await Response.countDocuments({
+      pollId: { $in: pollIds },
+      respondentId: null
+    });
+    const loggedInResponses = totalResponses - anonymousResponses;
+
     return {
       totalResponses,
       activePolls: currentActivePolls,
@@ -102,7 +109,9 @@ export class AnalyticsService {
       completionRate: totalViews > 0 ? formattedCompletionRate : "0%",
       completionRateGrowth: completionRateGrowth.toFixed(1),
       avgResponseTime: avgTimeSeconds > 0 ? formattedAvgTime : "N/A",
-      avgResponseTimeGrowth: avgResponseTimeGrowth.toFixed(1)
+      avgResponseTimeGrowth: avgResponseTimeGrowth.toFixed(1),
+      anonymousResponses,
+      loggedInResponses
     };
   }
 
@@ -124,12 +133,34 @@ export class AnalyticsService {
       {
         $group: {
           _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            isAnonymous: { $cond: [{ $ifNull: ["$respondentId", false] }, false, true] }
           },
           count: { $sum: 1 }
         }
       },
-      { $sort: { _id: 1 } }
+      {
+        $group: {
+          _id: "$_id.date",
+          anonymous: {
+            $sum: { $cond: ["$_id.isAnonymous", "$count", 0] }
+          },
+          loggedIn: {
+            $sum: { $cond: ["$_id.isAnonymous", 0, "$count"] }
+          },
+          total: { $sum: "$count" }
+        }
+      },
+      { $sort: { _id: 1 } },
+      {
+        $project: {
+          _id: 0,
+          date: "$_id",
+          anonymous: 1,
+          loggedIn: 1,
+          total: 1
+        }
+      }
     ]);
     return responses;
   }
