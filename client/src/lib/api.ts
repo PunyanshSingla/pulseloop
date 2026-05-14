@@ -3,13 +3,21 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   
+  const isFormData = options.body instanceof FormData;
+  
+  const headers: Record<string, string> = {
+    "x-voter-id": localStorage.getItem("pl_voter_id") || "",
+    ...((options.headers as Record<string, string>) || {}),
+  };
+
+  // Only set Content-Type to application/json if it's NOT FormData
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
+
   const response = await fetch(url, {
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "x-voter-id": localStorage.getItem("pl_voter_id") || "",
-      ...options.headers,
-    },
+    headers,
     credentials: "include", // Important for cookies
   });
 
@@ -25,7 +33,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   }
 
   if (!response.ok) {
-    throw new Error(data.message || "Something went wrong");
+    throw new Error(data.message || data.error || "Something went wrong");
   }
 
   return data;
@@ -41,7 +49,7 @@ export const pollsApi = {
   update: (id: string, data: any) => request(`/polls/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
   delete: (id: string) => request(`/polls/${id}`, { method: "DELETE" }),
   
-  // Voting (To be implemented in backend later, but preparing the UI for it)
+  // Voting
   vote: (pollId: string, data: any) => 
     request(`/polls/${pollId}/vote`, { 
       method: "POST", 
@@ -54,4 +62,15 @@ export const pollsApi = {
 
 export const analyticsApi = {
   getDashboardData: (days: number = 30) => request(`/analytics/dashboard?days=${days}`),
+};
+
+export const mediaApi = {
+  upload: (formData: FormData) => request<{ success: boolean, data: { secure_url: string } }>("/media/upload", {
+    method: "POST",
+    body: formData,
+  }),
+};
+
+export const usersApi = {
+  getMe: () => request<{ success: boolean, data: any }>("/user/me"),
 };

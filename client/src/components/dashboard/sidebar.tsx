@@ -17,7 +17,7 @@ export function Sidebar({ user }: SidebarProps) {
   const nav = [
     { icon: LayoutGrid, label: "Overview", href: "/dashboard" },
     { icon: BarChart3, label: "Polls", href: "/polls" },
-    { icon: Settings, label: "Settings", href: "#" },
+    { icon: Settings, label: "Settings", href: "/settings" },
   ];
 
   const initials = user?.name

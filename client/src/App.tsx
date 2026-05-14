@@ -14,6 +14,7 @@ import PollResultsPage from "./pages/polls/poll-results.tsx";
 import ExplorePage from "./pages/explore.tsx";
 import AuthCallbackPage from "./pages/auth-callback.tsx";
 import NotFoundPage from "./pages/not-found.tsx";
+import SettingsPage from "./pages/settings.tsx";
 import { AdminGuard } from "./components/auth/admin-guard";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/polls/create" element={<AdminGuard><CreatePollPage /></AdminGuard>} />
         <Route path="/polls/:id/edit" element={<AdminGuard><CreatePollPage /></AdminGuard>} />
         <Route path="/polls/:id" element={<AdminGuard><PollDetailsPage /></AdminGuard>} />
+        <Route path="/settings" element={<AdminGuard><SettingsPage /></AdminGuard>} />
         
         {/* Public Voting Route */}
         <Route path="/vote/:id" element={<PublicPollPage />} />

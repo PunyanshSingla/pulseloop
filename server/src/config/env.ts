@@ -12,7 +12,9 @@ const envSchema = z.object({
   EMAIL_FROM: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
-
+  CLOUDINARY_CLOUD_NAME: z.string(),
+  CLOUDINARY_API_KEY: z.string(),
+  CLOUDINARY_API_SECRET: z.string(),
 })
 function createEnv(env: NodeJS.ProcessEnv) {
   const parsed = envSchema.safeParse(env);
