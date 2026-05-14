@@ -119,7 +119,7 @@ function Hero() {
             <span>Now in public beta</span>
           </div>
           <h1 className="mx-auto mb-6 max-w-[24ch] text-balance text-4xl font-semibold tracking-tight md:text-6xl">
-            Gather signals from the noise with precision
+            Capture the heartbeat of your audience
           </h1>
           <p className="mx-auto mb-10 max-w-[56ch] text-pretty text-base text-muted-foreground sm:text-lg">
             Create friction-less polls that people actually enjoy answering.

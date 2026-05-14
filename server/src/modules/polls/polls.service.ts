@@ -196,6 +196,11 @@ export class PollsService {
     const poll = await Poll.findOne({ _id: id, createdBy: userId });
     if (!poll) throw new Error("Poll not found or unauthorized");
 
+    const now = new Date();
+    if (poll.startsAt && new Date(poll.startsAt) < now) {
+      throw new Error("Cannot edit a poll that has already started");
+    }
+
     const { questions, ...pollData } = data;
 
     // Update poll metadata

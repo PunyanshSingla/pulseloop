@@ -1,6 +1,6 @@
 import { authClient } from "@/lib/auth-client";
-import { useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, Link, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
@@ -20,14 +20,22 @@ import {
   ChevronRight
 } from "lucide-react";
 import { toast } from "sonner";
-import { useCreatePoll } from "@/hooks/use-polls";
+import { useCreatePoll, useUpdatePoll, usePoll } from "@/hooks/use-polls";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function CreatePollPage() {
+  const { id } = useParams<{ id: string }>();
+  const isEditing = !!id;
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
   const { data: session, isPending: isSessionPending } = authClient.useSession();
   const { mutate: createPoll, isPending: isCreating } = useCreatePoll();
-  const navigate = useNavigate();
+  const { mutate: updatePoll, isPending: isUpdating } = useUpdatePoll(id || "");
+  const { data: pollResponse, isLoading: isPollLoading } = usePoll(id || "");
   
+  const pollData = pollResponse?.data;
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [questions, setQuestions] = useState([
@@ -40,7 +48,28 @@ export default function CreatePollPage() {
   const [startsAt, setStartsAt] = useState<string>("");
   const [expiresAt, setExpiresAt] = useState<string>("");
 
-  if (isSessionPending) {
+  useEffect(() => {
+    if (isEditing && pollData) {
+      setTitle(pollData.title);
+      setDescription(pollData.description || "");
+      setVisibility(pollData.visibility);
+      setAllowAnonymous(pollData.allowAnonymous);
+      setAllowMultipleSubmissions(pollData.allowMultipleSubmissions);
+      if (pollData.startsAt) setStartsAt(new Date(pollData.startsAt).toISOString().slice(0, 16));
+      if (pollData.expiresAt) setExpiresAt(new Date(pollData.expiresAt).toISOString().slice(0, 16));
+      
+      if (pollData.questions && pollData.questions.length > 0) {
+        setQuestions(pollData.questions.map((q: any) => ({
+          id: q._id,
+          text: q.text,
+          isMandatory: q.isMandatory,
+          options: q.options.map((o: any) => o.text)
+        })));
+      }
+    }
+  }, [isEditing, pollData]);
+
+  if (isSessionPending || (isEditing && isPollLoading)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -138,17 +167,23 @@ export default function CreatePollPage() {
       });
     }
 
-    createPoll({
+    const pollPayload = {
       title,
       description,
-      status: "active",
+      status: pollData?.status || "active",
       visibility,
       allowAnonymous,
       allowMultipleSubmissions,
       questions: formattedQuestions,
       startsAt: start.toISOString(),
       expiresAt: end.toISOString(),
-    });
+    };
+
+    if (isEditing) {
+      updatePoll(pollPayload);
+    } else {
+      createPoll(pollPayload);
+    }
   };
 
   return (
@@ -349,9 +384,9 @@ export default function CreatePollPage() {
                       <Button 
                         className="w-full h-11 font-bold shadow-lg shadow-primary/20"
                         onClick={handleCreate}
-                        disabled={isCreating}
+                        disabled={isCreating || isUpdating}
                       >
-                        {isCreating ? "Creating..." : "Create Poll"}
+                        {isCreating || isUpdating ? (isEditing ? "Saving..." : "Creating...") : (isEditing ? "Save Changes" : "Create Poll")}
                       </Button>
                     </div>
 

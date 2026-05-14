@@ -95,6 +95,22 @@ export const useUpdatePoll = (id: string) => {
   });
 };
 
+export const useUpdatePollAction = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => pollsApi.update(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["polls"] });
+      queryClient.invalidateQueries({ queryKey: ["poll", variables.id] });
+      toast.success("Poll updated successfully!");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to update poll");
+    },
+  });
+};
+
 export const useDeletePoll = () => {
   const queryClient = useQueryClient();
 

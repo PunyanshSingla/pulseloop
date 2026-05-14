@@ -17,20 +17,61 @@ import {
   ArrowUpRight,
   LayoutGrid,
   List,
-  X
+  X,
+  Trash2,
+  Edit,
+  AlertTriangle,
+  AlertCircle,
+  Lock,
+  Unlock
 } from "lucide-react";
-import { usePolls } from "@/hooks/use-polls";
+import { usePolls, useDeletePoll, useUpdatePollAction } from "@/hooks/use-polls";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function PollsPage() {
   const { data: session, isPending: isSessionPending } = authClient.useSession();
   const { data: pollsResponse, isLoading: isPollsLoading, error: pollsError } = usePolls();
+  const { mutate: deletePoll } = useDeletePoll();
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [searchQuery, setSearchQuery] = useState("");
+  const [deletingPollId, setDeletingPollId] = useState<string | null>(null);
+  const { mutate: updatePoll } = useUpdatePollAction();
 
   const isPending = isSessionPending || isPollsLoading;
   const polls = pollsResponse?.data || [];
+
+  const confirmDelete = () => {
+    if (deletingPollId) {
+      deletePoll(deletingPollId);
+      setDeletingPollId(null);
+    }
+  };
+
+  const handleEdit = (poll: any) => {
+    if (poll.status === "closed") {
+      return toast.error("Cannot edit a closed poll. Re-open it first if needed.");
+    }
+    
+    if (poll.startsAt && new Date(poll.startsAt) < new Date()) {
+      return toast.error("Editing is disabled for active polls to maintain data integrity.");
+    }
+    
+    navigate(`/polls/${poll._id}/edit`);
+  };
+
+  const handleToggleStatus = (poll: any) => {
+    const nextStatus = poll.status === "active" ? "closed" : "active";
+    updatePoll({ id: poll._id, data: { status: nextStatus } });
+  };
+
+  const canEdit = (poll: any) => {
+    if (poll.status === "closed") return false;
+    if (!poll.startsAt) return true;
+    return new Date(poll.startsAt) > new Date();
+  };
 
   const filteredPolls = polls.filter((poll: any) => 
     poll.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -116,10 +157,6 @@ export default function PollsPage() {
                     <List className="size-4" />
                   </button>
                 </div>
-                <Button variant="outline" className="h-9 gap-2">
-                  <Filter className="size-4" />
-                  Filter
-                </Button>
                 <Button className="h-9 gap-2" onClick={() => navigate("/polls/create")}>
                   <Plus className="size-4" />
                   New poll
@@ -179,9 +216,35 @@ export default function PollsPage() {
                           </div>
                         </div>
                       </div>
-                      <button className="grid size-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-                        <MoreHorizontal className="size-5" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleEdit(poll)}
+                          className={`h-8 w-8 p-0 ${!canEdit(poll) ? "opacity-50 cursor-not-allowed" : ""}`}
+                          title={canEdit(poll) ? "Edit Poll" : "Edit Restricted"}
+                        >
+                          <Edit className="size-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleToggleStatus(poll)}
+                          className={`h-8 w-8 p-0 ${poll.status === "active" ? "text-amber-500 hover:text-amber-600 hover:bg-amber-500/10" : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"}`}
+                          title={poll.status === "active" ? "Close Poll" : "Re-open Poll"}
+                        >
+                          {poll.status === "active" ? <Lock className="size-4" /> : <Unlock className="size-4" />}
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => setDeletingPollId(poll._id)}
+                          className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                          title="Delete Poll"
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="mt-6 grid grid-cols-3 gap-4 border-t border-border/50 pt-4">
@@ -265,9 +328,35 @@ export default function PollsPage() {
                             {p.updatedAt ? formatDistanceToNow(new Date(p.updatedAt)) : "N/A"} ago
                           </td>
                           <td className="px-5 py-3.5 text-right">
-                            <button className="grid size-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-                              <MoreHorizontal className="size-4" />
-                            </button>
+                            <div className="flex items-center justify-end gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => handleEdit(p)}
+                                className={`h-7 w-7 p-0 ${!canEdit(p) ? "opacity-50 cursor-not-allowed" : ""}`}
+                                title={canEdit(p) ? "Edit Poll" : "Edit Restricted"}
+                              >
+                                <Edit className="size-3.5" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => handleToggleStatus(p)}
+                                className={`h-7 w-7 p-0 ${p.status === "active" ? "text-amber-500 hover:text-amber-600 hover:bg-amber-500/10" : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"}`}
+                                title={p.status === "active" ? "Close Poll" : "Re-open Poll"}
+                              >
+                                {p.status === "active" ? <Lock className="size-3.5" /> : <Unlock className="size-3.5" />}
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => setDeletingPollId(p._id)}
+                                className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                title="Delete Poll"
+                              >
+                                <Trash2 className="size-3.5" />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -279,6 +368,53 @@ export default function PollsPage() {
           </div>
         </main>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deletingPollId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDeletingPollId(null)}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+            >
+              <div className="flex flex-col items-center p-8 text-center">
+                <div className="mb-4 grid size-14 place-items-center rounded-full bg-destructive/10 text-destructive">
+                  <AlertTriangle className="size-7" />
+                </div>
+                <h2 className="text-xl font-bold tracking-tight">Delete Poll Permanently?</h2>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  This action will remove all questions and gathered responses. You cannot undo this once confirmed.
+                </p>
+                <div className="mt-8 flex w-full flex-col gap-2 sm:flex-row">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 rounded-xl"
+                    onClick={() => setDeletingPollId(null)}
+                  >
+                    Keep Poll
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    className="flex-1 rounded-xl font-bold"
+                    onClick={confirmDelete}
+                  >
+                    Delete Now
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

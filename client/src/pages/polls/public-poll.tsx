@@ -4,7 +4,7 @@ import { authClient } from "@/lib/auth-client";
 import { usePoll, useVote } from "@/hooks/use-polls";
 import { socketClient } from "@/lib/socket";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, ChevronLeft, Clock, Lock } from "lucide-react";
+import { Loader2, Check, ChevronLeft, Clock, Lock, AlertTriangle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { VotingOption } from "@/components/polls/voting-option";
 import confetti from "canvas-confetti";
@@ -23,7 +23,7 @@ if (typeof window !== "undefined") {
 export default function PublicPollPage() {
   const { id } = useParams<{ id: string }>();
   const { data: session, isPending: isAuthPending } = authClient.useSession();
-  const { data: response, isLoading: isPollLoading } = usePoll(id!);
+  const { data: response, isLoading: isPollLoading, error: pollError } = usePoll(id!);
   const { mutate: vote, isPending: isVoting, isSuccess } = useVote(id!);
   const queryClient = useQueryClient();
   
@@ -230,8 +230,51 @@ export default function PublicPollPage() {
     );
   }
 
-  if (!poll || !currentQuestion) {
-    return null; // Should be covered by loader, but safety first
+  if (pollError || !poll) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-full max-w-md space-y-8">
+          <div className="space-y-4">
+            <div className="relative mx-auto size-24 mb-6">
+              <div className="absolute inset-0 bg-rose-500/10 rounded-full blur-2xl animate-pulse" />
+              <div className="relative size-24 bg-rose-500/10 text-rose-500 rounded-3xl flex items-center justify-center border border-rose-500/20">
+                <AlertTriangle className="size-12" />
+              </div>
+            </div>
+            <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+              Poll <span className="text-rose-500">Not Found</span>
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 font-medium">
+              The poll you are looking for doesn't exist, has been deleted, or the link is incorrect.
+            </p>
+          </div>
+
+          <div className="pt-8 flex flex-col gap-4">
+            <Button asChild size="lg" className="h-14 rounded-2xl text-base font-black shadow-lg">
+              <Link to="/">Back to Home</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="h-14 rounded-2xl font-bold">
+              <Link to="/explore">Explore Other Polls</Link>
+            </Button>
+          </div>
+
+          <div className="pt-8 flex justify-center">
+            <Logo className="scale-75 opacity-50" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentQuestion) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-full max-w-md space-y-4">
+          <Loader2 className="size-8 animate-spin text-primary mx-auto" />
+          <p className="text-slate-500 dark:text-slate-400 font-medium">Loading poll questions...</p>
+        </div>
+      </div>
+    );
   }
 
   // Check Poll Timing

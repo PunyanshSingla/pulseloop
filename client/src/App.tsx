@@ -27,6 +27,7 @@ export default function App() {
         <Route path="/dashboard" element={<AdminGuard><DashboardPage /></AdminGuard>} />
         <Route path="/polls" element={<AdminGuard><PollsPage /></AdminGuard>} />
         <Route path="/polls/create" element={<AdminGuard><CreatePollPage /></AdminGuard>} />
+        <Route path="/polls/:id/edit" element={<AdminGuard><CreatePollPage /></AdminGuard>} />
         <Route path="/polls/:id" element={<AdminGuard><PollDetailsPage /></AdminGuard>} />
         
         {/* Public Voting Route */}

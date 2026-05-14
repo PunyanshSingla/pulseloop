@@ -9,7 +9,6 @@ import {
   Clock, 
   Globe, 
   Lock, 
-  MoreHorizontal, 
   Share2, 
   CheckCircle2,
   Eye,
@@ -24,6 +23,9 @@ import {
   Smartphone,
   Monitor,
   Languages,
+  AlertTriangle,
+  Trash2,
+  Edit2
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
@@ -89,6 +91,8 @@ export default function PollDetailsPage() {
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
 
   if (isSessionPending || isPollLoading) {
     return (
@@ -132,18 +136,18 @@ export default function PollDetailsPage() {
   };
 
 
-  const handleDelete = () => {
-    if (confirm("Are you sure you want to delete this poll? This action cannot be undone.")) {
-      deletePoll(id!, {
-        onSuccess: () => navigate("/polls")
-      });
-    }
+
+
+  const confirmDelete = () => {
+    deletePoll(id!, {
+      onSuccess: () => navigate("/polls")
+    });
+    setShowDeleteModal(false);
   };
 
-  const handlePublish = () => {
-    if (confirm("Are you sure you want to publish the results? This will close the poll and make results public.")) {
-      publishResults();
-    }
+  const confirmPublish = () => {
+    publishResults();
+    setShowPublishModal(false);
   };
 
   return (
@@ -193,7 +197,7 @@ export default function PollDetailsPage() {
                     size="sm" 
                     variant="outline" 
                     className="gap-2 rounded-xl border-emerald-500/50 text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-500" 
-                    onClick={handlePublish}
+                    onClick={() => setShowPublishModal(true)}
                     disabled={isPublishing}
                   >
                     <Globe className="size-4" />
@@ -205,9 +209,26 @@ export default function PollDetailsPage() {
                     Results Published
                   </div>
                 )}
-                <button className="grid size-9 place-items-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground">
-                  <MoreHorizontal className="size-5" />
-                </button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className={`gap-2 rounded-xl ${poll.status === "active" ? "text-amber-600 border-amber-600/20 hover:bg-amber-600/5" : "text-emerald-600 border-emerald-600/20 hover:bg-emerald-600/5"}`}
+                  onClick={toggleStatus}
+                >
+                  {poll.status === "active" ? (
+                    <><Lock className="size-4" /> Close Poll</>
+                  ) : (
+                    <><CheckCircle2 className="size-4" /> Re-open Poll</>
+                  )}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="size-9 rounded-xl border-destructive/20 text-muted-foreground hover:text-destructive hover:bg-destructive/5"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  <Trash2 className="size-5" />
+                </Button>
               </div>
             </div>
 
@@ -1086,6 +1107,99 @@ export default function PollDetailsPage() {
           </div>
         </main>
       </div>
+
+      {/* Delete Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDeleteModal(false)}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+            >
+              <div className="flex flex-col items-center p-8 text-center">
+                <div className="mb-4 grid size-14 place-items-center rounded-full bg-destructive/10 text-destructive">
+                  <AlertTriangle className="size-7" />
+                </div>
+                <h2 className="text-xl font-bold tracking-tight">Delete Poll Permanently?</h2>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  This action will remove all questions and gathered responses for "{poll.title}". You cannot undo this.
+                </p>
+                <div className="mt-8 flex w-full flex-col gap-2 sm:flex-row">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 rounded-xl"
+                    onClick={() => setShowDeleteModal(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    className="flex-1 rounded-xl font-bold"
+                    onClick={confirmDelete}
+                  >
+                    Confirm Delete
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Publish Modal */}
+      <AnimatePresence>
+        {showPublishModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPublishModal(false)}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+            >
+              <div className="flex flex-col items-center p-8 text-center">
+                <div className="mb-4 grid size-14 place-items-center rounded-full bg-emerald-500/10 text-emerald-500">
+                  <Globe className="size-7" />
+                </div>
+                <h2 className="text-xl font-bold tracking-tight">Publish Results?</h2>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  Publishing will close the poll and make the analytics visible to anyone with the results link.
+                </p>
+                <div className="mt-8 flex w-full flex-col gap-2 sm:flex-row">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 rounded-xl"
+                    onClick={() => setShowPublishModal(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    className="flex-1 rounded-xl font-bold bg-emerald-500 hover:bg-emerald-600"
+                    onClick={confirmPublish}
+                  >
+                    Publish Now
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

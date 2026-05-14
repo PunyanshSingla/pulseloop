@@ -1,4 +1,4 @@
-import { BarChart3, MoreHorizontal, CheckCircle2, Clock } from "lucide-react";
+import { BarChart3, MoreHorizontal, CheckCircle2, Clock, ExternalLink } from "lucide-react";
 import { usePolls } from "@/hooks/use-polls";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
@@ -82,9 +82,12 @@ export function PollsTable({ className }: { className?: string }) {
                     : "N/A"} ago
                 </td>
                 <td className="px-5 py-3.5 text-right">
-                  <button className="grid size-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-                    <MoreHorizontal className="size-4" />
-                  </button>
+                  <Link 
+                    to={`/polls/${p._id}`}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+                  >
+                    View <ExternalLink className="size-3" />
+                  </Link>
                 </td>
               </tr>
             ))}
