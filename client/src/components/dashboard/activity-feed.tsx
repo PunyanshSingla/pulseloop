@@ -1,7 +1,7 @@
 import { useDashboardData } from "@/hooks/use-analytics";
 import { formatDistanceToNow } from "date-fns";
 
-export function ActivityFeed() {
+export function ActivityFeed({ className }: { className?: string }) {
   const { data: dashboardDataResponse, isLoading } = useDashboardData();
   const events = dashboardDataResponse?.data?.activity || [];
 
@@ -18,7 +18,7 @@ export function ActivityFeed() {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div className={`rounded-xl border border-border bg-card p-6 flex flex-col ${className}`}>
       <div className="flex items-center justify-between">
         <p className="text-base font-semibold">Live activity</p>
         <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground font-medium">
@@ -29,7 +29,7 @@ export function ActivityFeed() {
           Realtime
         </span>
       </div>
-      <div className="mt-5 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+      <div className="mt-5 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent min-h-[200px]">
         <ul className="space-y-5">
           {events.map((e: any, i: number) => (
             <li key={i} className="flex items-start gap-3.5">

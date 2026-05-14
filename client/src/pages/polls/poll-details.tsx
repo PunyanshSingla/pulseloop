@@ -47,6 +47,24 @@ import { usePoll, useUpdatePoll, useDeletePoll, usePollResponses, usePollAnalyti
 
 const COLORS = ["#10b981", "#14b8a6", "#f59e0b", "#f97316", "#f43f5e", "#84cc16", "#0f766e"];
 
+const CustomTooltip = ({ active, payload, label, suffix = "votes" }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-xl border border-border bg-card/95 p-3 shadow-2xl backdrop-blur-md ring-1 ring-black/5">
+        {label && <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{label}</p>}
+        <div className="flex items-center gap-2">
+          <div className="size-2 rounded-full" style={{ backgroundColor: payload[0].color || payload[0].fill }} />
+          <p className="text-sm font-bold text-foreground">
+            {payload[0].value} <span className="text-[10px] font-medium text-muted-foreground ml-0.5">{suffix}</span>
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+
 export default function PollDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const { data: session, isPending: isSessionPending } = authClient.useSession();
@@ -298,16 +316,7 @@ export default function PollDetailsPage() {
                                   tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
                                   dx={-10}
                                 />
-                                <Tooltip 
-                                  contentStyle={{ 
-                                    backgroundColor: "hsl(var(--card))", 
-                                    borderRadius: "12px", 
-                                    border: "1px solid hsl(var(--border))",
-                                    boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                                    color: "hsl(var(--foreground))"
-                                  }}
-                                  itemStyle={{ color: "hsl(var(--foreground))" }}
-                                />
+                                <Tooltip content={<CustomTooltip />} />
                                 <Area 
                                   type="monotone" 
                                   dataKey="votes" 
@@ -413,18 +422,7 @@ export default function PollDetailsPage() {
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                               ))}
                                             </Pie>
-                                            <Tooltip 
-                                               contentStyle={{ 
-                                                backgroundColor: "hsl(var(--card))", 
-                                                borderRadius: "12px", 
-                                                border: "1px solid hsl(var(--border))",
-                                                boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                                                fontSize: "12px",
-                                                color: "hsl(var(--foreground))"
-                                              }}
-                                              itemStyle={{ color: "hsl(var(--foreground))" }}
-                                              formatter={(value: number, name: string) => [value === 1 ? '1 vote' : `${value} votes`, name]}
-                                            />
+                                            <Tooltip content={<CustomTooltip label="" suffix="votes" />} />
                                           </PieChart>
                                         </ResponsiveContainer>
                                       </div>
@@ -460,18 +458,7 @@ export default function PollDetailsPage() {
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                   ))}
                                 </Pie>
-                                <Tooltip 
-                                  contentStyle={{ 
-                                    backgroundColor: "hsl(var(--card))", 
-                                    borderRadius: "12px", 
-                                    border: "1px solid hsl(var(--border))",
-                                    boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                                    fontSize: "12px",
-                                    color: "hsl(var(--foreground))"
-                                  }}
-                                  itemStyle={{ color: "hsl(var(--foreground))" }}
-                                  formatter={(value: number) => [`${value} users`, "Count"]}
-                                />
+                                <Tooltip content={<CustomTooltip label="" suffix="users" />} />
                                 <Legend 
                                   verticalAlign="bottom" 
                                   height={36} 
@@ -511,73 +498,52 @@ export default function PollDetailsPage() {
                           </div>
                         </div>
 
-                        <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
-                          <div className="mb-6">
-                            <h3 className="text-sm font-bold">Top Browsers</h3>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">Most common browser platforms</p>
-                          </div>
-                          <div className="h-[180px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <BarChart data={analytics?.demographics.browsers || []} layout="vertical" margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
-                                <XAxis type="number" hide />
-                                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--foreground)" }} width={100} />
-                                <Tooltip 
-                                  contentStyle={{ 
-                                    backgroundColor: "hsl(var(--card))", 
-                                    borderRadius: "12px", 
-                                    border: "1px solid hsl(var(--border))",
-                                    boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                                    fontSize: "12px",
-                                    color: "hsl(var(--foreground))"
-                                  }}
-                                  itemStyle={{ color: "hsl(var(--foreground))" }}
-                                  cursor={{ fill: 'transparent' }}
-                                  formatter={(value: number) => [`${value} users`, "Count"]}
-                                />
-                                <Bar dataKey="value" fill="#10b981" radius={[0, 4, 4, 0]} barSize={12}>
-                                  {analytics?.demographics.browsers.map((entry: any, index: number) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                  ))}
-                                </Bar>
-                              </BarChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </div>
+                      </div>
+                    </div>
 
-                        <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
-                          <div className="mb-6">
-                            <h3 className="text-sm font-bold">Top Locations</h3>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">Where your respondents are located</p>
-                          </div>
-                          <div className="h-[180px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <BarChart data={analytics?.demographics.countries?.map((c: any) => ({
-                                name: c.name,
-                                value: c.value
-                              })) || []} layout="vertical" margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
-                                <XAxis type="number" hide />
-                                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--foreground)" }} width={100} />
-                                <Tooltip 
-                                  contentStyle={{ 
-                                    backgroundColor: "hsl(var(--card))", 
-                                    borderRadius: "12px", 
-                                    border: "1px solid hsl(var(--border))",
-                                    boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                                    fontSize: "12px",
-                                    color: "hsl(var(--foreground))"
-                                  }}
-                                  itemStyle={{ color: "hsl(var(--foreground))" }}
-                                  cursor={{ fill: 'transparent' }}
-                                  formatter={(value: number) => [`${value} users`, "Count"]}
-                                />
-                                <Bar dataKey="value" fill="#f59e0b" radius={[0, 4, 4, 0]} barSize={12}>
-                                  {analytics?.demographics.countries?.map((entry: any, index: number) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[(index + 3) % COLORS.length]} />
-                                  ))}
-                                </Bar>
-                              </BarChart>
-                            </ResponsiveContainer>
-                          </div>
+                    <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                      <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
+                        <div className="mb-6">
+                          <h3 className="text-sm font-bold">Top Browsers</h3>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">Most common browser platforms</p>
+                        </div>
+                        <div className="h-[180px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={analytics?.demographics.browsers || []} layout="vertical" margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+                              <XAxis type="number" hide />
+                              <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--foreground)" }} width={100} />
+                              <Tooltip content={<CustomTooltip label="" suffix="users" />} cursor={{ fill: 'transparent' }} />
+                              <Bar dataKey="value" fill="#10b981" radius={[0, 4, 4, 0]} barSize={12}>
+                                {analytics?.demographics.browsers.map((entry: any, index: number) => (
+                                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
+                        <div className="mb-6">
+                          <h3 className="text-sm font-bold">Top Locations</h3>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">Where your respondents are located</p>
+                        </div>
+                        <div className="h-[180px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={analytics?.demographics.countries?.map((c: any) => ({
+                              name: c.name,
+                              value: c.value
+                            })) || []} layout="vertical" margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+                              <XAxis type="number" hide />
+                              <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--foreground)" }} width={100} />
+                              <Tooltip content={<CustomTooltip label="" suffix="users" />} cursor={{ fill: 'transparent' }} />
+                              <Bar dataKey="value" fill="#f59e0b" radius={[0, 4, 4, 0]} barSize={12}>
+                                {analytics?.demographics.countries?.map((entry: any, index: number) => (
+                                  <Cell key={`cell-${index}`} fill={COLORS[(index + 3) % COLORS.length]} />
+                                ))}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
                         </div>
                       </div>
                     </div>

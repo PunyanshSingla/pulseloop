@@ -3,12 +3,12 @@ import { usePolls } from "@/hooks/use-polls";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
 
-export function PollsTable() {
+export function PollsTable({ className }: { className?: string }) {
   const { data: pollsResponse, isLoading } = usePolls();
-  const polls = pollsResponse?.data?.slice(0, 5) || [];
+  const polls = pollsResponse?.data?.slice(0, 10) || [];
   const totalCount = pollsResponse?.data?.length || 0;
   return (
-    <div className="rounded-xl border border-border bg-card">
+    <div className={`rounded-xl border border-border bg-card ${className}`}>
       <div className="flex items-center justify-between border-b border-border px-5 py-4">
         <div>
           <p className="text-sm font-medium">Recent polls</p>
