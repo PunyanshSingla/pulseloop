@@ -57,12 +57,8 @@ export class PollsService {
     const pollsWithCounts = await Promise.all(
       polls.map(async (poll) => {
         const questionCount = await Question.countDocuments({ pollId: poll._id });
-        const responses = await Response.find({ pollId: poll._id }).distinct("respondentId");
-        
-        // For anonymous responses, we might need a different way to count unique participants
-        // but for now, let's use the raw count divided by questions as a proxy if respondentId is missing
-        const totalResponses = await Response.countDocuments({ pollId: poll._id });
-        const responseCount = questionCount > 0 ? Math.ceil(totalResponses / questionCount) : totalResponses;
+        const uniqueVoters = await Response.distinct("voterId", { pollId: poll._id });
+        const responseCount = uniqueVoters.length;
         
         const completionRate = poll.viewCount > 0 ? (responseCount / poll.viewCount) * 100 : 0;
         
@@ -99,8 +95,8 @@ export class PollsService {
         userHasVoted = !!existingResponse;
       }
     }
-    const totalRawResponses = await Response.countDocuments({ pollId: id });
-    const totalPollResponses = questionCount > 0 ? Math.ceil(totalRawResponses / questionCount) : totalRawResponses;
+    const uniqueVoters = await Response.distinct("voterId", { pollId: id });
+    const totalPollResponses = uniqueVoters.length;
     const avgTimeResult = await Response.aggregate([
       { $match: { pollId: new mongoose.Types.ObjectId(id) } },
       { $group: { _id: null, avgTime: { $avg: "$timeTaken" } } }
@@ -327,28 +323,32 @@ export class PollsService {
     }));
     console.log("results", results)
     // 2. Device Breakdown
+    // 2. Device Breakdown (Unique per voter)
     const deviceBreakdown = await Response.aggregate([
       { $match: { pollId } },
-      { $group: { _id: "$deviceInfo.device", count: { $sum: 1 } } }
+      { $group: { _id: "$voterId", device: { $first: "$deviceInfo.device" } } },
+      { $group: { _id: "$device", count: { $sum: 1 } } }
     ]);
-    console.log("device breakdown", deviceBreakdown)
 
-    // 3. Browser Breakdown
+    // 3. Browser Breakdown (Unique per voter)
     const browserBreakdown = await Response.aggregate([
       { $match: { pollId } },
-      { $group: { _id: "$deviceInfo.browser", count: { $sum: 1 } } }
+      { $group: { _id: "$voterId", browser: { $first: "$deviceInfo.browser" } } },
+      { $group: { _id: "$browser", count: { $sum: 1 } } }
     ]);
 
-    // 4. OS Breakdown
+    // 4. OS Breakdown (Unique per voter)
     const osBreakdown = await Response.aggregate([
       { $match: { pollId } },
-      { $group: { _id: "$deviceInfo.os", count: { $sum: 1 } } }
+      { $group: { _id: "$voterId", os: { $first: "$deviceInfo.os" } } },
+      { $group: { _id: "$os", count: { $sum: 1 } } }
     ]);
 
-    // 4.5 Country Breakdown
+    // 4.5 Country Breakdown (Unique per voter)
     const countryBreakdown = await Response.aggregate([
       { $match: { pollId } },
-      { $group: { _id: "$ipAddress", count: { $sum: 1 } } }
+      { $group: { _id: "$voterId", ip: { $first: "$ipAddress" } } },
+      { $group: { _id: "$ip", count: { $sum: 1 } } }
     ]);
 
     const countriesMap: Record<string, number> = {};
@@ -428,12 +428,16 @@ export class PollsService {
     ]);
 
     // 6. Summary Stats with User Breakdown
-    const totalResponses = await Response.countDocuments({ pollId: pollId });
-    const anonymousResponses = await Response.countDocuments({ pollId: pollId, respondentId: null });
-    const loggedInResponses = totalResponses - anonymousResponses;
+    // 6. Summary Stats with Unique User Breakdown
+    const uniqueVoters = await Response.distinct("voterId", { pollId });
+    const totalUniqueRespondents = uniqueVoters.length;
+    
+    const anonymousVoters = await Response.distinct("voterId", { pollId, respondentId: null });
+    const anonymousCount = anonymousVoters.length;
+    const loggedInCount = totalUniqueRespondents - anonymousCount;
     
     const uniqueViews = poll.viewCount || 0;
-    const completionRate = uniqueViews > 0 ? (totalResponses / uniqueViews) * 100 : 0;
+    const completionRate = uniqueViews > 0 ? (totalUniqueRespondents / uniqueViews) * 100 : 0;
 
     const avgTimeResult = await Response.aggregate([
       { $match: { pollId } },
@@ -446,11 +450,11 @@ export class PollsService {
         title: poll.title,
         status: poll.status,
         viewCount: uniqueViews,
-        responseCount: totalResponses,
+        responseCount: totalUniqueRespondents,
         completionRate,
         avgTimeTaken,
-        anonymousResponses,
-        loggedInResponses
+        anonymousResponses: anonymousCount,
+        loggedInResponses: loggedInCount
       },
       results,
       demographics: {

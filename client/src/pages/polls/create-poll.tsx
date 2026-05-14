@@ -15,10 +15,13 @@ import {
   Globe,
   Lock,
   MessageSquare,
-  CheckCircle2
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCreatePoll } from "@/hooks/use-polls";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function CreatePollPage() {
   const { data: session, isPending: isSessionPending } = authClient.useSession();
@@ -30,6 +33,7 @@ export default function CreatePollPage() {
   const [questions, setQuestions] = useState([
     { id: 1, text: "", options: ["", ""], isMandatory: true }
   ]);
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [allowAnonymous, setAllowAnonymous] = useState(true);
   const [allowMultipleSubmissions, setAllowMultipleSubmissions] = useState(false);
@@ -53,7 +57,9 @@ export default function CreatePollPage() {
   }
 
   const addQuestion = () => {
-    setQuestions([...questions, { id: Date.now(), text: "", options: ["", ""], isMandatory: true }]);
+    const newId = Date.now();
+    setQuestions([...questions, { id: newId, text: "", options: ["", ""], isMandatory: true }]);
+    setActiveQuestionIndex(questions.length);
   };
 
   const removeQuestion = (id: number) => {
@@ -162,123 +168,201 @@ export default function CreatePollPage() {
 
             <div className="flex flex-col gap-8 lg:flex-row">
               {/* Form Side */}
-              <div className="flex-1 space-y-6">
+              <div className="flex-1 min-w-0 space-y-6">
                 <div className="space-y-1">
-                  <h1 className="text-2xl font-semibold tracking-tight">Create new poll</h1>
-                  <p className="text-sm text-muted-foreground">Design your poll and start collecting responses.</p>
+                  <h1 className="text-2xl font-black tracking-tight">Design your Poll</h1>
+                  <p className="text-sm text-muted-foreground">Configure your questions in the interactive slider below.</p>
                 </div>
 
-                <div className="space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm">
+                {/* Title & Description Section */}
+                <div className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
                   <div className="space-y-2">
-                    <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Poll Title</Label>
+                    <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest text-primary">Poll Title</Label>
                     <Input 
                       id="title" 
-                      placeholder="e.g. Weekly Team Feedback" 
-                      className="h-11 bg-muted/30 border-border focus:ring-primary/20"
+                      placeholder="e.g. Product Discovery Survey" 
+                      className="h-12 bg-muted/30 border-border font-bold text-lg focus:ring-primary/20 rounded-xl"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="description" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description (Optional)</Label>
+                    <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Description (Optional)</Label>
                     <Input 
                       id="description" 
-                      placeholder="Provide some context..." 
-                      className="h-11 bg-muted/30 border-border focus:ring-primary/20"
+                      placeholder="What is this poll about?" 
+                      className="h-11 bg-muted/20 border-border focus:ring-primary/20 rounded-xl text-sm"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                     />
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  {questions.map((q, idx) => (
-                    <div key={q.id} className="relative space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:border-primary/20">
-                      <div className="flex items-center justify-between">
+                {/* Question Slider Container */}
+                <div className="relative space-y-6">
+                  {/* Slider Header / Pagination */}
+                  <div className="flex items-center justify-between px-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-black text-primary uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full">
+                        Question {activeQuestionIndex + 1} of {questions.length}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={activeQuestionIndex === 0}
+                        onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}
+                        className="size-9 p-0 rounded-xl"
+                      >
+                        <ChevronLeft className="size-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={activeQuestionIndex === questions.length - 1}
+                        onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}
+                        className="size-9 p-0 rounded-xl"
+                      >
+                        <ChevronRight className="size-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={questions[activeQuestionIndex].id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.2 }}
+                      className="relative space-y-6 rounded-3xl border border-border bg-card p-8 shadow-md"
+                    >
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-4">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
-                            {idx + 1}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mr-1">Required</Label>
+                           <div className="flex items-center gap-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Mandatory</Label>
                             <button
-                              onClick={() => toggleMandatory(q.id)}
-                              className={`relative h-5 w-9 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20 ${
-                                q.isMandatory ? "bg-primary" : "bg-muted"
+                              onClick={() => toggleMandatory(questions[activeQuestionIndex].id)}
+                              className={`relative h-5 w-10 rounded-full transition-colors duration-200 ${
+                                questions[activeQuestionIndex].isMandatory ? "bg-emerald-500" : "bg-slate-200 dark:bg-slate-800"
                               }`}
                             >
                               <div className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                                q.isMandatory ? "translate-x-4" : ""
+                                questions[activeQuestionIndex].isMandatory ? "translate-x-5" : ""
                               }`} />
                             </button>
                           </div>
                         </div>
                         {questions.length > 1 && (
-                          <button 
-                            onClick={() => removeQuestion(q.id)}
-                            className="text-muted-foreground hover:text-destructive transition-colors"
+                          <Button 
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const idToRemove = questions[activeQuestionIndex].id;
+                              removeQuestion(idToRemove);
+                              setActiveQuestionIndex(Math.max(0, activeQuestionIndex - 1));
+                            }}
+                            className="text-muted-foreground hover:text-destructive transition-colors h-8 w-8 p-0 rounded-lg"
                           >
                             <Trash2 className="size-4" />
-                          </button>
+                          </Button>
                         )}
                       </div>
 
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Question</Label>
+                      <div className="space-y-6">
+                        <div className="space-y-3">
+                          <Label className="text-xs font-black uppercase tracking-widest text-slate-400">The Question</Label>
                           <Input 
-                            placeholder="What would you like to ask?" 
-                            className="h-11 bg-muted/30 border-border"
-                            value={q.text}
-                            onChange={(e) => handleQuestionChange(q.id, e.target.value)}
+                            placeholder="Type your question here..." 
+                            className="h-14 bg-muted/20 border-border text-lg font-bold rounded-2xl px-6 focus:bg-background transition-all"
+                            value={questions[activeQuestionIndex].text}
+                            onChange={(e) => handleQuestionChange(questions[activeQuestionIndex].id, e.target.value)}
                           />
                         </div>
 
-                        <div className="space-y-3">
-                          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Options</Label>
-                          <div className="grid gap-2">
-                            {q.options.map((option, oIdx) => (
-                              <Input 
-                                key={oIdx} 
-                                placeholder={`Option ${oIdx + 1}`} 
-                                className="h-10 bg-muted/20 border-border/60"
-                                value={option}
-                                onChange={(e) => handleOptionChange(q.id, oIdx, e.target.value)}
-                              />
+                        <div className="space-y-4">
+                          <Label className="text-xs font-black uppercase tracking-widest text-slate-400">Options</Label>
+                          <div className="grid gap-3">
+                            {questions[activeQuestionIndex].options.map((option, oIdx) => (
+                              <div key={oIdx} className="relative group">
+                                <Input 
+                                  placeholder={`Option ${oIdx + 1}`} 
+                                  className="h-12 bg-muted/10 border-border/60 rounded-xl pl-12 focus:bg-background transition-all"
+                                  value={option}
+                                  onChange={(e) => handleOptionChange(questions[activeQuestionIndex].id, oIdx, e.target.value)}
+                                />
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-muted-foreground/30 group-focus-within:text-primary transition-colors">
+                                  {String.fromCharCode(65 + oIdx)}
+                                </div>
+                              </div>
                             ))}
                           </div>
                           <button 
-                            onClick={() => addOption(q.id)}
-                            className="inline-flex items-center gap-2 text-xs font-medium text-primary hover:underline mt-1"
+                            onClick={() => addOption(questions[activeQuestionIndex].id)}
+                            className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors mt-2"
                           >
                             <Plus className="size-3" />
                             Add option
                           </button>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    </motion.div>
+                  </AnimatePresence>
 
-                  <Button 
-                    variant="outline" 
-                    className="w-full h-12 border-dashed border-border hover:border-primary/40 hover:bg-primary/5 text-muted-foreground hover:text-primary transition-all"
-                    onClick={addQuestion}
-                  >
-                    <Plus className="size-4 mr-2" />
-                    Add another question
-                  </Button>
+                  {/* Dot Indicator */}
+                  <div className="flex justify-center gap-1.5">
+                    {questions.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveQuestionIndex(i)}
+                        className={`size-1.5 rounded-full transition-all duration-300 ${
+                          activeQuestionIndex === i 
+                            ? "bg-primary w-6" 
+                            : "bg-slate-300 dark:bg-slate-700 hover:bg-slate-400"
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </div>
+
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 border-dashed border-primary/30 hover:border-primary/50 hover:bg-primary/5 text-primary transition-all rounded-2xl font-bold"
+                  onClick={addQuestion}
+                >
+                  <Plus className="size-4 mr-2" />
+                  Add another question
+                </Button>
               </div>
 
               {/* Settings / Preview Side */}
-              <div className="w-full space-y-6 lg:w-80">
-                <div className="space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm">
-                  <h3 className="flex items-center gap-2 text-sm font-semibold">
-                    <Settings2 className="size-4 text-primary" />
-                    Poll Settings
-                  </h3>
-                  
-                  <div className="space-y-4 pt-2">
+              <div className="w-full lg:w-80 shrink-0">
+                <div className="sticky top-6 space-y-6">
+                  <div className="space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm">
+                    <h3 className="flex items-center gap-2 text-sm font-semibold">
+                      <Settings2 className="size-4 text-primary" />
+                      Poll Actions
+                    </h3>
+                    
+                    <div className="space-y-3 pt-2">
+                      <Button 
+                        className="w-full h-11 font-bold shadow-lg shadow-primary/20"
+                        onClick={handleCreate}
+                        disabled={isCreating}
+                      >
+                        {isCreating ? "Creating..." : "Create Poll"}
+                      </Button>
+                    </div>
+
+                    <div className="h-px bg-border my-2" />
+
+                    <h3 className="flex items-center gap-2 text-sm font-semibold">
+                      <Globe className="size-4 text-primary" />
+                      Configuration
+                    </h3>
+                    
+                    <div className="space-y-4 pt-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-xs font-medium">
                         <Globe className="size-3.5 text-muted-foreground" />
@@ -340,26 +424,17 @@ export default function CreatePollPage() {
                       />
                     </div>
                   </div>
-
-                  <div className="pt-4 border-t border-border">
-                    <Button 
-                      className="w-full h-11 font-bold shadow-lg shadow-primary/20"
-                      onClick={handleCreate}
-                      disabled={isCreating}
-                    >
-                      {isCreating ? "Creating..." : "Create Poll"}
-                    </Button>
-                  </div>
                 </div>
 
-                <div className="rounded-xl border border-border bg-muted/30 p-6">
-                  <div className="flex items-center gap-2 text-sm font-semibold mb-2">
-                    <Sparkles className="size-4 text-primary" />
-                    Pro Tip
+                  <div className="rounded-xl border border-border bg-muted/30 p-6">
+                    <div className="flex items-center gap-2 text-sm font-semibold mb-2">
+                      <Sparkles className="size-4 text-primary" />
+                      Pro Tip
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Allowing Guest Voting (Anonymous) usually increases response rates by over 50%.
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Allowing Guest Voting (Anonymous) usually increases response rates by over 50%.
-                  </p>
                 </div>
               </div>
             </div>
