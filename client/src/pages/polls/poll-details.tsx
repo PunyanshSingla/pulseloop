@@ -1,6 +1,7 @@
 import { authClient } from "@/lib/auth-client";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
@@ -10,6 +11,7 @@ import {
   Globe, 
   Lock, 
   Share2, 
+  QrCode,
   CheckCircle2,
   Eye,
   Settings2,
@@ -45,6 +47,7 @@ import {
   Area,
   Legend
 } from "recharts";
+import { QRCodeSVG, QRCodeCanvas } from "qrcode.react";
 import { usePoll, useUpdatePoll, useDeletePoll, usePollResponses, usePollAnalytics, usePublishResults } from "@/hooks/use-polls";
 
 const COLORS = ["#10b981", "#14b8a6", "#f59e0b", "#f97316", "#f43f5e", "#84cc16", "#0f766e"];
@@ -93,6 +96,7 @@ export default function PollDetailsPage() {
   const itemsPerPage = 10;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
 
   if (isSessionPending || isPollLoading) {
     return (
@@ -182,6 +186,10 @@ export default function PollDetailsPage() {
               </div>
 
               <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => setShowQRModal(true)}>
+                  <QrCode className="size-4" />
+                  QR Code
+                </Button>
                 <Button variant="outline" size="sm" className="gap-2 rounded-xl" onClick={copyLink}>
                   <Share2 className="size-4" />
                   Share
@@ -1195,6 +1203,135 @@ export default function PollDetailsPage() {
                     Publish Now
                   </Button>
                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* QR Code Modal */}
+      <AnimatePresence>
+        {showQRModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowQRModal(false)}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card shadow-2xl flex flex-col items-center"
+            >
+              <div id="qr-share-card" className="w-full bg-card p-6 flex flex-col items-center text-center">
+                <div className="mb-4">
+                  <Logo className="scale-90" noLink />
+                </div>
+                
+                <h2 className="text-base font-bold tracking-tight mb-1 line-clamp-1">{poll.title}</h2>
+                <p className="text-[10px] text-muted-foreground mb-4">Scan to cast your vote</p>
+                
+                <div className="bg-white p-3 rounded-xl shadow-sm border border-border/50 mb-4">
+                  <QRCodeCanvas 
+                    id="poll-qr-canvas"
+                    value={`${import.meta.env.VITE_APP_ORIGIN}/vote/${poll._id}`} 
+                    size={160}
+                    level="H"
+                    includeMargin={false}
+                  />
+                </div>
+                
+                <p className="text-[9px] font-mono text-muted-foreground truncate w-full opacity-60">
+                  {import.meta.env.VITE_APP_ORIGIN.replace(/^https?:\/\//, "")}/vote/{poll._id}
+                </p>
+              </div>
+
+              <div className="w-full p-4 bg-muted/30 border-t border-border/50 grid grid-cols-2 gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="rounded-xl gap-2 h-9"
+                  onClick={async () => {
+                    const canvas = document.getElementById("poll-qr-canvas") as HTMLCanvasElement;
+                    if (!canvas) return;
+
+                    const downloadCanvas = document.createElement("canvas");
+                    const ctx = downloadCanvas.getContext("2d");
+                    if (!ctx) return;
+
+                    const size = 1000; // High res
+                    downloadCanvas.width = size;
+                    downloadCanvas.height = size + 350;
+                    
+                    // Background with subtle gradient or solid color
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(0, 0, downloadCanvas.width, downloadCanvas.height);
+                    
+                    // Branding Header
+                    ctx.fillStyle = "#10b981"; // Primary color
+                    ctx.font = "bold 60px sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.fillText("PulseLoop", size / 2, 100);
+                    
+                    ctx.fillStyle = "#000000";
+                    ctx.font = "bold 44px sans-serif";
+                    ctx.fillText(poll.title, size / 2, 180);
+                    
+                    ctx.fillStyle = "#666666";
+                    ctx.font = "30px sans-serif";
+                    ctx.fillText("Scan to cast your vote", size / 2, 240);
+                    
+                    // Draw QR Code
+                    ctx.drawImage(canvas, 100, 300, 800, 800);
+                    
+                    // Footer Branding
+                    ctx.fillStyle = "#999999";
+                    ctx.font = "24px monospace";
+                    ctx.fillText(import.meta.env.VITE_APP_ORIGIN.replace(/^https?:\/\//, "") + "/vote/" + poll._id, size / 2, size + 280);
+
+                    const dataUrl = downloadCanvas.toDataURL("image/png");
+                    
+                    // Try to use Share API first
+                    if (navigator.share && navigator.canShare) {
+                      try {
+                        const blob = await (await fetch(dataUrl)).blob();
+                        const file = new File([blob], `poll-qr-${poll._id}.png`, { type: "image/png" });
+                        
+                        if (navigator.canShare({ files: [file] })) {
+                          await navigator.share({
+                            files: [file],
+                            title: `Poll: ${poll.title}`,
+                            text: `Scan this QR code to vote on my poll: ${poll.title}`,
+                          });
+                          toast.success("Branded QR Shared!");
+                          return;
+                        }
+                      } catch (err) {
+                        console.error("Share failed", err);
+                      }
+                    }
+
+                    // Fallback to Download
+                    const link = document.createElement("a");
+                    link.download = `poll-qr-${poll.title.toLowerCase().replace(/\s+/g, "-")}.png`;
+                    link.href = dataUrl;
+                    link.click();
+                    toast.success("QR Code Downloaded!");
+                  }}
+                >
+                  <Share2 className="size-4" />
+                  Share Image
+                </Button>
+                <Button 
+                  variant="default" 
+                  className="rounded-xl"
+                  onClick={() => setShowQRModal(false)}
+                >
+                  Done
+                </Button>
               </div>
             </motion.div>
           </div>
