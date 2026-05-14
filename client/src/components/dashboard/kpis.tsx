@@ -18,24 +18,24 @@ export function KPIs() {
     { 
       label: "Active polls", 
       value: kpisData?.activePolls?.toString() || "0", 
-      change: "0", // Could calculate growth for this too
-      up: true, 
+      change: kpisData?.activePollsGrowth ? `${kpisData.activePollsGrowth > 0 ? "+" : ""}${kpisData.activePollsGrowth}%` : "0%", 
+      up: (kpisData?.activePollsGrowth || 0) >= 0, 
       sub: "currently live", 
       icon: Zap 
     },
     { 
       label: "Completion rate", 
       value: kpisData?.completionRate || "N/A", 
-      change: "0%", 
-      up: true, 
+      change: kpisData?.completionRateGrowth ? `${kpisData.completionRateGrowth > 0 ? "+" : ""}${kpisData.completionRateGrowth}%` : "0%", 
+      up: (kpisData?.completionRateGrowth || 0) >= 0, 
       sub: "avg across polls", 
       icon: CheckCircle2 
     },
     { 
       label: "Avg. response time", 
       value: kpisData?.avgResponseTime || "N/A", 
-      change: "0s", 
-      up: true, 
+      change: kpisData?.avgResponseTimeGrowth ? `${kpisData.avgResponseTimeGrowth > 0 ? "+" : ""}${kpisData.avgResponseTimeGrowth}%` : "0%", 
+      up: (kpisData?.avgResponseTimeGrowth || 0) <= 0, // Lower is better for response time
       sub: "avg per respondent", 
       icon: Clock 
     },

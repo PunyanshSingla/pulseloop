@@ -8,14 +8,8 @@ export const pollSchema = z.object({
   allowAnonymous: z.boolean().optional(),
   allowMultipleSubmissions: z.boolean().optional(),
   resultsPublished: z.boolean().optional(),
-  expiresAt: z.preprocess(
-    (arg) => (typeof arg === "string" ? new Date(arg) : arg),
-    z.date({ required_error: "End date is required" })
-  ),
-  startsAt: z.preprocess(
-    (arg) => (typeof arg === "string" ? new Date(arg) : arg),
-    z.date({ required_error: "Start date is required" })
-  ),
+  expiresAt: z.coerce.date().optional(),
+  startsAt: z.coerce.date().optional(),
   questions: z
     .array(
       z.object({

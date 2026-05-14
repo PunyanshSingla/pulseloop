@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import Poll from "../../models/Poll";
 import User from "../../models/User"
 import Response from "../../models/Response";
+import PollView from "../../models/PollView";
+import Question from "../../models/Question";
+import QuestionOption from "../../models/QuestionOption";
+
 export class AnalyticsService {
   async getKPIData(userId?: string) {
     const filter = userId ? { createdBy: new mongoose.Types.ObjectId(userId) } : {};
@@ -13,9 +17,8 @@ export class AnalyticsService {
     const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
 
     const totalResponses = await Response.countDocuments({ pollId: { $in: pollIds } });
-    const activePolls = polls.filter(p => p.status === "active").length;
-
-    // Calculate growth
+    
+    // Calculate response growth
     const currentPeriodResponses = await Response.countDocuments({
       pollId: { $in: pollIds },
       createdAt: { $gte: thirtyDaysAgo }
@@ -25,34 +28,81 @@ export class AnalyticsService {
       createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo }
     });
 
-    let growth = 0;
+    let responsesGrowth = 0;
     if (previousPeriodResponses > 0) {
-      growth = ((currentPeriodResponses - previousPeriodResponses) / previousPeriodResponses) * 100;
-    } else if (currentPeriodResponses > 0) {
-      growth = 100;
+      responsesGrowth = ((currentPeriodResponses - previousPeriodResponses) / previousPeriodResponses) * 100;
     }
 
-    // Calculate average response time
-    const avgResponseTimeData = await Response.aggregate([
-      { $match: { pollId: { $in: pollIds } } },
+    // Calculate average response time and growth
+    const currentAvgResponseTimeData = await Response.aggregate([
+      { $match: { pollId: { $in: pollIds }, createdAt: { $gte: thirtyDaysAgo } } },
+      { $group: { _id: null, avgTime: { $avg: "$timeTaken" } } }
+    ]);
+    const previousAvgResponseTimeData = await Response.aggregate([
+      { $match: { pollId: { $in: pollIds }, createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } } },
       { $group: { _id: null, avgTime: { $avg: "$timeTaken" } } }
     ]);
 
-    const avgTimeSeconds = avgResponseTimeData.length > 0 ? Math.round(avgResponseTimeData[0].avgTime) : 0;
+    const currentAvgTime = currentAvgResponseTimeData.length > 0 ? currentAvgResponseTimeData[0].avgTime : 0;
+    const previousAvgTime = previousAvgResponseTimeData.length > 0 ? previousAvgResponseTimeData[0].avgTime : 0;
+    
+    let avgResponseTimeGrowth = 0;
+    if (previousAvgTime > 0) {
+      avgResponseTimeGrowth = ((currentAvgTime - previousAvgTime) / previousAvgTime) * 100;
+    }
+
+    const overallAvgResponseTimeData = await Response.aggregate([
+      { $match: { pollId: { $in: pollIds } } },
+      { $group: { _id: null, avgTime: { $avg: "$timeTaken" } } }
+    ]);
+    const avgTimeSeconds = overallAvgResponseTimeData.length > 0 ? Math.round(overallAvgResponseTimeData[0].avgTime) : 0;
     const formattedAvgTime = avgTimeSeconds > 60 
       ? `${Math.floor(avgTimeSeconds / 60)}m ${avgTimeSeconds % 60}s` 
       : `${avgTimeSeconds}s`;
 
-    const totalViews = polls.reduce((sum, p) => sum + (p.viewCount || 0), 0);
+    // Completion rate and growth
+    const currentViews = await PollView.countDocuments({
+      pollId: { $in: pollIds },
+      createdAt: { $gte: thirtyDaysAgo }
+    });
+    const previousViews = await PollView.countDocuments({
+      pollId: { $in: pollIds },
+      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo }
+    });
+
+    const currentCompletionRate = currentViews > 0 ? (currentPeriodResponses / currentViews) * 100 : 0;
+    const previousCompletionRate = previousViews > 0 ? (previousPeriodResponses / previousViews) * 100 : 0;
+
+    let completionRateGrowth = 0;
+    if (previousCompletionRate > 0) {
+      completionRateGrowth = ((currentCompletionRate - previousCompletionRate) / previousCompletionRate) * 100;
+    }
+
+    const totalViews = await PollView.countDocuments({ pollId: { $in: pollIds } });
     const completionRateVal = totalViews > 0 ? (totalResponses / totalViews) * 100 : 0;
     const formattedCompletionRate = completionRateVal > 100 ? "100%" : completionRateVal.toFixed(1) + "%";
 
+    // Active polls growth
+    const currentActivePolls = polls.filter(p => p.status === "active").length;
+    const previousActivePolls = polls.filter(p => 
+      p.status === "active" && 
+      new Date(p.createdAt) < thirtyDaysAgo
+    ).length;
+
+    let activePollsGrowth = 0;
+    if (previousActivePolls > 0) {
+      activePollsGrowth = ((currentActivePolls - previousActivePolls) / previousActivePolls) * 100;
+    }
+
     return {
       totalResponses,
-      activePolls,
-      totalResponsesGrowth: growth.toFixed(1),
+      activePolls: currentActivePolls,
+      totalResponsesGrowth: responsesGrowth.toFixed(1),
+      activePollsGrowth: activePollsGrowth.toFixed(1),
       completionRate: totalViews > 0 ? formattedCompletionRate : "0%",
-      avgResponseTime: avgTimeSeconds > 0 ? formattedAvgTime : "N/A"
+      completionRateGrowth: completionRateGrowth.toFixed(1),
+      avgResponseTime: avgTimeSeconds > 0 ? formattedAvgTime : "N/A",
+      avgResponseTimeGrowth: avgResponseTimeGrowth.toFixed(1)
     };
   }
 
@@ -97,7 +147,26 @@ export class AnalyticsService {
     );
 
     // Sort by response count descending
-    return pollStats.sort((a, b) => b.responseCount - a.responseCount)[0];
+    const topPoll = pollStats.sort((a, b) => b.responseCount - a.responseCount)[0];
+    
+    // Fetch first question and options for the top poll
+    const firstQuestion = await Question.findOne({ pollId: topPoll._id }).sort({ order: 1 }).lean();
+    
+    if (firstQuestion) {
+      const options = await QuestionOption.find({ questionId: firstQuestion._id }).sort({ order: 1 }).lean();
+      const optionsWithStats = await Promise.all(
+        options.map(async (o) => {
+          const count = await Response.countDocuments({ selectedOptionId: o._id });
+          const totalQuestionResponses = await Response.countDocuments({ questionId: firstQuestion._id });
+          const percentage = totalQuestionResponses > 0 ? (count / totalQuestionResponses) * 100 : 0;
+          return { ...o, responseCount: count, percentage };
+        })
+      );
+      
+      (topPoll as any).questions = [{ ...firstQuestion, options: optionsWithStats }];
+    }
+
+    return topPoll;
   }
 
   async getLatestActivity(userId?: string, limit: number = 5) {

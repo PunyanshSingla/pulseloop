@@ -29,23 +29,29 @@ export function ActivityFeed() {
           Realtime
         </span>
       </div>
-      <ul className="mt-5 space-y-5">
-        {events.map((e: any, i: number) => (
-          <li key={i} className="flex items-start gap-3.5">
-            <div className="mt-0.5 grid size-8 place-items-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
-              {e.who.split(" ").map((s: string) => s[0]).join("").slice(0, 2)}
-            </div>
-            <div className="min-w-0 flex-1 text-base">
-              <p className="leading-snug">
-                <span className="font-semibold text-foreground">{e.who}</span>{" "}
-                <span className="text-muted-foreground">{e.what}</span>{" "}
-                <span className="font-semibold text-foreground">{e.poll}</span>
+      <div className="mt-5 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+        <ul className="space-y-5">
+          {events.map((e: any, i: number) => (
+            <li key={i} className="flex items-start gap-3.5">
+              <div className="mt-0.5 grid size-8 place-items-center rounded-full bg-muted text-xs font-bold text-muted-foreground shrink-0">
+                {e.who.split(" ").map((s: string) => s[0]).join("").slice(0, 2)}
+              </div>
+              <div className="min-w-0 flex-1 text-base">
+                <p className="leading-snug">
+                  <span className="font-semibold text-foreground">{e.who}</span>{" "}
+                  <span className="text-muted-foreground">{e.what}</span>{" "}
+                  <span className="font-semibold text-foreground">{e.poll}</span>
+                </p>
+                <p className="mt-0.5 text-sm text-muted-foreground font-medium">
+                {e.when && !isNaN(new Date(e.when).getTime()) 
+                  ? formatDistanceToNow(new Date(e.when)) 
+                  : "recently"} ago
               </p>
-              <p className="mt-0.5 text-sm text-muted-foreground font-medium">{formatDistanceToNow(new Date(e.when))} ago</p>
-            </div>
-          </li>
-        ))}
-      </ul>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

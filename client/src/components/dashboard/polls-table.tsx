@@ -67,10 +67,20 @@ export function PollsTable() {
                 <td className="px-5 py-3.5 text-right tabular-nums font-medium">{p.responseCount || 0}</td>
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">Responses collected</span>
+                    <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all" 
+                        style={{ width: `${Math.min(p.completionRate || 0, 100)}%` }} 
+                      />
+                    </div>
+                    <span className="text-xs font-bold text-foreground/80">{Math.round(p.completionRate || 0)}%</span>
                   </div>
                 </td>
-                <td className="px-5 py-3.5 text-xs text-muted-foreground">{formatDistanceToNow(new Date(p.createdAt))} ago</td>
+                <td className="px-5 py-3.5 text-xs text-muted-foreground">
+                  {p.createdAt && !isNaN(new Date(p.createdAt).getTime()) 
+                    ? formatDistanceToNow(new Date(p.createdAt)) 
+                    : "N/A"} ago
+                </td>
                 <td className="px-5 py-3.5 text-right">
                   <button className="grid size-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
                     <MoreHorizontal className="size-4" />

@@ -199,14 +199,16 @@ export default function PollsPage() {
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Created</p>
-                        <p className="mt-0.5 text-lg font-semibold">{formatDistanceToNow(new Date(poll.createdAt))}</p>
+                        <p className="mt-0.5 text-lg font-semibold">
+                          {poll.createdAt ? formatDistanceToNow(new Date(poll.createdAt)) : "N/A"}
+                        </p>
                       </div>
                     </div>
 
                     <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                       <span className="flex items-center gap-1.5">
                         <Clock className="size-3.5" />
-                        Updated {formatDistanceToNow(new Date(poll.updatedAt))} ago
+                        Updated {poll.updatedAt ? formatDistanceToNow(new Date(poll.updatedAt)) : "N/A"} ago
                       </span>
                       <Link to={`/polls/${poll._id}`} className="inline-flex items-center gap-1 font-medium text-foreground hover:underline">
                         Manage Poll <ArrowUpRight className="size-3.5" />
@@ -259,7 +261,9 @@ export default function PollsPage() {
                               ? `${Math.min(100, Math.round((p.responseCount / p.viewCount) * 100))}%` 
                               : "0%"}
                           </td>
-                          <td className="px-5 py-3.5 text-xs text-muted-foreground">{formatDistanceToNow(new Date(p.updatedAt))} ago</td>
+                          <td className="px-5 py-3.5 text-xs text-muted-foreground">
+                            {p.updatedAt ? formatDistanceToNow(new Date(p.updatedAt)) : "N/A"} ago
+                          </td>
                           <td className="px-5 py-3.5 text-right">
                             <button className="grid size-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
                               <MoreHorizontal className="size-4" />

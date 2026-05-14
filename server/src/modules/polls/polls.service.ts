@@ -64,7 +64,9 @@ export class PollsService {
         const totalResponses = await Response.countDocuments({ pollId: poll._id });
         const responseCount = questionCount > 0 ? Math.ceil(totalResponses / questionCount) : totalResponses;
         
-        return { ...poll, responseCount, questionCount };
+        const completionRate = poll.viewCount > 0 ? (responseCount / poll.viewCount) * 100 : 0;
+        
+        return { ...poll, responseCount, questionCount, completionRate };
       })
     );
 
