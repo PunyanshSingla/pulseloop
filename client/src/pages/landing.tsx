@@ -12,9 +12,12 @@ import {
 } from "lucide-react";
 import Logo from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { authClient } from "@/lib/auth-client";
 
 // ─── Nav ───────────────────────────────────────────────────────────────────────
 function Nav() {
+  const { data: session } = authClient.useSession();
+
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
@@ -27,20 +30,35 @@ function Nav() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Link
-            to="/sign-in"
-            className="hidden rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
-          >
-            Sign in
-          </Link>
-          <ThemeToggle />
-          <Link
-            to="/sign-up"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm ring-1 ring-primary/30 transition-all hover:brightness-110"
-          >
-            Get started
-            <ArrowRight className="size-3.5" />
-          </Link>
+          {!session ? (
+            <>
+              <Link
+                to="/sign-in"
+                className="hidden rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+              >
+                Sign in
+              </Link>
+              <ThemeToggle />
+              <Link
+                to="/sign-up"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm ring-1 ring-primary/30 transition-all hover:brightness-110"
+              >
+                Get started
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </>
+          ) : (
+            <>
+              <ThemeToggle />
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm ring-1 ring-primary/30 transition-all hover:brightness-110"
+              >
+                Dashboard
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </nav>
@@ -110,6 +128,8 @@ function PollMockup() {
 
 // ─── Hero ──────────────────────────────────────────────────────────────────────
 function Hero() {
+  const { data: session } = authClient.useSession();
+
   return (
     <section className="px-6 pt-24 pb-16">
       <div className="mx-auto max-w-7xl">
@@ -126,13 +146,23 @@ function Hero() {
             Share via link, collect rich data, and make informed decisions faster.
           </p>
           <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              to="/sign-up"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground ring-1 ring-primary/30 transition-all hover:brightness-110 sm:w-auto"
-            >
-              <Plus className="size-4" />
-              Create your first poll
-            </Link>
+            {!session ? (
+              <Link
+                to="/sign-up"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground ring-1 ring-primary/30 transition-all hover:brightness-110 sm:w-auto"
+              >
+                <Plus className="size-4" />
+                Create your first poll
+              </Link>
+            ) : (
+              <Link
+                to="/polls/create"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground ring-1 ring-primary/30 transition-all hover:brightness-110 sm:w-auto"
+              >
+                <Plus className="size-4" />
+                Create new poll
+              </Link>
+            )}
             <Link
               to="/explore"
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-sm ring-1 ring-black/5 transition-all hover:ring-black/10 sm:w-auto"
@@ -364,6 +394,8 @@ function Analytics() {
 
 // ─── CTA ───────────────────────────────────────────────────────────────────────
 function CTA() {
+  const { data: session } = authClient.useSession();
+
   return (
     <section className="px-6 py-24">
       <div className="mx-auto max-w-5xl rounded-2xl bg-primary p-12 text-center md:p-20">
@@ -374,18 +406,29 @@ function CTA() {
           Join over 10,000 product teams making data-driven decisions every day.
         </p>
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Link
-            to="/sign-up"
-            className="w-full rounded-lg bg-card px-8 py-3 text-sm font-medium text-primary shadow-xl ring-1 ring-white/10 sm:w-auto"
-          >
-            Create free account
-          </Link>
-          <Link
-            to="/sign-in"
-            className="w-full px-8 py-3 text-sm font-medium text-primary-foreground/80 transition-colors hover:text-primary-foreground sm:w-auto"
-          >
-            Sign in
-          </Link>
+          {!session ? (
+            <>
+              <Link
+                to="/sign-up"
+                className="w-full rounded-lg bg-card px-8 py-3 text-sm font-medium text-primary shadow-xl ring-1 ring-white/10 sm:w-auto"
+              >
+                Create free account
+              </Link>
+              <Link
+                to="/sign-in"
+                className="w-full px-8 py-3 text-sm font-medium text-primary-foreground/80 transition-colors hover:text-primary-foreground sm:w-auto"
+              >
+                Sign in
+              </Link>
+            </>
+          ) : (
+            <Link
+              to="/dashboard"
+              className="w-full rounded-lg bg-card px-8 py-3 text-sm font-medium text-primary shadow-xl ring-1 ring-white/10 sm:w-auto"
+            >
+              Go to Dashboard
+            </Link>
+          )}
         </div>
       </div>
     </section>
