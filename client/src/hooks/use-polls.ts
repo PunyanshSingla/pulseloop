@@ -3,6 +3,8 @@ import { pollsApi } from "@/lib/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import type { Poll, PollResponse, PollsResponse } from "@/types/polls";
+import { useEffect } from "react";
+import { socketClient } from "@/lib/socket";
 
 export const usePolls = () => {
   return useQuery<PollsResponse>({
@@ -19,6 +21,28 @@ export const usePublicPolls = () => {
 };
 
 export const usePoll = (id: string) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!id) return;
+
+    const socket = socketClient.connect();
+    socketClient.joinPoll(id);
+
+    const handleUpdate = () => {
+      queryClient.invalidateQueries({ queryKey: ["poll", id] });
+    };
+
+    socket?.on("poll:updated", handleUpdate);
+    socket?.on("vote:cast", handleUpdate);
+
+    return () => {
+      socket?.off("poll:updated", handleUpdate);
+      socket?.off("vote:cast", handleUpdate);
+      socketClient.leavePoll(id);
+    };
+  }, [id, queryClient]);
+
   return useQuery<PollResponse>({
     queryKey: ["poll", id],
     queryFn: () => pollsApi.getById(id),
@@ -109,12 +133,33 @@ export const usePollResponses = (id: string) => {
 };
 
 export const usePollAnalytics = (id: string) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!id) return;
+
+    const socket = socketClient.connect();
+    socketClient.joinPoll(id);
+
+    const handleUpdate = () => {
+      queryClient.invalidateQueries({ queryKey: ["poll-analytics", id] });
+    };
+
+    socket?.on("vote:cast", handleUpdate);
+
+    return () => {
+      socket?.off("vote:cast", handleUpdate);
+      // We don't call leavePoll here as usePoll might be using it too
+      // but joinPoll is idempotent in this client implementation
+    };
+  }, [id, queryClient]);
+
   return useQuery<{
     devices: { name: string; value: number }[];
     browsers: { name: string; value: number }[];
     os: { name: string; value: number }[];
     countries: { name: string; value: number }[];
-  }>({
+  } | any>({
     queryKey: ["poll-analytics", id],
     queryFn: () => pollsApi.getAnalytics(id),
     enabled: !!id,

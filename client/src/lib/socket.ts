@@ -47,6 +47,14 @@ class SocketClient {
   public leavePoll(pollId: string) {
     this.socket?.emit("leave:poll", pollId);
   }
+
+  public joinDashboard(userId: string) {
+    this.socket?.emit("join:dashboard", userId);
+  }
+
+  public leaveDashboard(userId: string) {
+    this.socket?.emit("leave:dashboard", userId);
+  }
 }
 
 export const socketClient = SocketClient.getInstance();

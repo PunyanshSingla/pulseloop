@@ -202,6 +202,14 @@ export class PollsController {
         pollId
       });
 
+      // Notify owner's dashboard
+      if (updatedPoll?.createdBy) {
+        socketService.emitToDashboard(updatedPoll.createdBy.toString(), "analytics:update", {
+          pollId,
+          type: "vote"
+        });
+      }
+
       res.status(201).json({ success: true, data: results });
     } catch (error) {
       next(error);
@@ -252,6 +260,16 @@ export class PollsController {
         fingerprint, 
         ipAddress 
       });
+
+      if (isNewView) {
+        const poll = await Poll.findById(id);
+        if (poll?.createdBy) {
+          socketService.emitToDashboard(poll.createdBy.toString(), "analytics:update", {
+            pollId: id,
+            type: "view"
+          });
+        }
+      }
 
       res.status(200).json({ success: true, isNewView });
     } catch (error) {

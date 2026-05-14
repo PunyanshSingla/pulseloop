@@ -36,6 +36,16 @@ export class SocketService {
         console.log(`👤 User ${socket.id} left poll: ${pollId}`);
       });
 
+      socket.on("join:dashboard", (userId: string) => {
+        socket.join(`dashboard:${userId}`);
+        console.log(`📊 User ${socket.id} joined dashboard: ${userId}`);
+      });
+
+      socket.on("leave:dashboard", (userId: string) => {
+        socket.leave(`dashboard:${userId}`);
+        console.log(`📊 User ${socket.id} left dashboard: ${userId}`);
+      });
+
       socket.on("disconnect", () => {
         console.log(`🔌 User disconnected: ${socket.id}`);
       });
@@ -47,6 +57,11 @@ export class SocketService {
   public emitToPoll(pollId: string, event: string, data: any) {
     if (!this.io) return;
     this.io.to(`poll:${pollId}`).emit(event, data);
+  }
+
+  public emitToDashboard(userId: string, event: string, data: any) {
+    if (!this.io) return;
+    this.io.to(`dashboard:${userId}`).emit(event, data);
   }
 
   public getIO() {
