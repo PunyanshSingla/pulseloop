@@ -15,7 +15,7 @@ export const errorMiddleware = (
   if (err instanceof ZodError) {
     statusCode = 400;
     message = "Validation Error";
-    errors = err.errors.map(e => ({
+    errors = err.issues.map((e: any) => ({
       path: e.path.join("."),
       message: e.message
     }));
