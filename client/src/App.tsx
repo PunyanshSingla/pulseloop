@@ -13,6 +13,7 @@ import PublicPollPage from "./pages/polls/public-poll.tsx";
 import PollResultsPage from "./pages/polls/poll-results.tsx";
 import ExplorePage from "./pages/explore.tsx";
 import AuthCallbackPage from "./pages/auth-callback.tsx";
+import NotFoundPage from "./pages/not-found.tsx";
 import { AdminGuard } from "./components/auth/admin-guard";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Toaster />
     </>
