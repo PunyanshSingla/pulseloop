@@ -11,6 +11,7 @@ import confetti from "canvas-confetti";
 import { pollsApi } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/logo";
+import { toast } from "sonner";
 
 // Initialize voter ID early for API consistency
 if (typeof window !== "undefined") {
@@ -103,11 +104,24 @@ export default function PublicPollPage() {
     socket?.on("poll:updated", (updatedPoll) => {
       queryClient.setQueryData(["poll", id], { success: true, data: updatedPoll });
     });
+
+    socket?.on("poll:published", (updatedPoll) => {
+      queryClient.setQueryData(["poll", id], { success: true, data: updatedPoll });
+      toast.info("Results have been published!");
+    });
+
     return () => {
       socketClient.leavePoll(id);
       socket?.off("poll:updated");
+      socket?.off("poll:published");
     };
   }, [id, queryClient]);
+
+  useEffect(() => {
+    if (poll?.userHasVoted) {
+      setHasVoted(true);
+    }
+  }, [poll?.userHasVoted]);
 
   const handleOptionSelect = (optionId: string) => {
     if (!currentQuestion) return;
@@ -301,6 +315,11 @@ export default function PublicPollPage() {
         </div>
       </div>
     );
+  }
+
+  // If results are published, redirect to results page
+  if (poll.resultsPublished) {
+    return <Navigate to={`/vote/${id}/results`} replace />;
   }
 
   // Only redirect to sign-in if the poll specifically DISALLOWS anonymous voting

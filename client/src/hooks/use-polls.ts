@@ -165,3 +165,19 @@ export const usePollAnalytics = (id: string) => {
     enabled: !!id,
   });
 };
+
+export const usePublishResults = (id: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => pollsApi.publishResults(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["poll", id] });
+      queryClient.invalidateQueries({ queryKey: ["poll-analytics", id] });
+      toast.success("Results published successfully!");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to publish results");
+    },
+  });
+};

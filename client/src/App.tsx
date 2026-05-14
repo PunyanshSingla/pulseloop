@@ -10,6 +10,7 @@ import PollsPage from "./pages/polls.tsx";
 import CreatePollPage from "./pages/polls/create-poll.tsx";
 import PollDetailsPage from "./pages/polls/poll-details.tsx";
 import PublicPollPage from "./pages/polls/public-poll.tsx";
+import PollResultsPage from "./pages/polls/poll-results.tsx";
 import ExplorePage from "./pages/explore.tsx";
 import AuthCallbackPage from "./pages/auth-callback.tsx";
 import { AdminGuard } from "./components/auth/admin-guard";
@@ -30,6 +31,7 @@ export default function App() {
         
         {/* Public Voting Route */}
         <Route path="/vote/:id" element={<PublicPollPage />} />
+        <Route path="/vote/:id/results" element={<PollResultsPage />} />
         
         <Route path="/auth-callback" element={<AuthCallbackPage />} />
         <Route path="/sign-in" element={<SignInPage />} />

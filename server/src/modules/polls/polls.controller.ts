@@ -113,6 +113,23 @@ export class PollsController {
 
       console.log(`[Vote Attempt] Poll: ${poll.title}, User: ${userId || "Guest"}, Device: ${deviceInfo?.os}/${deviceInfo?.browser}`);
 
+      // 1. Check Poll Status
+      if (poll.status !== "active") {
+        res.status(403).json({ success: false, message: "This poll is not currently accepting responses." });
+        return;
+      }
+
+      // 2. Check Expiry
+      if (poll.expiresAt && new Date(poll.expiresAt) < new Date()) {
+        res.status(403).json({ success: false, message: "This poll has expired and is no longer accepting responses." });
+        return;
+      }
+
+      // 3. Check Authentication Mode
+      if (!userId && !poll.allowAnonymous) {
+        res.status(401).json({ success: false, message: "This poll requires authentication. Please log in to vote." });
+        return;
+      }
       if (!poll.allowMultipleSubmissions) {
         // Build a robust query to catch duplicates across all 3 layers
         const duplicateQuery: any = { pollId };
@@ -280,8 +297,38 @@ export class PollsController {
   async getAnalytics(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
+      const user = (req as any).user;
+
+      const poll = await Poll.findById(id);
+      if (!poll) throw new Error("Poll not found");
+
+      // Access granted if:
+      // 1. Results are published
+      // 2. User is the creator
+      const isOwner = user && poll.createdBy.toString() === user.id;
+      
+      if (!poll.resultsPublished && !isOwner) {
+        res.status(403).json({ success: false, message: "Unauthorized access to analytics" });
+        return;
+      }
+
       const analytics = await pollsService.getPollAnalytics(id as string);
       res.status(200).json({ success: true, data: analytics });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async publishResults(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const userId = (req as any).user.id;
+      const poll = await pollsService.publishResults(id as string, userId);
+
+      // Notify all connected clients in the poll room
+      socketService.emitToPoll(id as string, "poll:published", poll);
+
+      res.status(200).json({ success: true, data: poll });
     } catch (error) {
       next(error);
     }

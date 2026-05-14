@@ -43,7 +43,7 @@ import {
   Area,
   Legend
 } from "recharts";
-import { usePoll, useUpdatePoll, useDeletePoll, usePollResponses, usePollAnalytics } from "@/hooks/use-polls";
+import { usePoll, useUpdatePoll, useDeletePoll, usePollResponses, usePollAnalytics, usePublishResults } from "@/hooks/use-polls";
 
 const COLORS = ["#10b981", "#14b8a6", "#f59e0b", "#f97316", "#f43f5e", "#84cc16", "#0f766e"];
 
@@ -76,6 +76,7 @@ export default function PollDetailsPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const { data: responsesData, isLoading: isResponsesLoading } = usePollResponses(id!);
   const { data: analyticsResponse, isLoading: isAnalyticsLoading } = usePollAnalytics(id!);
+  const { mutate: publishResults, isPending: isPublishing } = usePublishResults(id!);
   
   if (!isAnalyticsLoading) {
     console.log(analyticsResponse, "response from poll details page");
@@ -130,11 +131,18 @@ export default function PollDetailsPage() {
     updatePoll({ status: nextStatus });
   };
 
+
   const handleDelete = () => {
     if (confirm("Are you sure you want to delete this poll? This action cannot be undone.")) {
-      deletePoll(poll._id, {
+      deletePoll(id!, {
         onSuccess: () => navigate("/polls")
       });
+    }
+  };
+
+  const handlePublish = () => {
+    if (confirm("Are you sure you want to publish the results? This will close the poll and make results public.")) {
+      publishResults();
     }
   };
 
@@ -180,6 +188,23 @@ export default function PollDetailsPage() {
                     Live Preview
                   </a>
                 </Button>
+                {!poll.resultsPublished ? (
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="gap-2 rounded-xl border-emerald-500/50 text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-500" 
+                    onClick={handlePublish}
+                    disabled={isPublishing}
+                  >
+                    <Globe className="size-4" />
+                    Publish Results
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 text-xs font-bold text-emerald-500">
+                    <ShieldCheck className="size-4" />
+                    Results Published
+                  </div>
+                )}
                 <button className="grid size-9 place-items-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground">
                   <MoreHorizontal className="size-5" />
                 </button>

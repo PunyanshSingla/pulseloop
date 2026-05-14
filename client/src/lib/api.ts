@@ -49,6 +49,7 @@ export const pollsApi = {
     }),
   getResponses: (pollId: string) => request(`/polls/${pollId}/responses`),
   getAnalytics: (pollId: string) => request(`/polls/${pollId}/analytics`),
+  publishResults: (id: string) => request(`/polls/${id}/publish`, { method: "POST" }),
 };
 
 export const analyticsApi = {

@@ -467,6 +467,17 @@ export class PollsService {
       }))
     };
   }
+
+  async publishResults(id: string, userId: string) {
+    const poll = await Poll.findOne({ _id: id, createdBy: userId });
+    if (!poll) throw new Error("Poll not found or unauthorized");
+
+    poll.resultsPublished = true;
+    poll.status = "closed"; // Automatically close the poll when results are published
+    await poll.save();
+
+    return poll;
+  }
 }
 
 export const pollsService = new PollsService();
