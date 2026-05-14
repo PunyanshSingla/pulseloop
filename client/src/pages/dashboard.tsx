@@ -55,25 +55,6 @@ export default function DashboardPage() {
                 </p>
                 <h2 className="mt-2 text-3xl font-extrabold tracking-tight">Performance at a glance</h2>
               </div>
-              <div className="flex items-center gap-4">
-                <Link
-                  to="/"
-                  className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  ← Back to landing
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
-                  onClick={async () => {
-                    await authClient.signOut();
-                    navigate("/sign-in");
-                  }}
-                >
-                  Sign Out
-                </Button>
-              </div>
             </div>
 
             <KPIs />

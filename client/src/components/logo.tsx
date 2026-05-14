@@ -1,10 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export function Logo({ className = "", iconOnly = false }: { className?: string, iconOnly?: boolean }) {
-  return (
-    <Link to={"/"} className='cursor-pointer'>
-      <div className={`flex items-center gap-3 group cursor-pointer ${className}`}>
+export function Logo({ className = "", iconOnly = false, noLink = false }: { className?: string, iconOnly?: boolean, noLink?: boolean }) {
+  const content = (
+    <div className={`flex items-center gap-3 group cursor-pointer ${className}`}>
         {/* Icon Container */}
         <div className="relative w-10 h-10 flex items-center justify-center">
           {/* Glow behind the icon */}
@@ -71,6 +70,13 @@ export function Logo({ className = "", iconOnly = false }: { className?: string,
         }
       `}} />
       </div>
+  );
+
+  if (noLink) return content;
+
+  return (
+    <Link to="/" className="cursor-pointer">
+      {content}
     </Link>
   );
 }
