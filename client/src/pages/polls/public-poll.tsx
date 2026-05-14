@@ -12,6 +12,7 @@ import { pollsApi } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/logo";
 import { toast } from "sonner";
+import { PageLoader } from "@/components/ui/page-loader";
 
 // Initialize voter ID early for API consistency
 if (typeof window !== "undefined") {

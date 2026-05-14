@@ -2,6 +2,7 @@ import { Router } from "express";
 import { pollsController } from "./polls.controller";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 import { optionalAuthMiddleware } from "../../middlewares/optional-auth.middleware";
+import { voteRateLimit, createPollRateLimit } from "../../middlewares/rate-limit.middleware";
 
 const router = Router();
 
@@ -11,8 +12,8 @@ router.get("/:id", optionalAuthMiddleware, pollsController.getById);
 router.post("/:id/view", optionalAuthMiddleware, pollsController.trackView);
 
 // Protected routes
-router.post("/", authMiddleware, pollsController.create);
-router.post("/:id/vote", optionalAuthMiddleware, pollsController.vote);
+router.post("/", authMiddleware, createPollRateLimit, pollsController.create);
+router.post("/:id/vote", optionalAuthMiddleware, voteRateLimit, pollsController.vote);
 router.patch("/:id", authMiddleware, pollsController.update);
 router.delete("/:id", authMiddleware, pollsController.delete);
 router.get("/:id/responses", authMiddleware, pollsController.getResponses);

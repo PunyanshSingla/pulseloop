@@ -1,11 +1,4 @@
-import { useParams, Link } from "react-router-dom";
-import { usePoll, useVote } from "@/hooks/use-polls";
-import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, Loader2, BarChart2, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { PageLoader } from "@/components/ui/page-loader";
 
 export default function ViewPollPage() {
   const { id } = useParams<{ id: string }>();
@@ -23,16 +16,7 @@ export default function ViewPollPage() {
   }, [isSuccess]);
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#f8fafc]">
-        <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="size-12 rounded-full border-4 border-primary border-t-transparent"
-        />
-        <p className="mt-4 text-sm font-bold text-muted-foreground uppercase tracking-widest">Loading Poll Experience...</p>
-      </div>
-    );
+    return <PageLoader message="Loading Poll Experience..." />;
   }
 
   const poll = response?.data;

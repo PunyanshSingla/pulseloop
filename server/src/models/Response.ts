@@ -93,9 +93,21 @@ const responseSchema = new Schema<IResponse>(
   }
 );
 
-// Indexes for performance
+// Indexes for performance and data integrity
 responseSchema.index({ pollId: 1, createdAt: -1 });
 responseSchema.index({ respondentId: 1 });
+
+// Unique indexes to prevent duplicate votes per question
+// Using sparse to allow nulls if needed, though pollId and questionId are required
+responseSchema.index(
+  { pollId: 1, questionId: 1, respondentId: 1 }, 
+  { unique: true, partialFilterExpression: { respondentId: { $type: "objectId" } } }
+);
+
+responseSchema.index(
+  { pollId: 1, questionId: 1, voterId: 1 }, 
+  { unique: true, partialFilterExpression: { voterId: { $type: "string" } } }
+);
 
 const Response =
   mongoose.models.Response ||

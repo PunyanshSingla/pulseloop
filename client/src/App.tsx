@@ -16,6 +16,7 @@ import AuthCallbackPage from "./pages/auth-callback.tsx";
 import NotFoundPage from "./pages/not-found.tsx";
 import SettingsPage from "./pages/settings.tsx";
 import { AdminGuard } from "./components/auth/admin-guard";
+import { AuthGuard } from "./components/auth/auth-guard";
 import { Toaster } from "@/components/ui/sonner";
 
 export default function App() {
@@ -25,13 +26,13 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/explore" element={<ExplorePage />} />
         
-        {/* Admin Routes */}
-        <Route path="/dashboard" element={<AdminGuard><DashboardPage /></AdminGuard>} />
-        <Route path="/polls" element={<AdminGuard><PollsPage /></AdminGuard>} />
-        <Route path="/polls/create" element={<AdminGuard><CreatePollPage /></AdminGuard>} />
-        <Route path="/polls/:id/edit" element={<AdminGuard><CreatePollPage /></AdminGuard>} />
-        <Route path="/polls/:id" element={<AdminGuard><PollDetailsPage /></AdminGuard>} />
-        <Route path="/settings" element={<AdminGuard><SettingsPage /></AdminGuard>} />
+        {/* Protected User Routes */}
+        <Route path="/dashboard" element={<AuthGuard><DashboardPage /></AuthGuard>} />
+        <Route path="/polls" element={<AuthGuard><PollsPage /></AuthGuard>} />
+        <Route path="/polls/create" element={<AuthGuard><CreatePollPage /></AuthGuard>} />
+        <Route path="/polls/:id/edit" element={<AuthGuard><CreatePollPage /></AuthGuard>} />
+        <Route path="/polls/:id" element={<AuthGuard><PollDetailsPage /></AuthGuard>} />
+        <Route path="/settings" element={<AuthGuard><SettingsPage /></AuthGuard>} />
         
         {/* Public Voting Route */}
         <Route path="/vote/:id" element={<PublicPollPage />} />
