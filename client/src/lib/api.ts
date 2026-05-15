@@ -78,3 +78,11 @@ export const mediaApi = {
 export const usersApi = {
   getMe: () => request<{ success: boolean, data: unknown }>("/user/me"),
 };
+
+export const aiApi = {
+  generatePoll: (prompt: string) => 
+    request<{ success: boolean, data: any }>("/ai/generate", { 
+      method: "POST", 
+      body: JSON.stringify({ prompt }) 
+    }),
+};

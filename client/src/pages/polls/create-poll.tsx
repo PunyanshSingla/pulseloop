@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import { useCreatePoll, useUpdatePoll, usePoll } from "@/hooks/use-polls";
 import { motion, AnimatePresence } from "framer-motion";
+import { aiApi } from "@/lib/api";
 
 export default function CreatePollPage() {
   const { id } = useParams<{ id: string }>();
@@ -45,6 +46,10 @@ export default function CreatePollPage() {
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [aiPrompt, setAIPrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [aiMode, setAIMode] = useState<"replace" | "append">("replace");
 
   useEffect(() => {
     if (isEditing && pollData && !isInitialized) {
@@ -95,6 +100,50 @@ export default function CreatePollPage() {
   const removeQuestion = (id: number) => {
     if (questions.length > 1) {
       setQuestions(questions.filter(q => q.id !== id));
+    }
+  };
+
+  const handleAIGenerate = async () => {
+    if (!aiPrompt.trim()) return toast.error("Please enter a topic for the AI.");
+    
+    setIsGenerating(true);
+    try {
+      const response = await aiApi.generatePoll(aiPrompt);
+      if (response.success && response.data) {
+        const { title: aiTitle, description: aiDesc, questions: aiQuestions } = response.data;
+
+        const mappedQuestions = aiQuestions.map((q: any, idx: number) => ({
+          id: Date.now() + idx,
+          text: q.text,
+          isMandatory: q.isMandatory,
+          options: q.options
+        }));
+
+        if (aiMode === "append") {
+          const combinedQuestions = [...questions, ...mappedQuestions];
+          if (combinedQuestions.length > 10) {
+            toast.error("Adding these questions would exceed the 10-question limit.");
+            return;
+          }
+          setQuestions(combinedQuestions);
+          setActiveQuestionIndex(Math.max(0, combinedQuestions.length - mappedQuestions.length));
+          toast.success("New AI questions added. Review and edit as needed.");
+        } else {
+          setTitle(aiTitle);
+          setDescription(aiDesc);
+          setQuestions(mappedQuestions);
+          setActiveQuestionIndex(0);
+          toast.success("Poll generated successfully! Feel free to edit it.");
+        }
+
+        setIsAIModalOpen(false);
+        setAIPrompt("");
+        setAIMode("replace");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to generate poll with AI.");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -205,9 +254,23 @@ export default function CreatePollPage() {
             <div className="flex flex-col gap-8 lg:flex-row">
               {/* Form Side */}
               <div className="flex-1 min-w-0 space-y-6">
-                <div className="space-y-1">
-                  <h1 className="text-xl md:text-2xl font-black tracking-tight">Design your Poll</h1>
-                  <p className="text-sm text-muted-foreground">Configure your questions in the interactive slider below.</p>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="space-y-1">
+                    <h1 className="text-xl md:text-2xl font-black tracking-tight">Design your Poll</h1>
+                    <p className="text-sm text-muted-foreground">Configure your questions in the interactive slider below.</p>
+                  </div>
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={() => {
+                      setAIMode("replace");
+                      setIsAIModalOpen(true);
+                    }}
+                    className="gap-2 rounded-xl border-primary/20 bg-primary/5 text-primary font-bold hover:bg-primary/10"
+                  >
+                    <Sparkles className="size-4" />
+                    Generate with AI
+                  </Button>
                 </div>
 
                 {/* Title & Description Section */}
@@ -477,6 +540,106 @@ export default function CreatePollPage() {
           </div>
         </main>
       </div>
+      {/* AI Generation Modal */}
+      <AnimatePresence>
+        {isAIModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isGenerating && setIsAIModalOpen(false)}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+            >
+              <div className="p-8">
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                    <Sparkles className="size-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold tracking-tight">Generate with Gemini AI</h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Enter a topic and our AI will draft a complete poll for you.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="ai-prompt" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Poll Topic or Description</Label>
+                    <textarea 
+                      id="ai-prompt"
+                      placeholder="e.g. Employee satisfaction survey for a tech company, or A fun poll about favorite summer vacation spots..."
+                      className="min-h-[120px] w-full rounded-xl border border-border bg-muted/30 p-4 text-sm outline-none ring-primary/10 transition-all focus:border-primary/50 focus:ring-4"
+                      value={aiPrompt}
+                      onChange={(e) => setAIPrompt(e.target.value)}
+                      disabled={isGenerating}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Generation Mode</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        type="button"
+                        variant={aiMode === "replace" ? "default" : "outline"}
+                        className="rounded-xl"
+                        onClick={() => setAIMode("replace")}
+                        disabled={isGenerating}
+                      >
+                        Replace Poll
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={aiMode === "append" ? "default" : "outline"}
+                        className="rounded-xl"
+                        onClick={() => setAIMode("append")}
+                        disabled={isGenerating}
+                      >
+                        Add Questions
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3 pt-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1 rounded-xl"
+                      onClick={() => setIsAIModalOpen(false)}
+                      disabled={isGenerating}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      className="flex-1 rounded-xl font-bold gap-2"
+                      onClick={handleAIGenerate}
+                      disabled={isGenerating || !aiPrompt.trim()}
+                    >
+                      {isGenerating ? (
+                        <>
+                          <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="size-4" />
+                          {aiMode === "append" ? "Add Questions" : "Generate Poll"}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

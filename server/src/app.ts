@@ -8,6 +8,7 @@ import pollRoutes from "./modules/polls/polls.routes";
 import analyticsRoutes from "./modules/analytics/analytics.routes";
 import mediaRoutes from "./modules/media/media.routes";
 import usersRoutes from "./modules/users/users.routes";
+import aiRoutes from "./modules/ai/ai.routes";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use("/api/polls", pollRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/user", usersRoutes);
+app.use("/api/ai", aiRoutes);
 
 app.get("/api/health", (_, res) => {
   res.status(200).json({
