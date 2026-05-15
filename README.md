@@ -1,99 +1,110 @@
 # PulseLoop 🚀
 
-PulseLoop is a high-performance, real-time poll and feedback platform built for the modern web. It allows creators to build engaging polls with granular control over privacy, mandatory questions, and expiry timing, while providing deep analytical insights through a live dashboard.
+PulseLoop is a premium, real-time polling and analytics platform designed for high engagement and deep data insights. It features a sophisticated dashboard, AI-driven poll generation, and robust response tracking for both anonymous and authenticated users.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Dynamic Poll Builder**: Create multi-question polls with single-option selections.
-- **Mandatory & Optional Questions**: Toggle requirements for each question individually.
-- **Smart Privacy Modes**: Support for both **Anonymous** and **Authenticated** responses.
-- **Expiry System**: Set start and end times for polls with automatic enforcement.
-- **Real-Time Analytics Dashboard**:
-  - **Live Pulse**: Instant updates via WebSockets (Socket.io) when votes are cast.
-  - **Demographics**: Breakdown by Device, Browser, OS, and Geographic location.
-  - **Engagement Metrics**: Completion rates and average time taken.
-  - **Identity Analysis**: Stacked breakdown of guest vs. registered user activity.
-- **Public Results Publishing**: Creators can choose to publish final results, making them visible to the public via the same poll link.
-- **Beautiful UI/UX**: Crafted with Tailwind CSS, Framer Motion, and Recharts for a premium feel.
+### 📊 Advanced Analytics Dashboard
+- **Real-Time KPIs**: Live tracking of Total Responses, Active Polls, Completion Rates, and Avg. Time Taken with period-over-period growth metrics.
+- **Engagement Charts**: Interactive "Responses Over Time" stacked area charts showing participation trends.
+- **User Breakdown**: Visual pie charts differentiating between **Logged-in** and **Anonymous** participants.
+- **Platform Analytics**: Granular distribution data for Devices, Browsers, and Operating Systems.
+- **Live Activity Feed**: A real-time stream of platform events using WebSockets.
+- **Top Poll Spotlight**: Automatic identification and performance highlighting of trending polls.
 
-## 🛠️ Tech Stack
+### 📝 Dynamic Poll Ecosystem
+- **Multi-Question Builder**: Create complex polls with multiple questions in a single flow.
+- **Smart Validation**: Individual "Mandatory" toggles for every question to ensure critical data collection.
+- **Expiry & Scheduling**: Precise control over poll start/end times with automatic status transitions (Running, Scheduled, Ended).
+- **Privacy Controls**: Toggle between Public/Private visibility and enable/disable Anonymous participation.
+- **Public Results**: One-click publishing to share live analytics with the public via dedicated URLs.
 
-- **Frontend**: React, Vite, TanStack Query, Framer Motion, Lucide React, Recharts, Tailwind CSS.
-- **Backend**: Node.js, Express, MongoDB (Mongoose).
-- **Real-Time**: Socket.io.
-- **Auth**: Custom Auth with session-based tracking and browser fingerprinting for guest users.
+### 🗳️ Premium Voting Experience
+- **Step-by-Step Flow**: A focused, distraction-free voting interface with a real-time progress indicator.
+- **Universal Participation**: Seamless voting for guest users via **Unique Voter Identification** to prevent duplicate votes without requiring login.
+- **Interactive Feedback**: Smooth animations using Framer Motion and celebration effects (Confetti) upon submission.
+- **Live Updates**: Results pages update instantly as new votes are cast without requiring a refresh.
 
-## 🚀 Getting Started
+### 🤖 AI-Powered Capabilities
+- **Gemini AI Integration**: Generate professional-grade polls, questions, and balanced options from a single prompt.
+- **Structured Generation**: Context-aware content generation to speed up the creation process.
 
-### Prerequisites
+### 🔐 Security & Identity
+- **Better-Auth Integration**: Secure session management with multi-provider support.
+- **Social Login**: Full support for **Google OAuth** for quick onboarding.
+- **Account Management**: Profile customization with Cloudinary-backed avatar uploads and secure password reset flows.
+- **Email Verification**: Built-in verification flow to ensure high-quality user accounts.
 
-- Node.js (v18+)
-- MongoDB (Running locally or MongoDB Atlas)
+## 🛠️ Technology Stack
 
-### Setup
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | React, Vite, TanStack Query, Framer Motion, Recharts, shadcn/ui, Tailwind CSS (v4) |
+| **Backend** | Node.js, Express, MongoDB (Mongoose), Socket.io |
+| **Auth** | Better-Auth (MongoDB Adapter), Google OAuth |
+| **Services** | Resend (Email), Cloudinary (Media), Google Gemini AI (AI SDK) |
+| **Validation** | Zod (End-to-end schema validation) |
 
-1. **Clone the repository**
-   ```bash
-   git clone <repo-url>
-   cd pulseloop
-   ```
+## 🚀 Installation & Setup
 
-2. **Install Dependencies**
-   ```bash
-   # Root
-   npm install
-   
-   # Client
-   cd client && npm install
-   
-   # Server
-   cd ../server && npm install
-   ```
+### 1. Prerequisites
+- Node.js v18+
+- MongoDB instance (Local or Atlas)
+- pnpm (Recommended)
 
-3. **Environment Variables**
-   
-   Create a `.env` in the `server` directory:
-   ```env
-   PORT=5000
-   MONGODB_URI=mongodb://localhost:27017/pulseloop
-   JWT_SECRET=your_secret_here
-   CLIENT_URL=http://localhost:5173
-   ```
+### 2. Project Initialization
+```bash
+# Clone the repository
+git clone <repo-url>
+cd pulseloop
 
-   Create a `.env` in the `client` directory:
-   ```env
-   VITE_API_BASE_URL=http://localhost:5000/api
-   VITE_SOCKET_URL=http://localhost:5000
-   VITE_APP_ORIGIN=http://localhost:5173
-   ```
+# Setup Client
+cd client && pnpm install
 
-4. **Run Development Servers**
+# Setup Server
+cd ../server && pnpm install
+```
 
-   ```bash
-   # Server (from /server)
-   npm run dev
-   
-   # Client (from /client)
-   npm run dev
-   ```
+### 3. Environment Configuration
+**Server (.env)**:
+```env
+PORT=5000
+NODE_ENV=development
+CLIENT_URL=http://localhost:5173
+MONGODB_URI=your_mongodb_uri
+DATABASE_NAME=pulseloop
 
-## 📜 Hackathon Requirements Completion
+# Better-Auth
+BETTER_AUTH_URL=http://localhost:5000
+BETTER_AUTH_SECRET=your_secret
 
-| Requirement | Status | Implementation Details |
-| :--- | :--- | :--- |
-| **Poll Creation** | ✅ Complete | Multi-question support with drag-and-drop ordering. |
-| **Mandatory Questions** | ✅ Complete | Enforced on both frontend (UI blocks) and backend (API validation). |
-| **Anonymous/Auth Modes** | ✅ Complete | Creators can toggle `allowAnonymous`. Backend validates identity requirements. |
-| **Expiry System** | ✅ Complete | Automatic blocking of responses after `expiresAt`. Countdown timer for pending polls. |
-| **Real-time Updates** | ✅ Complete | Live charts and KPI updates using Socket.io rooms. |
-| **Public Results** | ✅ Complete | One-click "Publish Results" feature that converts voting links to insights views. |
-| **Fullstack Implementation** | ✅ Complete | Integrated Express API + React Single Page Application. |
+# Social & AI
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_GENERATIVE_AI_API_KEY=...
 
-## 🛡️ Security & Integrity
+# Email & Media
+RESEND_API_KEY=...
+EMAIL_FROM=...
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+```
 
-- **Fingerprinting**: Prevents duplicate votes from anonymous users using multi-layered browser fingerprinting + IP tracking.
-- **Zod Validation**: Strict schema validation for all API inputs.
-- **Protected Routes**: Secure dashboard and analytics accessible only to authenticated creators.
+**Client (.env)**:
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+VITE_APP_ORIGIN=http://localhost:5173
+```
+
+### 4. Running the Project
+```bash
+# Run Backend (from /server)
+pnpm run dev
+
+# Run Frontend (from /client)
+pnpm run dev
+```
 
 ---
-Built with ❤️ for the Hackathon.
+Built with ❤️ by Punyansh Singla
