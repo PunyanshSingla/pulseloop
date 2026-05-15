@@ -3,7 +3,7 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { env } from "./env.js";
 import { sendResetPasswordEmail, sendVerificationEmail } from "../shared/email/email.service.js";
 import { getClient } from "./db.js";
-const db =  await getClient()
+const db = await getClient()
 if (!db) throw new Error("MongoDB connection not found");
 export const auth = betterAuth({
     database: mongodbAdapter(db),
@@ -14,6 +14,14 @@ export const auth = betterAuth({
     account: {
         storeStateStrategy: "cookie",
     },
+    advanced: {
+        useSecureCookies: true,
+        defaultCookieAttributes: {
+            sameSite: "none",
+            secure: true,
+        },
+    },
+
     baseURL: env.BETTER_AUTH_URL,
     trustedOrigins: [
         env.CLIENT_URL
