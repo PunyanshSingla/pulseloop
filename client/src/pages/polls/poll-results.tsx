@@ -19,7 +19,7 @@ import {
   Pie, 
   Cell 
 } from "recharts";
-import type { Poll, Analytics } from "@/types/polls";
+import type { Poll } from "@/types/polls";
 
 export default function PollResultsPage() {
   const { id } = useParams<{ id: string }>();
