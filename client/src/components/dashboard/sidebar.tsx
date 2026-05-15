@@ -1,7 +1,8 @@
-import { LayoutGrid, BarChart3, Settings, LogOut, History } from "lucide-react";
+import { LayoutGrid, BarChart3, Settings, LogOut, History, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { authClient } from "@/lib/auth-client";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface SidebarProps {
   user?: {
@@ -9,9 +10,11 @@ interface SidebarProps {
     email: string;
     image?: string | null;
   };
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export function Sidebar({ user }: SidebarProps) {
+export function Sidebar({ user, isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const nav = [
@@ -30,62 +33,87 @@ export function Sidebar({ user }: SidebarProps) {
     : "??";
 
   return (
-    <aside className="hidden w-64 shrink-0 h-screen sticky top-0 flex-col border-r border-border bg-background/50 lg:flex">
-      <div className="flex h-16 items-center gap-2 border-b border-border px-6">
-        <Logo className="scale-75 origin-left" noLink />
-      </div>
+    <>
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
+          />
+        )}
+      </AnimatePresence>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-6">
-        <p className="px-3 pb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
-          Workspace
-        </p>
-        <ul className="space-y-1">
-          {nav.map((n) => {
-            const isActive = location.pathname === n.href;
-            return (
-              <li key={n.label}>
-                <Link
-                  to={n.href}
-                  className={`flex w-full items-center gap-3.5 rounded-lg px-3.5 py-2.5 text-base font-semibold transition-colors ${
-                    isActive
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-                >
-                  <n.icon className="size-5" />
-                  {n.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-
-      <div className="border-t border-border p-5 bg-background space-y-4">
-        <div className="flex items-center gap-3.5">
-          {user?.image ? (
-            <img src={user.image} alt={user.name} className="size-10 rounded-full object-cover ring-2 ring-primary/20" />
-          ) : (
-            <div className="grid size-10 place-items-center rounded-full bg-gradient-to-br from-primary to-primary/60 text-sm font-bold text-primary-foreground">
-              {initials}
-            </div>
-          )}
-          <div className="min-w-0">
-            <p className="truncate text-base font-bold">{user?.name || "Anonymous"}</p>
-            <p className="truncate text-sm text-muted-foreground font-medium">{user?.email || "No email"}</p>
-          </div>
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-72 flex-col border-r border-border bg-background transition-transform duration-300 lg:sticky lg:top-0 lg:z-0 lg:flex lg:h-screen lg:w-64 lg:translate-x-0
+        ${isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"}
+      `}>
+        <div className="flex h-16 items-center justify-between border-b border-border px-6">
+          <Logo className="scale-75 origin-left" noLink />
+          <button 
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
+          >
+            <X className="size-5" />
+          </button>
         </div>
-        <button 
-          onClick={async () => {
-            await authClient.signOut();
-            navigate("/sign-in");
-          }}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/10"
-        >
-          <LogOut className="size-4" />
-          Sign out
-        </button>
-      </div>
-    </aside>
+
+        <nav className="flex-1 overflow-y-auto px-3 py-6">
+          <p className="px-3 pb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
+            Workspace
+          </p>
+          <ul className="space-y-1">
+            {nav.map((n) => {
+              const isActive = location.pathname === n.href;
+              return (
+                <li key={n.label}>
+                  <Link
+                    to={n.href}
+                    onClick={onClose}
+                    className={`flex w-full items-center gap-3.5 rounded-lg px-3.5 py-2.5 text-base font-semibold transition-colors ${
+                      isActive
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                  >
+                    <n.icon className="size-5" />
+                    {n.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        <div className="border-t border-border p-5 bg-background space-y-4">
+          <div className="flex items-center gap-3.5">
+            {user?.image ? (
+              <img src={user.image} alt={user.name} className="size-10 rounded-full object-cover ring-2 ring-primary/20" />
+            ) : (
+              <div className="grid size-10 place-items-center rounded-full bg-gradient-to-br from-primary to-primary/60 text-sm font-bold text-primary-foreground">
+                {initials}
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="truncate text-base font-bold">{user?.name || "Anonymous"}</p>
+              <p className="truncate text-sm text-muted-foreground font-medium">{user?.email || "No email"}</p>
+            </div>
+          </div>
+          <button 
+            onClick={async () => {
+              await authClient.signOut();
+              navigate("/sign-in");
+            }}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/10"
+          >
+            <LogOut className="size-4" />
+            Sign out
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

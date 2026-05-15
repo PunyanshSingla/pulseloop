@@ -1,5 +1,6 @@
 import { authClient } from "@/lib/auth-client";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
@@ -13,6 +14,7 @@ import { ActivityFeed } from "@/components/dashboard/activity-feed";
 export default function DashboardPage() {
   const { data: session, isPending } = authClient.useSession();
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   if (isPending) {
     return (
@@ -40,11 +42,11 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar user={session.user} />
+    <div className="flex min-h-screen bg-background relative overflow-x-hidden">
+      <Sidebar user={session.user} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar userName={session.user.name} />
+      <div className="flex min-w-0 flex-1 flex-col w-full">
+        <Topbar userName={session.user.name} onMenuClick={() => setIsSidebarOpen(true)} />
         
         <main className="flex-1 px-6 py-6 overflow-y-auto">
           <div className="mx-auto max-w-7xl space-y-6">

@@ -10,9 +10,12 @@ import {
   Clock,
   LayoutGrid,
   List,
-  Sparkles
+  Sparkles,
+  Menu,
+  X
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
@@ -23,6 +26,18 @@ export default function ExplorePage() {
   const { data: pollsResponse, isLoading } = usePublicPolls();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when window is resized to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const polls = pollsResponse?.data || [];
   const filteredPolls = polls.filter((poll: Poll) => 
@@ -51,7 +66,7 @@ export default function ExplorePage() {
       <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 items-center justify-between px-6 max-w-7xl">
           <Logo />
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             {session ? (
               <Button asChild variant="ghost" className="text-sm font-medium">
                 <Link to="/dashboard">Dashboard</Link>
@@ -67,7 +82,62 @@ export default function ExplorePage() {
               </Link>
             </Button>
           </div>
+          
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none"
+            >
+              {isMobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="border-b border-border bg-background md:hidden"
+            >
+              <div className="space-y-1 px-4 py-6">
+                <Link
+                  to="/"
+                  className="block rounded-lg px-3 py-4 text-base font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                  Home
+                </Link>
+                <div className="pt-4 border-t border-border mt-4 flex flex-col gap-3">
+                  {session ? (
+                    <Link
+                      to="/dashboard"
+                      className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-medium text-primary-foreground shadow-sm"
+                    >
+                      Dashboard
+                    </Link>
+                  ) : (
+                    <>
+                      <Link
+                        to="/sign-in"
+                        className="flex w-full items-center justify-center rounded-lg px-4 py-3 text-base font-medium text-foreground ring-1 ring-border"
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        to="/sign-up"
+                        className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-medium text-primary-foreground shadow-sm"
+                      >
+                        Get Started
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       <main className="mx-auto px-6 py-12 max-w-7xl">
@@ -90,8 +160,8 @@ export default function ExplorePage() {
         </div>
 
         {/* Search and Controls */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-card p-4 rounded-2xl shadow-sm border border-border">
-          <div className="relative flex-1 max-w-lg">
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-card p-4 rounded-2xl shadow-sm border border-border">
+          <div className="relative flex-1 w-full md:max-w-lg">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
             <input
               type="text"
@@ -101,7 +171,7 @@ export default function ExplorePage() {
               className="w-full h-11 bg-muted/50 border border-border/50 rounded-xl pl-11 pr-4 text-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none"
             />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-end gap-3">
             <div className="flex items-center rounded-lg border border-border bg-background p-1">
               <button
                 onClick={() => setViewMode("cards")}

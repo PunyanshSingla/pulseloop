@@ -34,6 +34,7 @@ export default function VotedPollsPage() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const isPending = isSessionPending || isPollsLoading;
   const polls = pollsResponse?.data || [];
@@ -54,10 +55,10 @@ export default function VotedPollsPage() {
 
   if (pollsError) {
     return (
-      <div className="flex min-h-screen bg-background">
-        <Sidebar user={session.user} />
-        <div className="flex flex-1 flex-col">
-          <Topbar userName={session.user.name} />
+      <div className="flex min-h-screen bg-background relative overflow-x-hidden">
+        <Sidebar user={session.user} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <div className="flex flex-1 flex-col w-full">
+          <Topbar userName={session.user.name} onMenuClick={() => setIsSidebarOpen(true)} />
           <div className="flex flex-1 items-center justify-center">
             <div className="text-center">
               <div className="grid size-12 place-items-center rounded-full bg-destructive/10 text-destructive mx-auto mb-4">
@@ -76,11 +77,11 @@ export default function VotedPollsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar user={session.user} />
+    <div className="flex min-h-screen bg-background relative overflow-x-hidden">
+      <Sidebar user={session.user} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar userName={session.user.name} />
+      <div className="flex min-w-0 flex-1 flex-col w-full">
+        <Topbar userName={session.user.name} onMenuClick={() => setIsSidebarOpen(true)} />
         
         <main className="flex-1 px-6 py-6 overflow-y-auto">
           <div className="mx-auto max-w-7xl space-y-6">

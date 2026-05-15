@@ -13,10 +13,25 @@ import {
 import Logo from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { authClient } from "@/lib/auth-client";
+import { useState, useEffect } from "react";
+import { Menu, X } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
 
 // ─── Nav ───────────────────────────────────────────────────────────────────────
 function Nav() {
   const { data: session } = authClient.useSession();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when window is resized to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
@@ -34,14 +49,16 @@ function Nav() {
             <>
               <Link
                 to="/sign-in"
-                className="hidden rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+                className="hidden rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground md:inline-flex"
               >
                 Sign in
               </Link>
-              <ThemeToggle />
+              <div className="hidden sm:block">
+                <ThemeToggle />
+              </div>
               <Link
                 to="/sign-up"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm ring-1 ring-primary/30 transition-all hover:brightness-110"
+                className="hidden items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm ring-1 ring-primary/30 transition-all hover:brightness-110 sm:inline-flex"
               >
                 Get started
                 <ArrowRight className="size-3.5" />
@@ -49,18 +66,96 @@ function Nav() {
             </>
           ) : (
             <>
-              <ThemeToggle />
+              <div className="hidden sm:block">
+                <ThemeToggle />
+              </div>
               <Link
                 to="/dashboard"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm ring-1 ring-primary/30 transition-all hover:brightness-110"
+                className="hidden items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm ring-1 ring-primary/30 transition-all hover:brightness-110 sm:inline-flex"
               >
                 Dashboard
                 <ArrowRight className="size-3.5" />
               </Link>
             </>
           )}
+          
+          <div className="flex items-center gap-2 md:hidden">
+            <ThemeToggle />
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none"
+              aria-expanded={isMobileMenuOpen}
+            >
+              <span className="sr-only">Open main menu</span>
+              {isMobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="border-b border-border bg-background md:hidden"
+          >
+            <div className="space-y-1 px-4 py-6">
+              <a
+                href="#product"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block rounded-lg px-3 py-4 text-base font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                Product
+              </a>
+              <a
+                href="#how"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block rounded-lg px-3 py-4 text-base font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                How it works
+              </a>
+              <Link
+                to="/explore"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block rounded-lg px-3 py-4 text-base font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                Explore
+              </Link>
+              <div className="pt-4 border-t border-border mt-4 flex flex-col gap-3">
+                {!session ? (
+                  <>
+                    <Link
+                      to="/sign-in"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex w-full items-center justify-center rounded-lg px-4 py-3 text-base font-medium text-foreground ring-1 ring-border"
+                    >
+                      Sign in
+                    </Link>
+                    <Link
+                      to="/sign-up"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-medium text-primary-foreground shadow-sm"
+                    >
+                      Get started
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-medium text-primary-foreground shadow-sm"
+                  >
+                    Dashboard
+                  </Link>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

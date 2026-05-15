@@ -44,6 +44,7 @@ export default function CreatePollPage() {
   const [startsAt, setStartsAt] = useState<string>("");
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (isEditing && pollData && !isInitialized) {
@@ -187,11 +188,11 @@ export default function CreatePollPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
-      <Sidebar user={session.user} />
+    <div className="flex min-h-screen bg-background text-foreground relative overflow-x-hidden">
+      <Sidebar user={session.user} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar userName={session.user.name} />
+      <div className="flex min-w-0 flex-1 flex-col w-full">
+        <Topbar userName={session.user.name} onMenuClick={() => setIsSidebarOpen(true)} />
         
         <main className="flex-1 px-6 py-6 overflow-y-auto">
           <div className="mx-auto max-w-4xl">
@@ -205,18 +206,18 @@ export default function CreatePollPage() {
               {/* Form Side */}
               <div className="flex-1 min-w-0 space-y-6">
                 <div className="space-y-1">
-                  <h1 className="text-2xl font-black tracking-tight">Design your Poll</h1>
+                  <h1 className="text-xl md:text-2xl font-black tracking-tight">Design your Poll</h1>
                   <p className="text-sm text-muted-foreground">Configure your questions in the interactive slider below.</p>
                 </div>
 
                 {/* Title & Description Section */}
-                <div className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
+                <div className="space-y-4 rounded-2xl border border-border bg-card p-4 md:p-6 shadow-sm">
                   <div className="space-y-2">
                     <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest text-primary">Poll Title</Label>
                     <Input 
                       id="title" 
                       placeholder="e.g. Product Discovery Survey" 
-                      className="h-12 bg-muted/30 border-border font-bold text-lg focus:ring-primary/20 rounded-xl"
+                      className="h-12 bg-muted/30 border-border font-bold text-base md:text-lg focus:ring-primary/20 rounded-xl"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                     />
@@ -271,7 +272,7 @@ export default function CreatePollPage() {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2 }}
-                      className="relative space-y-6 rounded-3xl border border-border bg-card p-8 shadow-md"
+                      className="relative space-y-6 rounded-3xl border border-border bg-card p-5 md:p-8 shadow-md"
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-4">
@@ -310,7 +311,7 @@ export default function CreatePollPage() {
                           <Label className="text-xs font-black uppercase tracking-widest text-slate-400">The Question</Label>
                           <Input 
                             placeholder="Type your question here..." 
-                            className="h-14 bg-muted/20 border-border text-lg font-bold rounded-2xl px-6 focus:bg-background transition-all"
+                            className="h-12 md:h-14 bg-muted/20 border-border text-base md:text-lg font-bold rounded-2xl px-4 md:px-6 focus:bg-background transition-all"
                             value={questions[activeQuestionIndex].text}
                             onChange={(e) => handleQuestionChange(questions[activeQuestionIndex].id, e.target.value)}
                           />

@@ -19,6 +19,7 @@ export default function SettingsPage() {
   const [userData, setUserData] = useState<{ hasPassword?: boolean } | null>(null);
   const [isUserPending, setIsUserPending] = useState(true);
   const [isProfileInitialized, setIsProfileInitialized] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -136,27 +137,27 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar user={session?.user} />
-      <div className="flex flex-1 flex-col">
-        <Topbar userName={session?.user?.name} />
-        <main className="flex-1 px-6 py-10 overflow-y-auto">
-          <div className="mx-auto max-w-4xl space-y-12">
+    <div className="flex min-h-screen bg-background relative overflow-x-hidden">
+      <Sidebar user={session?.user} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <div className="flex flex-1 flex-col w-full">
+        <Topbar userName={session?.user?.name} onMenuClick={() => setIsSidebarOpen(true)} />
+        <main className="flex-1 px-4 md:px-6 py-6 md:py-10 overflow-y-auto">
+          <div className="mx-auto max-w-4xl space-y-8 md:space-y-12">
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight">Settings</h1>
-              <p className="text-muted-foreground mt-2">Manage your account details and security preferences.</p>
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Settings</h1>
+              <p className="text-sm md:text-base text-muted-foreground mt-2">Manage your account details and security preferences.</p>
             </div>
 
             <div className="grid gap-12 lg:grid-cols-1">
               {/* Profile Information Section */}
-              <section className="rounded-2xl border border-border bg-card p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-8 border-b border-border pb-6">
-                  <div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
+              <section className="rounded-2xl border border-border bg-card p-4 md:p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6 md:mb-8 border-b border-border pb-6">
+                  <div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary shrink-0">
                     <User className="size-5" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">Profile Information</h2>
-                    <p className="text-sm text-muted-foreground">Update your public identity on PulseLoop.</p>
+                    <h2 className="text-lg md:text-xl font-bold">Profile Information</h2>
+                    <p className="text-xs md:text-sm text-muted-foreground">Update your public identity on PulseLoop.</p>
                   </div>
                 </div>
 
@@ -244,8 +245,8 @@ export default function SettingsPage() {
                         <p className="text-[10px] text-muted-foreground font-medium">Or paste a direct link to an image file.</p>
                       </div>
 
-                      <div className="flex justify-end pt-2">
-                        <Button disabled={isUpdatingProfile || isUploading} className="h-11 gap-2 rounded-xl px-8 font-bold">
+                      <div className="flex justify-end pt-4 md:pt-2">
+                        <Button disabled={isUpdatingProfile || isUploading} className="h-11 w-full md:w-auto gap-2 rounded-xl px-8 font-bold">
                           {isUpdatingProfile ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
                           Update Profile
                         </Button>
@@ -256,14 +257,14 @@ export default function SettingsPage() {
               </section>
 
               {/* Security Section */}
-              <section className="rounded-2xl border border-border bg-card p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-8 border-b border-border pb-6">
-                  <div className="grid size-10 place-items-center rounded-xl bg-amber-500/10 text-amber-600">
+              <section className="rounded-2xl border border-border bg-card p-4 md:p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6 md:mb-8 border-b border-border pb-6">
+                  <div className="grid size-10 place-items-center rounded-xl bg-amber-500/10 text-amber-600 shrink-0">
                     <Lock className="size-5" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">Security & Password</h2>
-                    <p className="text-sm text-muted-foreground">Manage your account security and password.</p>
+                    <h2 className="text-lg md:text-xl font-bold">Security & Password</h2>
+                    <p className="text-xs md:text-sm text-muted-foreground">Manage your account security and password.</p>
                   </div>
                 </div>
 
@@ -313,15 +314,15 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4">
-                      <p className="text-xs text-muted-foreground max-w-[240px]">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-4">
+                      <p className="text-xs text-muted-foreground max-w-sm">
                         Changing your password will sign you out of all other active sessions for security.
                       </p>
                       <Button 
                         type="submit"
                         disabled={isUpdatingPassword} 
                         variant="outline" 
-                        className="h-11 gap-2 rounded-xl border-primary px-8 font-bold text-primary hover:bg-primary/5"
+                        className="h-11 w-full md:w-auto gap-2 rounded-xl border-primary px-8 font-bold text-primary hover:bg-primary/5"
                       >
                         {isUpdatingPassword ? <Loader2 className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />}
                         Change Password

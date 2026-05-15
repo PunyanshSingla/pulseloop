@@ -46,6 +46,7 @@ export default function PollsPage() {
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [searchQuery, setSearchQuery] = useState("");
   const [deletingPollId, setDeletingPollId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { mutate: updatePoll } = useUpdatePollAction();
 
   const isPending = isSessionPending || isPollsLoading;
@@ -103,10 +104,10 @@ export default function PollsPage() {
 
   if (pollsError) {
     return (
-      <div className="flex min-h-screen bg-background">
-        <Sidebar user={session.user} />
-        <div className="flex flex-1 flex-col">
-          <Topbar userName={session.user.name} />
+      <div className="flex min-h-screen bg-background relative overflow-x-hidden">
+        <Sidebar user={session.user} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <div className="flex flex-1 flex-col w-full">
+          <Topbar userName={session.user.name} onMenuClick={() => setIsSidebarOpen(true)} />
           <div className="flex flex-1 items-center justify-center">
             <div className="text-center">
               <div className="grid size-12 place-items-center rounded-full bg-destructive/10 text-destructive mx-auto mb-4">
@@ -128,22 +129,22 @@ export default function PollsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
-      <Sidebar user={session.user} />
+    <div className="flex min-h-screen bg-background text-foreground relative overflow-x-hidden">
+      <Sidebar user={session.user} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar userName={session.user.name} />
+      <div className="flex min-w-0 flex-1 flex-col w-full">
+        <Topbar userName={session.user.name} onMenuClick={() => setIsSidebarOpen(true)} />
         
         <main className="flex-1 px-6 py-6 overflow-y-auto">
           <div className="mx-auto max-w-7xl space-y-6">
             {/* Header section */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight">Polls</h1>
+                <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Polls</h1>
                 <p className="text-sm text-muted-foreground">Manage and track your active and past polls.</p>
               </div>
               <div className="flex items-center gap-2">
-                <div className="mr-2 flex items-center rounded-lg border border-border bg-background p-0.5">
+                <div className="flex items-center rounded-lg border border-border bg-background p-0.5">
                   <button
                     onClick={() => setViewMode("cards")}
                     className={`rounded-md p-1.5 transition-colors ${
@@ -163,7 +164,7 @@ export default function PollsPage() {
                     <List className="size-4" />
                   </button>
                 </div>
-                <Button className="h-9 gap-2" onClick={() => navigate("/polls/create")}>
+                <Button className="h-9 gap-2 font-bold px-4" onClick={() => navigate("/polls/create")}>
                   <Plus className="size-4" />
                   New poll
                 </Button>
@@ -309,11 +310,11 @@ export default function PollsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Poll</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Type</TableHead>
+                      <TableHead className="hidden sm:table-cell">Status</TableHead>
+                      <TableHead className="hidden md:table-cell">Type</TableHead>
                       <TableHead className="text-right">Responses</TableHead>
-                      <TableHead className="text-right">Completion</TableHead>
-                      <TableHead>Updated</TableHead>
+                      <TableHead className="hidden lg:table-cell text-right">Completion</TableHead>
+                      <TableHead className="hidden xl:table-cell">Updated</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -337,17 +338,17 @@ export default function PollsPage() {
                               </Link>
                             </div>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="hidden sm:table-cell">
                             <StatusPill status={p.status.charAt(0).toUpperCase() + p.status.slice(1)} />
                           </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">{p.visibility.charAt(0).toUpperCase() + p.visibility.slice(1)}</TableCell>
-                          <TableCell className="text-right tabular-nums">{p.responseCount || 0}</TableCell>
-                          <TableCell className="text-right tabular-nums">
+                          <TableCell className="hidden md:table-cell text-xs text-muted-foreground">{p.visibility.charAt(0).toUpperCase() + p.visibility.slice(1)}</TableCell>
+                          <TableCell className="text-right tabular-nums font-semibold">{p.responseCount || 0}</TableCell>
+                          <TableCell className="hidden lg:table-cell text-right tabular-nums">
                             {p.viewCount > 0 
                               ? `${Math.min(100, Math.round((p.responseCount / p.viewCount) * 100))}%` 
                               : "0%"}
                           </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
+                          <TableCell className="hidden xl:table-cell text-xs text-muted-foreground">
                             {p.updatedAt ? formatDistanceToNow(new Date(p.updatedAt)) : "N/A"} ago
                           </TableCell>
                           <TableCell className="text-right">
