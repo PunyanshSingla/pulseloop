@@ -13,7 +13,7 @@ export function ShareStrip() {
           className="flex items-center gap-3 rounded-md bg-zinc-800 px-3 py-1.5 ring-1 ring-white/10 cursor-pointer"
         >
           <code className="text-sm text-emerald-400">
-            {typeof window !== 'undefined' ? window.location.host : 'pulseloop.io'}/s/6k2p9
+            {typeof window !== 'undefined' ? window.location.host : 'pulseloop.io'}/vote/6k2p9
           </code>
           <button className="text-zinc-500 transition-colors hover:text-white" aria-label="Copy link">
             <Copy className="size-4" />

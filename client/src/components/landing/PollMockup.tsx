@@ -18,7 +18,7 @@ export function PollMockup() {
             Live Poll
           </span>
           <span className="font-mono text-xs text-muted-foreground">
-            {typeof window !== 'undefined' ? window.location.host : 'pulseloop.io'}/p/q3-roadmap
+            {typeof window !== 'undefined' ? window.location.host : 'pulseloop.io'}/vote/q3-roadmap
           </span>
         </div>
         <h2 className="mb-6 max-w-[40ch] text-balance text-xl font-medium">
