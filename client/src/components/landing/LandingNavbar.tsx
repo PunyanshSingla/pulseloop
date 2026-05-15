@@ -22,6 +22,7 @@ export function LandingNavbar({ session }: LandingNavbarProps) {
   const navLinks = [
     { label: "Features", href: "#features", isAnchor: true },
     { label: "How it works", href: "#how", isAnchor: true },
+    { label: "Demo", href: "#demo", isAnchor: true },
     { label: "Explore", href: "/explore", isAnchor: false },
   ];
 

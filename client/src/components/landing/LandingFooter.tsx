@@ -19,6 +19,7 @@ export function LandingFooter() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link to="/explore" className="hover:text-foreground transition-colors">Explore Polls</Link></li>
                 <li><Link to="/dashboard" className="hover:text-foreground transition-colors">Dashboard</Link></li>
+                <li><a href="#demo" className="hover:text-foreground transition-colors">Watch Demo</a></li>
                 <li><Link to="/sign-up" className="hover:text-foreground transition-colors">Get Started</Link></li>
               </ul>
             </div>

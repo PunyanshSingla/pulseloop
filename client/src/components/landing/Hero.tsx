@@ -57,13 +57,14 @@ export function Hero({ session }: HeroProps) {
               </motion.div>
             )}
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                to="/explore"
+              <a
+                href="#demo"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-sm ring-1 ring-black/5 transition-all hover:ring-black/10 sm:w-auto"
               >
-                Explore public polls
-              </Link>
+                Watch Demo
+              </a>
             </motion.div>
+
           </div>
         </motion.div>
         <motion.div

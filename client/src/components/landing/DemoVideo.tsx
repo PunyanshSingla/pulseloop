@@ -34,7 +34,7 @@ export function DemoVideo() {
           {/* REPLACE THE URL BELOW WITH YOUR ACTUAL YOUTUBE VIDEO URL */}
           <iframe 
             className="absolute inset-0 h-full w-full"
-            src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+            src="https://www.youtube.com/embed/w8JUsg56CDc" 
             title="PulseLoop Demo Video"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
