@@ -104,9 +104,9 @@ export default function PollsPage() {
 
   if (pollsError) {
     return (
-      <div className="flex min-h-screen bg-background relative overflow-x-hidden">
+      <div className="flex h-screen bg-background relative overflow-hidden">
         <Sidebar user={session.user} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-        <div className="flex flex-1 flex-col w-full">
+        <div className="flex flex-1 flex-col w-full h-full">
           <Topbar userName={session.user.name} onMenuClick={() => setIsSidebarOpen(true)} />
           <div className="flex flex-1 items-center justify-center">
             <div className="text-center">
@@ -129,10 +129,10 @@ export default function PollsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground relative overflow-x-hidden">
+    <div className="flex h-screen bg-background text-foreground relative overflow-hidden">
       <Sidebar user={session.user} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      <div className="flex min-w-0 flex-1 flex-col w-full">
+      <div className="flex min-w-0 flex-1 flex-col w-full h-full">
         <Topbar userName={session.user.name} onMenuClick={() => setIsSidebarOpen(true)} />
         
         <main className="flex-1 px-6 py-6 overflow-y-auto">

@@ -137,9 +137,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background relative overflow-x-hidden">
+    <div className="flex h-screen bg-background relative overflow-hidden">
       <Sidebar user={session?.user} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="flex flex-1 flex-col w-full">
+      <div className="flex flex-1 flex-col w-full h-full">
         <Topbar userName={session?.user?.name} onMenuClick={() => setIsSidebarOpen(true)} />
         <main className="flex-1 px-4 md:px-6 py-6 md:py-10 overflow-y-auto">
           <div className="mx-auto max-w-4xl space-y-8 md:space-y-12">

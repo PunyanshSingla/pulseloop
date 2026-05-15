@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   Table, 
@@ -11,7 +11,7 @@ import {
   TableCell 
 } from "@/components/ui/table";
 import { LoaderContainer } from "@/components/ui/loader";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 
 import type { Poll } from "@/types/polls";
 
@@ -65,6 +65,32 @@ export const PollResponses = ({ poll, responsesData, isLoading }: PollResponsesP
     setSelectedQuestionFilter("all");
     setSelectedTypeFilter("all");
     setCurrentPage(1);
+  };
+
+  const exportToCSV = () => {
+    if (filtered.length === 0) return;
+
+    const headers = ["Respondent Name", "Respondent Email", "Question", "Answer", "Time Taken (s)", "Submitted At"];
+    const rows = filtered.map(resp => [
+      resp.respondentId?.name || "Anonymous",
+      resp.respondentId?.email || "N/A",
+      `"${resp.questionText.replace(/"/g, '""')}"`,
+      `"${resp.optionText.replace(/"/g, '""')}"`,
+      resp.timeTaken,
+      format(new Date(resp.createdAt), "yyyy-MM-dd HH:mm:ss")
+    ]);
+
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `pulseloop_responses_${poll._id}_${format(new Date(), "yyyyMMdd")}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -131,6 +157,16 @@ export const PollResponses = ({ poll, responsesData, isLoading }: PollResponsesP
       <div className="rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-border/50 bg-muted/10 flex items-center justify-between">
           <h3 className="text-sm font-semibold">Individual Submissions</h3>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={exportToCSV}
+            disabled={filtered.length === 0}
+            className="h-8 gap-2 rounded-lg text-xs font-bold border-emerald-500/20 text-emerald-600 hover:bg-emerald-500/5"
+          >
+            <Download className="size-3.5" />
+            Export CSV
+          </Button>
         </div>
         
         {isLoading ? (
