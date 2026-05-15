@@ -16,17 +16,21 @@ export class AnalyticsService {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
 
-    const totalResponses = await Response.countDocuments({ pollId: { $in: pollIds } });
+    // Use aggregate to get unique voters count more efficiently than distinct().length
+    const getUniqueVotersCount = async (matchFilter: any) => {
+      const result = await Response.aggregate([
+        { $match: { pollId: { $in: pollIds }, ...matchFilter } },
+        { $group: { _id: "$voterId" } },
+        { $count: "count" }
+      ]);
+      return result.length > 0 ? result[0].count : 0;
+    };
+
+    const totalResponses = await getUniqueVotersCount({});
     
-    // Calculate response growth
-    const currentPeriodResponses = await Response.countDocuments({
-      pollId: { $in: pollIds },
-      createdAt: { $gte: thirtyDaysAgo }
-    });
-    const previousPeriodResponses = await Response.countDocuments({
-      pollId: { $in: pollIds },
-      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo }
-    });
+    // Calculate response growth (Unique voters)
+    const currentPeriodResponses = await getUniqueVotersCount({ createdAt: { $gte: thirtyDaysAgo } });
+    const previousPeriodResponses = await getUniqueVotersCount({ createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } });
 
     let responsesGrowth = 0;
     if (previousPeriodResponses > 0) {
@@ -34,6 +38,7 @@ export class AnalyticsService {
     }
 
     // Calculate average response time and growth
+    // Note: for average time, we can still use all response docs as it represents avg per question
     const currentAvgResponseTimeData = await Response.aggregate([
       { $match: { pollId: { $in: pollIds }, createdAt: { $gte: thirtyDaysAgo } } },
       { $group: { _id: null, avgTime: { $avg: "$timeTaken" } } }
@@ -56,9 +61,14 @@ export class AnalyticsService {
       { $group: { _id: null, avgTime: { $avg: "$timeTaken" } } }
     ]);
     const avgTimeSeconds = overallAvgResponseTimeData.length > 0 ? Math.round(overallAvgResponseTimeData[0].avgTime) : 0;
-    const formattedAvgTime = avgTimeSeconds > 60 
-      ? `${Math.floor(avgTimeSeconds / 60)}m ${avgTimeSeconds % 60}s` 
-      : `${avgTimeSeconds}s`;
+    
+    // We want the total average time for a poll (avg per question * avg question count)
+    const avgQuestionsPerPoll = polls.length > 0 ? (await Question.countDocuments({ pollId: { $in: pollIds } })) / polls.length : 0;
+    const totalAvgTimeSeconds = Math.round(avgTimeSeconds * avgQuestionsPerPoll);
+
+    const formattedAvgTime = totalAvgTimeSeconds > 60 
+      ? `${Math.floor(totalAvgTimeSeconds / 60)}m ${totalAvgTimeSeconds % 60}s` 
+      : `${totalAvgTimeSeconds}s`;
 
     // Completion rate and growth
     const currentViews = await PollView.countDocuments({
@@ -94,11 +104,8 @@ export class AnalyticsService {
       activePollsGrowth = ((currentActivePolls - previousActivePolls) / previousActivePolls) * 100;
     }
 
-    // Anonymous vs Logged-in breakdown
-    const anonymousResponses = await Response.countDocuments({
-      pollId: { $in: pollIds },
-      respondentId: null
-    });
+    // Anonymous vs Logged-in breakdown (Unique voters)
+    const anonymousResponses = await getUniqueVotersCount({ respondentId: null });
     const loggedInResponses = totalResponses - anonymousResponses;
 
     return {
@@ -108,7 +115,7 @@ export class AnalyticsService {
       activePollsGrowth: activePollsGrowth.toFixed(1),
       completionRate: totalViews > 0 ? formattedCompletionRate : "0%",
       completionRateGrowth: completionRateGrowth.toFixed(1),
-      avgResponseTime: avgTimeSeconds > 0 ? formattedAvgTime : "N/A",
+      avgResponseTime: totalAvgTimeSeconds > 0 ? formattedAvgTime : "N/A",
       avgResponseTimeGrowth: avgResponseTimeGrowth.toFixed(1),
       anonymousResponses,
       loggedInResponses
@@ -131,9 +138,18 @@ export class AnalyticsService {
         }
       },
       {
+        // First group by voterId to get one document per submission
+        $group: {
+          _id: "$voterId",
+          date: { $first: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } } },
+          respondentId: { $first: "$respondentId" }
+        }
+      },
+      {
+        // Then group by date and user type
         $group: {
           _id: {
-            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            date: "$date",
             isAnonymous: { $cond: [{ $ifNull: ["$respondentId", false] }, false, true] }
           },
           count: { $sum: 1 }
@@ -151,7 +167,7 @@ export class AnalyticsService {
           total: { $sum: "$count" }
         }
       },
-      { $sort: { _id: 1 } },
+      { $sort: { "_id": 1 } },
       {
         $project: {
           _id: 0,
@@ -229,6 +245,37 @@ export class AnalyticsService {
       console.error("Error in getLatestActivity:", error);
       return [];
     }
+  }
+
+  async getDemographics(userId?: string) {
+    const filter = userId ? { createdBy: new mongoose.Types.ObjectId(userId) } : {};
+    const polls = await Poll.find(filter).select("_id");
+    const pollIds = polls.map(p => p._id);
+
+    if (pollIds.length === 0) return { devices: [], browsers: [], os: [] };
+
+    const [devices, browsers, os] = await Promise.all([
+      Response.aggregate([
+        { $match: { pollId: { $in: pollIds } } },
+        { $group: { _id: "$voterId", device: { $first: "$deviceInfo.device" } } },
+        { $group: { _id: { $ifNull: ["$device", "Unknown"] }, count: { $sum: 1 } } },
+        { $project: { name: "$_id", value: "$count", _id: 0 } }
+      ]),
+      Response.aggregate([
+        { $match: { pollId: { $in: pollIds } } },
+        { $group: { _id: "$voterId", browser: { $first: "$deviceInfo.browser" } } },
+        { $group: { _id: { $ifNull: ["$browser", "Unknown"] }, count: { $sum: 1 } } },
+        { $project: { name: "$_id", value: "$count", _id: 0 } }
+      ]),
+      Response.aggregate([
+        { $match: { pollId: { $in: pollIds } } },
+        { $group: { _id: "$voterId", os: { $first: "$deviceInfo.os" } } },
+        { $group: { _id: { $ifNull: ["$os", "Unknown"] }, count: { $sum: 1 } } },
+        { $project: { name: "$_id", value: "$count", _id: 0 } }
+      ])
+    ]);
+
+    return { devices, browsers, os };
   }
 }
 

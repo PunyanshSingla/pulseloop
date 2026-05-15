@@ -10,11 +10,12 @@ export class AnalyticsController {
       const queryId = user.id;
       const days = parseInt(req.query.days as string) || 30;
       
-      const [kpis, chartData, topPoll, activity] = await Promise.all([
+      const [kpis, chartData, topPoll, activity, demographics] = await Promise.all([
         analyticsService.getKPIData(queryId),
         analyticsService.getResponsesOverTime(queryId, days),
         analyticsService.getTopPerformingPoll(queryId),
-        analyticsService.getLatestActivity(queryId)
+        analyticsService.getLatestActivity(queryId),
+        analyticsService.getDemographics(queryId)
       ]);
 
       res.status(200).json({
@@ -23,7 +24,8 @@ export class AnalyticsController {
           kpis,
           chartData,
           topPoll,
-          activity
+          activity,
+          demographics
         }
       });
     } catch (error) {

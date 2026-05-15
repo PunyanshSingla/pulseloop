@@ -41,7 +41,7 @@ export default function PublicPollPage() {
   const [voteAsAnonymous, setVoteAsAnonymous] = useState(false);
 
   // Success state derived from mutation or server data
-  const hasVoted = useMemo(() => isSuccess || !!poll?.hasVoted, [isSuccess, poll?.hasVoted]);
+  const hasVoted = useMemo(() => isSuccess || !!poll?.userHasVoted, [isSuccess, poll?.userHasVoted]);
 
   useEffect(() => {
     if (!poll?.startsAt) return;

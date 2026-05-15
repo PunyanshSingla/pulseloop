@@ -1,9 +1,6 @@
-import { authClient } from "@/lib/auth-client";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sidebar } from "@/components/dashboard/sidebar";
-import { Topbar } from "@/components/dashboard/topbar";
 import { toast } from "sonner";
 import { AnimatePresence } from "framer-motion";
 import { 
@@ -26,7 +23,6 @@ import { PollModals } from "@/components/polls/details/PollModals";
 
 export default function PollDetailsPage() {
   const { id } = useParams<{ id: string }>();
-  const { data: session, isPending: isSessionPending } = authClient.useSession();
   const { data: pollResponse, isLoading: isPollLoading } = usePoll(id!);
   const { mutate: updatePoll } = useUpdatePoll(id!);
   const { mutate: deletePoll } = useDeletePoll();
@@ -40,11 +36,10 @@ export default function PollDetailsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  if (isSessionPending || isPollLoading) {
+  if (isPollLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex flex-1 items-center justify-center min-h-[400px]">
         <LoaderContainer message="Loading poll details..." />
       </div>
     );
@@ -52,29 +47,18 @@ export default function PollDetailsPage() {
 
   const poll = pollResponse?.data;
   const analytics = analyticsResponse?.data;
-  
-  if (!session) {
-    navigate("/sign-in");
-    return null;
-  }
 
   if (!poll) {
     return (
-      <div className="flex h-screen bg-background text-foreground relative overflow-hidden">
-        <Sidebar user={session.user} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-        <div className="flex flex-1 flex-col w-full h-full">
-          <Topbar userName={session.user.name} onMenuClick={() => setIsSidebarOpen(true)} />
-          <div className="flex flex-1 flex-col items-center justify-center gap-4">
-            <h2 className="text-xl font-semibold">Poll not found</h2>
-            <Button onClick={() => navigate("/polls")}>Back to polls</Button>
-          </div>
-        </div>
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 min-h-[400px]">
+        <h2 className="text-xl font-black text-foreground uppercase tracking-tight">Poll not found</h2>
+        <Button onClick={() => navigate("/polls")} className="rounded-xl font-bold">Back to polls</Button>
       </div>
     );
   }
 
   const copyLink = () => {
-    const url = `${import.meta.env.VITE_APP_ORIGIN}/vote/${poll._id}`;
+    const url = `${window.location.origin}/vote/${poll._id}`;
     navigator.clipboard.writeText(url);
     toast.success("Link copied to clipboard!");
   };
@@ -97,47 +81,37 @@ export default function PollDetailsPage() {
   };
 
   return (
-    <div className="flex h-screen bg-background text-foreground selection:bg-primary/10 relative overflow-hidden">
-      <Sidebar user={session.user} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      
-      <div className="flex min-w-0 flex-1 flex-col w-full h-full">
-        <Topbar userName={session.user.name} onMenuClick={() => setIsSidebarOpen(true)} />
-        
-        <main className="flex-1 px-4 sm:px-6 py-6 overflow-y-auto">
-          <div className="mx-auto space-y-8 max-w-7xl">
-            <PollHeader 
-              poll={poll}
-              isPublishing={isPublishing}
-              onCopyLink={copyLink}
-              onToggleStatus={toggleStatus}
-              onShowQR={() => setShowQRModal(true)}
-              onShowPublish={() => setShowPublishModal(true)}
-              onShowDelete={() => setShowDeleteModal(true)}
+    <div className="mx-auto space-y-8 max-w-7xl">
+      <PollHeader 
+        poll={poll}
+        isPublishing={isPublishing}
+        onCopyLink={copyLink}
+        onToggleStatus={toggleStatus}
+        onShowQR={() => setShowQRModal(true)}
+        onShowPublish={() => setShowPublishModal(true)}
+        onShowDelete={() => setShowDeleteModal(true)}
+      />
+
+      <PollTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+      <div className="min-h-[400px] mt-8 pb-12">
+        <AnimatePresence mode="wait">
+          {activeTab === "overview" && (
+            <PollOverview poll={poll} analytics={analytics} />
+          )}
+
+          {activeTab === "responses" && (
+            <PollResponses 
+              poll={poll} 
+              responsesData={responsesData} 
+              isLoading={isResponsesLoading} 
             />
+          )}
 
-            <PollTabs activeTab={activeTab} onTabChange={setActiveTab} />
-
-            <div className="min-h-[400px] mt-8 pb-12">
-              <AnimatePresence mode="wait">
-                {activeTab === "overview" && (
-                  <PollOverview poll={poll} analytics={analytics} />
-                )}
-
-                {activeTab === "responses" && (
-                  <PollResponses 
-                    poll={poll} 
-                    responsesData={responsesData} 
-                    isLoading={isResponsesLoading} 
-                  />
-                )}
-
-                {activeTab === "settings" && (
-                  <PollSettings poll={poll} onUpdatePoll={updatePoll} />
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-        </main>
+          {activeTab === "settings" && (
+            <PollSettings poll={poll} onUpdatePoll={updatePoll} />
+          )}
+        </AnimatePresence>
       </div>
 
       <PollModals 

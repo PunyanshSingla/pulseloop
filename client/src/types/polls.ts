@@ -128,6 +128,11 @@ export interface DashboardData {
     };
     chartData: { date: string; anonymous: number; loggedIn: number; total: number }[];
     topPoll: Poll | null;
+    demographics: {
+      devices: { name: string; value: number }[];
+      os: { name: string; value: number }[];
+      browsers: { name: string; value: number }[];
+    };
     activity: ActivityEvent[];
   };
 }

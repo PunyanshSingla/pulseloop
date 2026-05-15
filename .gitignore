@@ -2,8 +2,13 @@ node_modules
 .env
 client/node_modules
 client/.env
+client/dist
 server/node_modules
 server/.env
+server/dist
+dist
+build
+.DS_Store
+*.log
 client/skills-lock.json
 client/.agents
-server/dist

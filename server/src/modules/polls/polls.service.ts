@@ -612,24 +612,23 @@ export class PollsService {
         } 
       },
       {
+        // Group by voterId first
         $group: {
-          _id: {
-            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-            isAnonymous: { $cond: [{ $ifNull: ["$respondentId", false] }, false, true] }
-          },
-          votes: { $sum: 1 }
+          _id: "$voterId",
+          date: { $first: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } } },
+          isAnonymous: { $first: { $cond: [{ $ifNull: ["$respondentId", false] }, false, true] } }
         }
       },
       {
         $group: {
-          _id: "$_id.date",
+          _id: "$date",
           anonymous: {
-            $sum: { $cond: ["$_id.isAnonymous", "$votes", 0] }
+            $sum: { $cond: ["$isAnonymous", 1, 0] }
           },
           loggedIn: {
-            $sum: { $cond: ["$_id.isAnonymous", 0, "$votes"] }
+            $sum: { $cond: ["$isAnonymous", 0, 1] }
           },
-          total: { $sum: "$votes" }
+          total: { $sum: 1 }
         }
       },
       { $sort: { "_id": 1 } }

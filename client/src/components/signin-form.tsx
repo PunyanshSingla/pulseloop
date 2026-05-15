@@ -18,17 +18,26 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState(() => localStorage.getItem("login_email") || "")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
 
+  const fillDemo = () => {
+    setEmail("demo@pulseloop.io")
+    setPassword("Password123!")
+    toast.info("Demo credentials filled!")
+  }
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     
+    // Persist email for convenience
+    localStorage.setItem("login_email", email)
+
     const { error } = await authClient.signIn.email({
       email,
       password,
@@ -60,7 +69,14 @@ export function LoginForm({
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Login to your account</h1>
           <p className="text-sm text-balance text-muted-foreground">
-            Enter your email below to login to your account
+            Enter your email below or{" "}
+            <button 
+              type="button"
+              onClick={fillDemo}
+              className="text-primary font-bold hover:underline underline-offset-4"
+            >
+              use the demo account
+            </button>
           </p>
         </div>
         <Field>

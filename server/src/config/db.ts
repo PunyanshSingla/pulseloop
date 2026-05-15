@@ -25,15 +25,24 @@ export const connectDB = async () => {
             dbName: DB_NAME,
             autoIndex: false,
             maxPoolSize: 10,
+            serverSelectionTimeoutMS: 10000, // Timeout after 10s
         };
 
-        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-            console.log('Successfully connected to MongoDB.');
-            return mongoose;
-        }).catch(error => {
-            console.error('Error connecting to MongoDB:', error);
-            throw error;
-        });
+        const connectWithRetry = async (retries = 5, delay = 2000) => {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const conn = await mongoose.connect(MONGODB_URI, opts);
+                    console.log('Successfully connected to MongoDB.');
+                    return conn;
+                } catch (error) {
+                    console.error(`Error connecting to MongoDB (Attempt ${i + 1}/${retries}):`, error);
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        };
+
+        cached.promise = connectWithRetry();
     }
 
     cached.conn = await cached.promise;

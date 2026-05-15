@@ -10,32 +10,32 @@ export function KPIs() {
     { 
       label: "Total responses", 
       value: kpisData?.totalResponses?.toLocaleString() || "0", 
-      change: kpisData?.totalResponsesGrowth ? `${kpisData.totalResponsesGrowth > 0 ? "+" : ""}${kpisData.totalResponsesGrowth}%` : "0%", 
-      up: (kpisData?.totalResponsesGrowth || 0) >= 0, 
+      change: kpisData?.totalResponsesGrowth ? `${parseFloat(kpisData.totalResponsesGrowth) > 0 ? "+" : ""}${kpisData.totalResponsesGrowth}%` : "0%", 
+      up: parseFloat(kpisData?.totalResponsesGrowth || "0") >= 0, 
       sub: "vs last 30 days", 
       icon: BarChart3 
     },
     { 
       label: "Active polls", 
       value: kpisData?.activePolls?.toString() || "0", 
-      change: kpisData?.activePollsGrowth ? `${kpisData.activePollsGrowth > 0 ? "+" : ""}${kpisData.activePollsGrowth}%` : "0%", 
-      up: (kpisData?.activePollsGrowth || 0) >= 0, 
+      change: kpisData?.activePollsGrowth ? `${parseFloat(kpisData.activePollsGrowth) > 0 ? "+" : ""}${kpisData.activePollsGrowth}%` : "0%", 
+      up: parseFloat(kpisData?.activePollsGrowth || "0") >= 0, 
       sub: "currently live", 
       icon: Zap 
     },
     { 
       label: "Completion rate", 
       value: kpisData?.completionRate || "N/A", 
-      change: kpisData?.completionRateGrowth ? `${kpisData.completionRateGrowth > 0 ? "+" : ""}${kpisData.completionRateGrowth}%` : "0%", 
-      up: (kpisData?.completionRateGrowth || 0) >= 0, 
+      change: kpisData?.completionRateGrowth ? `${parseFloat(kpisData.completionRateGrowth) > 0 ? "+" : ""}${kpisData.completionRateGrowth}%` : "0%", 
+      up: parseFloat(kpisData?.completionRateGrowth || "0") >= 0, 
       sub: "avg across polls", 
       icon: CheckCircle2 
     },
     { 
       label: "Avg. response time", 
       value: kpisData?.avgResponseTime || "N/A", 
-      change: kpisData?.avgResponseTimeGrowth ? `${kpisData.avgResponseTimeGrowth > 0 ? "+" : ""}${kpisData.avgResponseTimeGrowth}%` : "0%", 
-      up: (kpisData?.avgResponseTimeGrowth || 0) <= 0, // Lower is better for response time
+      change: kpisData?.avgResponseTimeGrowth ? `${parseFloat(kpisData.avgResponseTimeGrowth) > 0 ? "+" : ""}${kpisData.avgResponseTimeGrowth}%` : "0%", 
+      up: parseFloat(kpisData?.avgResponseTimeGrowth || "0") <= 0, // Lower is better for response time
       sub: "avg per respondent", 
       icon: Clock 
     },

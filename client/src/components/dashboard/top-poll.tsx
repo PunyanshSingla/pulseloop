@@ -40,8 +40,8 @@ export function TopPoll() {
         {poll.title}
       </h3>
       <div className="mt-5 space-y-4 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-        {options.map((o: { _id: string, text: string, percentage?: number, responseCount?: number }, i: number) => (
-          <div key={o._id}>
+        {options.map((o, i) => (
+          <div key={o._id || i}>
             <div className="flex items-center justify-between text-sm">
               <span className="font-semibold text-foreground/90">{o.text}</span>
               <span className="text-muted-foreground font-bold tabular-nums">

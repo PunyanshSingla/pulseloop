@@ -1,6 +1,5 @@
-import { BarChart3, ExternalLink } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 import { usePolls } from "@/hooks/use-polls";
-import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
 import StatusPill from "./status-pill";
 import { 
@@ -21,7 +20,7 @@ export function PollsTable({ className }: { className?: string }) {
   const totalCount = pollsResponse?.data?.length || 0;
 
   return (
-    <div className={`rounded-xl border border-border bg-card flex flex-col h-[500px] ${className}`}>
+    <div className={`rounded-xl border border-border bg-card flex flex-col h-full ${className}`}>
       <div className="flex items-center justify-between border-b border-border px-5 py-4 shrink-0">
         <div>
           <p className="text-sm font-medium">Recent polls</p>
@@ -41,66 +40,55 @@ export function PollsTable({ className }: { className?: string }) {
           No polls found.
         </div>
       ) : (
-        <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
           <Table>
             <TableHeader className="sticky top-0 bg-card z-10 shadow-[0_1px_0_0_var(--border)]">
               <TableRow>
-              <TableHead>Poll</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Responses</TableHead>
-              <TableHead>Completion</TableHead>
-              <TableHead>Updated</TableHead>
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {polls.map((p: Poll & { completionRate?: number }) => (
-              <TableRow key={p._id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="grid size-8 place-items-center rounded-md bg-muted text-muted-foreground">
-                      <BarChart3 className="size-4" />
-                    </div>
-                    <div>
-                      <Link to={`/polls/${p._id}`} className="text-base font-semibold hover:text-primary transition-colors">{p.title}</Link>
-                      <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                        {import.meta.env.VITE_APP_ORIGIN.replace(/^https?:\/\//, "")}/vote/{p._id}
-                      </p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <StatusPill status={p.status.charAt(0).toUpperCase() + p.status.slice(1)} />
-                </TableCell>
-                <TableCell className="text-right tabular-nums font-medium">{p.responseCount || 0}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-                      <div
-                        className="h-full bg-primary transition-all"
-                        style={{ width: `${Math.min(p.completionRate || 0, 100)}%` }}
-                      />
-                    </div>
-                    <span className="text-xs font-bold text-foreground/80">{Math.round(p.completionRate || 0)}%</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-xs text-muted-foreground">
-                  {p.createdAt && !isNaN(new Date(p.createdAt).getTime())
-                    ? formatDistanceToNow(new Date(p.createdAt))
-                    : "N/A"} ago
-                </TableCell>
-                <TableCell className="text-right">
-                  <Link
-                    to={`/polls/${p._id}`}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
-                  >
-                    View <ExternalLink className="size-3" />
-                  </Link>
-                </TableCell>
+                <TableHead className="w-[300px]">Poll</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Responses</TableHead>
+                <TableHead className="text-right">Completion</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {polls.map((p: Poll & { completionRate?: number }) => (
+                <TableRow key={p._id} className="group">
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/5 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                        <BarChart3 className="size-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <Link to={`/polls/${p._id}`} className="text-sm font-bold text-foreground hover:text-primary transition-colors truncate block">
+                          {p.title}
+                        </Link>
+                        <p className="text-[10px] font-medium text-muted-foreground truncate uppercase tracking-tight">
+                          {p.visibility} • {new Date(p.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <StatusPill status={p.status.charAt(0).toUpperCase() + p.status.slice(1)} />
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums font-bold text-sm">
+                    {p.responseCount || 0}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden hidden sm:block">
+                        <div
+                          className="h-full bg-primary transition-all"
+                          style={{ width: `${Math.min(p.completionRate || 0, 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-black text-foreground">{Math.round(p.completionRate || 0)}%</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

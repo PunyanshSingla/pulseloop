@@ -1,4 +1,5 @@
 import { useDashboardData } from "@/hooks/use-analytics";
+import { useState } from "react";
 import { Users, UserX, UserCheck } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
@@ -11,6 +12,8 @@ export function UserTypeBreakdown() {
     { name: "Anonymous", value: kpis?.anonymousResponses || 0, color: "oklch(0.85 0.05 190)" },
   ];
 
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  
   const total = (kpis?.loggedInResponses || 0) + (kpis?.anonymousResponses || 0);
   const loggedInPercentage = total > 0 ? Math.round((kpis?.loggedInResponses || 0) / total * 100) : 0;
   const anonymousPercentage = total > 0 ? 100 - loggedInPercentage : 0;
@@ -39,25 +42,44 @@ export function UserTypeBreakdown() {
               paddingAngle={8}
               dataKey="value"
               stroke="none"
+              onMouseEnter={(_, index) => setActiveIndex(index)}
+              onMouseLeave={() => setActiveIndex(null)}
             >
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.color} 
+                  opacity={activeIndex === null || activeIndex === index ? 1 : 0.6}
+                  style={{ outline: "none" }}
+                />
               ))}
             </Pie>
             <Tooltip 
-              contentStyle={{ 
-                backgroundColor: "hsl(var(--card))", 
-                borderRadius: "12px", 
-                border: "1px solid hsl(var(--border))",
-                boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                fontSize: "12px",
-                color: "hsl(var(--foreground))"
+              content={({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  return (
+                    <div className="rounded-xl border border-border bg-card p-3 shadow-2xl">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div 
+                          className="size-2 rounded-full" 
+                          style={{ backgroundColor: payload[0].payload.color }} 
+                        />
+                        <p className="text-xs font-bold text-foreground">
+                          {payload[0].name}
+                        </p>
+                      </div>
+                      <p className="text-sm font-black text-foreground pl-4">
+                        {payload[0].value} <span className="text-[10px] text-muted-foreground uppercase tracking-widest ml-1">Votes</span>
+                      </p>
+                    </div>
+                  );
+                }
+                return null;
               }}
-              itemStyle={{ color: "hsl(var(--foreground))" }}
             />
           </PieChart>
         </ResponsiveContainer>
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+        <div className={`absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-200 ${activeIndex !== null ? "opacity-0" : "opacity-100"}`}>
           <p className="text-2xl font-bold text-foreground">{total}</p>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Votes</p>
         </div>

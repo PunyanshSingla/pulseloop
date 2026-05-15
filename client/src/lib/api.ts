@@ -1,4 +1,4 @@
-import type { Poll, PollResponse, PollsResponse, Analytics, AnalyticsResponse, DashboardData, VotePayload, Response } from "@/types/polls";
+import type { Poll, PollResponse, PollsResponse, AnalyticsResponse, DashboardData, VotePayload, Response } from "@/types/polls";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 

@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { LoginForm } from "@/components/signin-form"
 import Logo from "@/components/logo"
 import { useTheme } from "next-themes"
@@ -6,15 +7,26 @@ import { Navigate, useSearchParams } from "react-router-dom"
 
 export default function SignInPage() {
   const theme = useTheme()
+  const [hasCheckedSession, setHasCheckedSession] = useState(false)
   const { data: session, isPending } = authClient.useSession()
   const [searchParams] = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
 
-  if (isPending) {
-    return null // Or a loading spinner
+  // Mark initial check as done once we've had a successful or failed load
+  if (!isPending && !hasCheckedSession) {
+    setHasCheckedSession(true)
   }
 
-  if (session) {
+  // Only show the spinner during the VERY FIRST load
+  if (!hasCheckedSession && isPending) {
+    return (
+      <div className="flex min-h-svh items-center justify-center bg-slate-50 dark:bg-slate-950">
+         <div className="size-8 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
+      </div>
+    )
+  }
+
+  if (session && hasCheckedSession) {
     return <Navigate to={callbackUrl} replace />
   }
 

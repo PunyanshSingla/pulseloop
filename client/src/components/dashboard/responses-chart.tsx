@@ -16,11 +16,13 @@ export function ResponsesChart() {
     
     return interval.map(date => {
       const dateStr = format(date, "yyyy-MM-dd");
-      const found = (rawData as { date: string, total: number }[]).find((d) => d.date === dateStr);
+      const found = (rawData as { date: string, total: number, anonymous?: number, loggedIn?: number }[]).find((d) => d.date === dateStr);
       return {
         date: dateStr,
         label: format(date, "MMM dd"),
-        count: found ? found.total : 0
+        count: found ? found.total : 0,
+        anonymous: found ? (found.anonymous || 0) : 0,
+        loggedIn: found ? (found.loggedIn || 0) : 0,
       };
     });
   }, [dashboardDataResponse, range]);
@@ -77,14 +79,38 @@ export function ResponsesChart() {
         {/* Tooltip */}
         {hoveredIndex !== null && (
           <div 
-            className="absolute z-10 pointer-events-none rounded-lg bg-foreground px-3 py-2 text-xs font-bold text-background shadow-xl -translate-x-1/2 -translate-y-full transition-all duration-200"
+            className="absolute z-10 pointer-events-none rounded-xl bg-foreground p-3 text-xs font-bold text-background shadow-2xl -translate-x-1/2 -translate-y-full transition-all duration-200 border border-white/10"
             style={{ 
               left: `${(hoveredIndex * step) / w * 100}%`,
               top: `${h - (data[hoveredIndex] / max) * (h - 40) - 35}px`
             }}
           >
-            <div className="text-[10px] opacity-70 mb-0.5">{chartData[hoveredIndex].label}</div>
-            <div>{chartData[hoveredIndex].count} responses</div>
+            <div className="text-[10px] uppercase tracking-widest opacity-50 mb-2 border-b border-white/10 pb-1">
+              {chartData[hoveredIndex].label}
+            </div>
+            <div className="space-y-1.5 min-w-[120px]">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-1.5 text-background/80">
+                  <div className="size-1.5 rounded-full bg-primary" />
+                  <span>Total</span>
+                </div>
+                <span>{chartData[hoveredIndex].count}</span>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-1.5 text-background/60">
+                  <div className="size-1.5 rounded-full bg-primary/40" />
+                  <span>Anonymous</span>
+                </div>
+                <span>{chartData[hoveredIndex].anonymous}</span>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-1.5 text-background/60">
+                  <div className="size-1.5 rounded-full bg-white/40" />
+                  <span>Logged-in</span>
+                </div>
+                <span>{chartData[hoveredIndex].loggedIn}</span>
+              </div>
+            </div>
             <div className="absolute left-1/2 bottom-0 h-2 w-2 -translate-x-1/2 translate-y-1/2 rotate-45 bg-foreground" />
           </div>
         )}
