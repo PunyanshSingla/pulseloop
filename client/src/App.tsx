@@ -11,6 +11,7 @@ import CreatePollPage from "./pages/polls/create-poll.tsx";
 import PollDetailsPage from "./pages/polls/poll-details.tsx";
 import PublicPollPage from "./pages/polls/public-poll.tsx";
 import PollResultsPage from "./pages/polls/poll-results.tsx";
+import VotedPollsPage from "./pages/polls/voted-polls.tsx";
 import ExplorePage from "./pages/explore.tsx";
 import AuthCallbackPage from "./pages/auth-callback.tsx";
 import NotFoundPage from "./pages/not-found.tsx";
@@ -29,6 +30,7 @@ export default function App() {
         {/* Protected User Routes */}
         <Route path="/dashboard" element={<AuthGuard><DashboardPage /></AuthGuard>} />
         <Route path="/polls" element={<AuthGuard><PollsPage /></AuthGuard>} />
+        <Route path="/polls/voted" element={<AuthGuard><VotedPollsPage /></AuthGuard>} />
         <Route path="/polls/create" element={<AuthGuard><CreatePollPage /></AuthGuard>} />
         <Route path="/polls/:id/edit" element={<AuthGuard><CreatePollPage /></AuthGuard>} />
         <Route path="/polls/:id" element={<AuthGuard><PollDetailsPage /></AuthGuard>} />

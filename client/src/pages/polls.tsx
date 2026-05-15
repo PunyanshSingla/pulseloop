@@ -32,7 +32,9 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function PollsPage() {
   const { data: session, isPending: isSessionPending } = authClient.useSession();
-  const { data: pollsResponse, isLoading: isPollsLoading, error: pollsError } = usePolls();
+  const [page, setPage] = useState(1);
+  const limit = 6;
+  const { data: pollsResponse, isLoading: isPollsLoading, error: pollsError } = usePolls(page, limit);
   const { mutate: deletePoll } = useDeletePoll();
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
@@ -42,6 +44,7 @@ export default function PollsPage() {
 
   const isPending = isSessionPending || isPollsLoading;
   const polls = pollsResponse?.data || [];
+  const hasMore = polls.length === limit;
 
   const confirmDelete = () => {
     if (deletingPollId) {
@@ -211,7 +214,12 @@ export default function PollsPage() {
                             </h3>
                           </Link>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <StatusPill status={poll.status.charAt(0).toUpperCase() + poll.status.slice(1)} />
+                            {(() => {
+                              const isExpired = poll.expiresAt && new Date(poll.expiresAt) < new Date();
+                              const isRunning = poll.status === "active" && !isExpired;
+                              const displayStatus = isRunning ? "Running" : isExpired ? "Ended" : poll.status.charAt(0).toUpperCase() + poll.status.slice(1);
+                              return <StatusPill status={displayStatus} />;
+                            })()}
                             <span className="text-xs text-muted-foreground">• {poll.visibility.charAt(0).toUpperCase() + poll.visibility.slice(1)}</span>
                           </div>
                         </div>
@@ -226,15 +234,21 @@ export default function PollsPage() {
                         >
                           <Edit className="size-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleToggleStatus(poll)}
-                          className={`h-8 w-8 p-0 ${poll.status === "active" ? "text-amber-500 hover:text-amber-600 hover:bg-amber-500/10" : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"}`}
-                          title={poll.status === "active" ? "Close Poll" : "Re-open Poll"}
-                        >
-                          {poll.status === "active" ? <Lock className="size-4" /> : <Unlock className="size-4" />}
-                        </Button>
+                        {(() => {
+                          const isExpired = poll.expiresAt && new Date(poll.expiresAt) < new Date();
+                          if (isExpired) return null;
+                          return (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleToggleStatus(poll)}
+                              className={`h-8 w-8 p-0 ${poll.status === "active" ? "text-amber-500 hover:text-amber-600 hover:bg-amber-500/10" : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"}`}
+                              title={poll.status === "active" ? "Close Poll" : "Re-open Poll"}
+                            >
+                              {poll.status === "active" ? <Lock className="size-4" /> : <Unlock className="size-4" />}
+                            </Button>
+                          );
+                        })()}
                         <Button 
                           variant="ghost" 
                           size="sm" 
@@ -365,6 +379,31 @@ export default function PollsPage() {
                 </div>
               </div>
             )}
+
+            {/* Pagination Controls */}
+            {polls.length > 0 && (
+              <div className="flex items-center justify-center gap-4 pt-6 border-t border-border/50">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1 || isPollsLoading}
+                  className="rounded-lg px-4"
+                >
+                  Previous
+                </Button>
+                <span className="text-sm font-bold bg-muted px-3 py-1 rounded-md">Page {page}</span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setPage(p => p + 1)}
+                  disabled={!hasMore || isPollsLoading}
+                  className="rounded-lg px-4"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </div>
         </main>
       </div>
@@ -421,7 +460,9 @@ export default function PollsPage() {
 
 function StatusPill({ status }: { status: string }) {
   const map: Record<string, { cls: string; icon: React.ReactNode }> = {
-    Live: { cls: "bg-accent text-accent-foreground", icon: <span className="size-1.5 rounded-full bg-primary" /> },
+    Running: { cls: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", icon: <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" /> },
+    Ended: { cls: "bg-amber-500/10 text-amber-600 dark:text-amber-400", icon: <Calendar className="size-3" /> },
+    Active: { cls: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", icon: <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" /> },
     Draft: { cls: "bg-muted text-muted-foreground", icon: <Clock className="size-3" /> },
     Closed: { cls: "bg-foreground/5 text-foreground/70", icon: <CheckCircle2 className="size-3" /> },
   };

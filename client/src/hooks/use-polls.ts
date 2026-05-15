@@ -6,10 +6,10 @@ import type { Poll, PollResponse, PollsResponse } from "@/types/polls";
 import { useEffect } from "react";
 import { socketClient } from "@/lib/socket";
 
-export const usePolls = () => {
+export const usePolls = (page: number = 1, limit: number = 10) => {
   return useQuery<PollsResponse>({
-    queryKey: ["polls"],
-    queryFn: pollsApi.getAll,
+    queryKey: ["polls", page, limit],
+    queryFn: () => pollsApi.getAll(limit, (page - 1) * limit),
   });
 };
 
@@ -17,6 +17,13 @@ export const usePublicPolls = () => {
   return useQuery<PollsResponse>({
     queryKey: ["public-polls"],
     queryFn: pollsApi.getPublic,
+  });
+};
+
+export const useVotedPolls = () => {
+  return useQuery<PollsResponse>({
+    queryKey: ["voted-polls"],
+    queryFn: pollsApi.getVoted,
   });
 };
 

@@ -5,11 +5,9 @@ export class AnalyticsController {
   async getDashboardData(req: Request, res: Response, next: NextFunction) {
     try {
       const user = (req as any).user;
-      console.log("user", user) 
-      const isAdmin = user.role === "admin";
-      console.log("isAdmin", isAdmin)
-      // If admin, we don't pass userId to get global stats
-      const queryId = isAdmin ? undefined : user.id;
+      
+      // Always filter by userId to ensure users only see their own data
+      const queryId = user.id;
       const days = parseInt(req.query.days as string) || 30;
       
       const [kpis, chartData, topPoll, activity] = await Promise.all([

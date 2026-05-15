@@ -1,4 +1,4 @@
-import { LayoutGrid, BarChart3, Settings, LogOut } from "lucide-react";
+import { LayoutGrid, BarChart3, Settings, LogOut, History } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { authClient } from "@/lib/auth-client";
@@ -17,6 +17,7 @@ export function Sidebar({ user }: SidebarProps) {
   const nav = [
     { icon: LayoutGrid, label: "Overview", href: "/dashboard" },
     { icon: BarChart3, label: "Polls", href: "/polls" },
+    { icon: History, label: "History", href: "/polls/voted" },
     { icon: Settings, label: "Settings", href: "/settings" },
   ];
 

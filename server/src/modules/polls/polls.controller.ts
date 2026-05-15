@@ -286,6 +286,19 @@ export class PollsController {
       next(error);
     }
   }
+
+  async getVoted(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user.id;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const skip = parseInt(req.query.skip as string) || 0;
+      
+      const polls = await pollsService.getVotedPolls(userId, { limit, skip });
+      res.status(200).json({ success: true, data: polls });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const pollsController = new PollsController();

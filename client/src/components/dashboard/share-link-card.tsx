@@ -135,14 +135,16 @@ export function ShareLinkCard() {
         </div>
       )}
 
-      <div className="mt-4 flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/40 px-3.5 py-2.5 font-mono text-xs">
-        <span className="truncate">{shareLink.replace(/^https?:\/\//, "")}</span>
+      <div className="mt-4 flex items-center gap-3 rounded-lg border border-dashed border-border bg-muted/40 px-3 py-2 font-mono text-xs">
+        <div className="flex-1 overflow-x-auto whitespace-nowrap scrollbar-hide py-0.5">
+          {shareLink.replace(/^https?:\/\//, "")}
+        </div>
         <button
           onClick={handleShare}
           disabled={!latestPoll}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-foreground px-2.5 py-1.5 text-xs font-medium text-background hover:opacity-90 disabled:opacity-50"
+          className="shrink-0 inline-flex items-center gap-1.5 rounded-md bg-foreground px-2.5 py-1.5 text-[10px] font-bold text-background hover:opacity-90 disabled:opacity-50"
         >
-          <Globe className="size-3.5" /> Share
+          <Share2 className="size-3" /> Share
         </button>
       </div>
     </div>

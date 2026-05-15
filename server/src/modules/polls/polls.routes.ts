@@ -6,13 +6,16 @@ import { voteRateLimit, createPollRateLimit } from "../../middlewares/rate-limit
 
 const router = Router();
 
+// Static routes (must be before parameterized routes)
+router.get("/voted", authMiddleware, pollsController.getVoted);
+
 // Public routes
 router.get("/", optionalAuthMiddleware, pollsController.getAll);
+router.post("/", authMiddleware, createPollRateLimit, pollsController.create);
+
+// Parameterized routes
 router.get("/:id", optionalAuthMiddleware, pollsController.getById);
 router.post("/:id/view", optionalAuthMiddleware, pollsController.trackView);
-
-// Protected routes
-router.post("/", authMiddleware, createPollRateLimit, pollsController.create);
 router.post("/:id/vote", optionalAuthMiddleware, voteRateLimit, pollsController.vote);
 router.patch("/:id", authMiddleware, pollsController.update);
 router.delete("/:id", authMiddleware, pollsController.delete);

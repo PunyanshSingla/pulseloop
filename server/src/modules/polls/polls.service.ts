@@ -53,8 +53,22 @@ export class PollsService {
   async getPolls(filters: any = {}, options: { limit?: number; skip?: number } = {}) {
     const { limit = 20, skip = 0 } = options;
     
+    // Ensure ID fields in filters are ObjectIds for aggregation
+    const matchFilters = { ...filters };
+    if (matchFilters.createdBy && typeof matchFilters.createdBy === "string") {
+      matchFilters.createdBy = new mongoose.Types.ObjectId(matchFilters.createdBy);
+    }
+    if (matchFilters._id && typeof matchFilters._id === "string") {
+      matchFilters._id = new mongoose.Types.ObjectId(matchFilters._id);
+    }
+    if (matchFilters._id && matchFilters._id.$in && Array.isArray(matchFilters._id.$in)) {
+      matchFilters._id.$in = matchFilters._id.$in
+        .filter((id: any) => id && mongoose.Types.ObjectId.isValid(id))
+        .map((id: any) => new mongoose.Types.ObjectId(id));
+    }
+
     const polls = await Poll.aggregate([
-      { $match: filters },
+      { $match: matchFilters },
       { $sort: { createdAt: -1 } },
       { $skip: skip },
       { $limit: limit },
@@ -527,20 +541,20 @@ export class PollsService {
       Response.aggregate([
         { $match: { pollId } },
         { $group: { _id: "$voterId", device: { $first: "$deviceInfo.device" } } },
-        { $group: { _id: { $ifNull: ["$_id", "Unknown"] }, count: { $sum: 1 } } },
-        { $project: { name: { $ifNull: ["$_id", "Desktop"] }, value: "$count", _id: 0 } }
+        { $group: { _id: { $ifNull: ["$device", "Unknown"] }, count: { $sum: 1 } } },
+        { $project: { name: "$_id", value: "$count", _id: 0 } }
       ]),
       Response.aggregate([
         { $match: { pollId } },
         { $group: { _id: "$voterId", browser: { $first: "$deviceInfo.browser" } } },
-        { $group: { _id: { $ifNull: ["$_id", "Unknown"] }, count: { $sum: 1 } } },
-        { $project: { name: { $ifNull: ["$_id", "Unknown"] }, value: "$count", _id: 0 } }
+        { $group: { _id: { $ifNull: ["$browser", "Unknown"] }, count: { $sum: 1 } } },
+        { $project: { name: "$_id", value: "$count", _id: 0 } }
       ]),
       Response.aggregate([
         { $match: { pollId } },
         { $group: { _id: "$voterId", os: { $first: "$deviceInfo.os" } } },
-        { $group: { _id: { $ifNull: ["$_id", "Unknown"] }, count: { $sum: 1 } } },
-        { $project: { name: { $ifNull: ["$_id", "Unknown"] }, value: "$count", _id: 0 } }
+        { $group: { _id: { $ifNull: ["$os", "Unknown"] }, count: { $sum: 1 } } },
+        { $project: { name: "$_id", value: "$count", _id: 0 } }
       ]),
       Response.aggregate([
         { $match: { pollId } },
@@ -674,6 +688,21 @@ export class PollsService {
     await poll.save();
 
     return poll;
+  }
+
+  async getVotedPolls(userId: string, options: { limit?: number; skip?: number } = {}) {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    
+    // 1. Get unique poll IDs where the user has voted
+    const votedPollIds = await Response.distinct("pollId", { respondentId: userObjectId });
+    
+    // Defensive filtering: ensure we only have valid hex strings/ObjectIds
+    const validPollIds = votedPollIds.filter(id => id && mongoose.Types.ObjectId.isValid(id));
+    
+    if (validPollIds.length === 0) return [];
+
+    // 2. Reuse getPolls with filters for these specific IDs
+    return this.getPolls({ _id: { $in: validPollIds } }, options);
   }
 }
 
