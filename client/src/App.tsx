@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/landing.tsx";
 import SignInPage from "./pages/sign-in.tsx";
@@ -22,6 +23,13 @@ import { Toaster } from "@/components/ui/sonner";
 import { ErrorBoundary } from "./components/error-boundary";
 
 export default function App() {
+  useEffect(() => {
+    if (!localStorage.getItem("pl_voter_id")) {
+      const newVoterId = `voter_${Math.random().toString(36).substring(2, 15)}`;
+      localStorage.setItem("pl_voter_id", newVoterId);
+    }
+  }, []);
+
   return (
     <>
       <ErrorBoundary>

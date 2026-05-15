@@ -28,7 +28,7 @@ export default function PollResultsPage() {
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
 
   const poll = response?.data as Poll;
-  const analytics = analyticsResponse as unknown as Analytics;
+  const analytics = analyticsResponse?.data;
 
   if (isPollLoading || isAnalyticsLoading) {
     return (

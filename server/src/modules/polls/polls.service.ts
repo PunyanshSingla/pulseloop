@@ -536,29 +536,33 @@ export class PollsService {
       };
     });
 
-    // 2. Demographics (already using aggregation, keep as is but optimize if needed)
+    // 2. Demographics
+    const participantKey = { 
+      $ifNull: ["$respondentId", { $ifNull: ["$voterId", "$fingerprint"] }] 
+    };
+
     const [deviceBreakdown, browserBreakdown, osBreakdown, countryBreakdown] = await Promise.all([
       Response.aggregate([
         { $match: { pollId } },
-        { $group: { _id: "$voterId", device: { $first: "$deviceInfo.device" } } },
+        { $group: { _id: participantKey, device: { $first: "$deviceInfo.device" } } },
         { $group: { _id: { $ifNull: ["$device", "Unknown"] }, count: { $sum: 1 } } },
         { $project: { name: "$_id", value: "$count", _id: 0 } }
       ]),
       Response.aggregate([
         { $match: { pollId } },
-        { $group: { _id: "$voterId", browser: { $first: "$deviceInfo.browser" } } },
+        { $group: { _id: participantKey, browser: { $first: "$deviceInfo.browser" } } },
         { $group: { _id: { $ifNull: ["$browser", "Unknown"] }, count: { $sum: 1 } } },
         { $project: { name: "$_id", value: "$count", _id: 0 } }
       ]),
       Response.aggregate([
         { $match: { pollId } },
-        { $group: { _id: "$voterId", os: { $first: "$deviceInfo.os" } } },
+        { $group: { _id: participantKey, os: { $first: "$deviceInfo.os" } } },
         { $group: { _id: { $ifNull: ["$os", "Unknown"] }, count: { $sum: 1 } } },
         { $project: { name: "$_id", value: "$count", _id: 0 } }
       ]),
       Response.aggregate([
         { $match: { pollId } },
-        { $group: { _id: "$voterId", ip: { $first: "$ipAddress" } } },
+        { $group: { _id: participantKey, ip: { $first: "$ipAddress" } } },
         { $group: { _id: "$ip", count: { $sum: 1 } } }
       ])
     ]);
@@ -604,7 +608,7 @@ export class PollsService {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
-    const timeline = await Response.aggregate([
+    const timelineRaw = await Response.aggregate([
       { 
         $match: { 
           pollId,
@@ -612,34 +616,48 @@ export class PollsService {
         } 
       },
       {
-        // Group by voterId first
         $group: {
-          _id: "$voterId",
-          date: { $first: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } } },
+          _id: {
+            participantId: participantKey,
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }
+          },
           isAnonymous: { $first: { $cond: [{ $ifNull: ["$respondentId", false] }, false, true] } }
         }
       },
       {
         $group: {
-          _id: "$date",
-          anonymous: {
-            $sum: { $cond: ["$isAnonymous", 1, 0] }
-          },
-          loggedIn: {
-            $sum: { $cond: ["$isAnonymous", 0, 1] }
-          },
+          _id: "$_id.date",
+          anonymous: { $sum: { $cond: ["$isAnonymous", 1, 0] } },
+          loggedIn: { $sum: { $cond: ["$isAnonymous", 0, 1] } },
           total: { $sum: 1 }
         }
       },
       { $sort: { "_id": 1 } }
     ]);
 
+    // Fill in missing dates for the last 7 days
+    const timeline = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const existing = timelineRaw.find(t => t._id === dateStr);
+      timeline.push({
+        date: dateStr,
+        votes: existing?.total || 0,
+        anonymous: existing?.anonymous || 0,
+        loggedIn: existing?.loggedIn || 0
+      });
+    }
+
     // 6. Summary Stats
-    const uniqueVoters = await Response.distinct("voterId", { pollId });
-    const totalUniqueRespondents = uniqueVoters.length;
+    const uniqueParticipants = await Response.aggregate([
+      { $match: { pollId } },
+      { $group: { _id: participantKey, respondentId: { $first: "$respondentId" } } }
+    ]);
     
-    const anonymousVoters = await Response.distinct("voterId", { pollId, respondentId: null });
-    const anonymousCount = anonymousVoters.length;
+    const totalUniqueRespondents = uniqueParticipants.length;
+    const anonymousCount = uniqueParticipants.filter(p => !p.respondentId).length;
     const loggedInCount = totalUniqueRespondents - anonymousCount;
     
     const uniqueViews = poll.viewCount || 0;
@@ -669,12 +687,7 @@ export class PollsService {
         os: osBreakdown,
         countries
       },
-      timeline: timeline.map(t => ({ 
-        date: t._id, 
-        votes: t.total,
-        anonymous: t.anonymous,
-        loggedIn: t.loggedIn
-      }))
+      timeline
     };
   }
 
