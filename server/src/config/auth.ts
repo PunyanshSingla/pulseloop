@@ -1,8 +1,8 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { env } from "./env";
-import { sendResetPasswordEmail, sendVerificationEmail } from "../shared/email/email.service";
-import { getClient } from "./db";
+import { env } from "./env.js";
+import { sendResetPasswordEmail, sendVerificationEmail } from "../shared/email/email.service.js";
+import { getClient } from "./db.js";
 const db =  await getClient()
 if (!db) throw new Error("MongoDB connection not found");
 export const auth = betterAuth({

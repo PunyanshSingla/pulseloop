@@ -188,20 +188,20 @@ export default function ViewPollPage() {
                       {q.text}
                     </h3>
                     <RadioGroup 
-                      onValueChange={(val) => setSelectedOptions(prev => ({ ...prev, [q._id]: val }))}
-                      value={selectedOptions[q._id]}
+                      onValueChange={(val: string) => setSelectedOptions(prev => ({ ...prev, [q._id!]: val }))}
+                      value={selectedOptions[q._id!]}
                       className="grid gap-4"
                     >
-                      {q.options.map((o: { _id: string, text: string }) => {
-                        const isSelected = selectedOptions[q._id] === o._id;
+                      {q.options.map((o) => {
+                        const isSelected = selectedOptions[q._id!] === o._id;
                         return (
                           <motion.div
-                            key={o._id}
+                            key={o._id!}
                             whileHover={{ scale: 1.01 }}
                             whileTap={{ scale: 0.99 }}
                           >
                             <Label 
-                              htmlFor={o._id}
+                              htmlFor={o._id!}
                               className={`flex items-center gap-4 border-2 p-6 rounded-2xl cursor-pointer transition-all duration-300 relative overflow-hidden group ${
                                 isSelected 
                                   ? "border-primary bg-primary/5 ring-4 ring-primary/10" 
@@ -216,7 +216,7 @@ export default function ViewPollPage() {
                               <span className={`flex-1 text-lg font-bold transition-colors ${isSelected ? "text-primary" : "text-slate-700"}`}>
                                 {o.text}
                               </span>
-                              <RadioGroupItem value={o._id} id={o._id} className="sr-only" />
+                              <RadioGroupItem value={o._id!} id={o._id!} className="sr-only" />
                             </Label>
                           </motion.div>
                         );
@@ -235,12 +235,12 @@ export default function ViewPollPage() {
                 <Button 
                   onClick={handleVote} 
                   size="lg"
-                  disabled={isPending || poll.questions.some((q) => !selectedOptions[q._id])}
+                  disabled={isPending || poll.questions.some((q) => !selectedOptions[q._id!])}
                   className="h-16 rounded-2xl text-xl font-black bg-slate-900 hover:bg-slate-800 shadow-xl shadow-slate-900/10 transition-all disabled:opacity-50"
                 >
                   {isPending ? (
                     <span className="flex items-center gap-2">
-                      <Loader size="sm" /> Recording Vote...
+                      <Loader size={20} /> Recording Vote...
                     </span>
                   ) : "Cast Your Vote"}
                 </Button>

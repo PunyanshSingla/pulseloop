@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { mediaController } from "./media.controller";
-import { authMiddleware } from "../../middlewares/auth.middleware";
+import { mediaController } from "./media.controller.js";
+import { authMiddleware } from "../../middlewares/auth.middleware.js";
 import multer from "multer";
 
 const router = Router();

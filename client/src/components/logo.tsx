@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 
 export function Logo({ className = "", iconOnly = false, noLink = false }: { className?: string, iconOnly?: boolean, noLink?: boolean }) {

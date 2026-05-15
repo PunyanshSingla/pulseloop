@@ -30,7 +30,7 @@ interface Response {
 
 interface PollResponsesProps {
   poll: Poll;
-  responsesData: { data: Response[] };
+  responsesData: { data: Response[] } | undefined;
   isLoading: boolean;
 }
 

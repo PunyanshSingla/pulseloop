@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { env } from './env';
+import { env } from "./env.js";
 
 const MONGODB_URI = env.MONGODB_URI;
 const DB_NAME = env.DATABASE_NAME;

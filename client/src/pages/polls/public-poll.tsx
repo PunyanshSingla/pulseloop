@@ -46,7 +46,7 @@ export default function PublicPollPage() {
 
     const timer = setInterval(() => {
       const now = new Date().getTime();
-      const start = new Date(poll.startsAt).getTime();
+      const start = new Date(poll.startsAt || "").getTime();
       const diff = start - now;
 
       if (diff > 0) {
@@ -106,7 +106,7 @@ export default function PublicPollPage() {
   const handleOptionSelect = (optionId: string) => {
     if (!currentQuestion) return;
     
-    const newSelections = { ...selectedOptions, [currentQuestion._id]: optionId };
+    const newSelections = { ...selectedOptions, [currentQuestion._id!]: optionId };
     setSelectedOptions(newSelections);
 
     if (currentStep < totalSteps - 1) {
@@ -177,11 +177,11 @@ export default function PublicPollPage() {
     }));
 
     const unansweredMandatoryQuestions = poll.questions.filter((q) => 
-      q.isMandatory && !selectedOptions[q._id]
+      q.isMandatory && !selectedOptions[q._id!]
     );
 
     if (unansweredMandatoryQuestions.length > 0) {
-      const firstUnansweredIdx = poll.questions.findIndex((q) => q._id === unansweredMandatoryQuestions[0]._id);
+      const firstUnansweredIdx = poll.questions.findIndex((q) => q._id === unansweredMandatoryQuestions[0]._id!);
       setCurrentStep(firstUnansweredIdx);
       return;
     }
@@ -245,7 +245,7 @@ export default function PublicPollPage() {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
         <div className="w-full max-w-md space-y-4">
-          <Loader message="Loading poll questions..." />
+          <LoaderContainer message="Loading poll questions..." />
         </div>
       </div>
     );
@@ -342,7 +342,7 @@ export default function PublicPollPage() {
   }
 
   const isLastStep = currentStep === totalSteps - 1;
-  const hasAnsweredCurrent = !!selectedOptions[currentQuestion._id];
+  const hasAnsweredCurrent = !!selectedOptions[currentQuestion._id!];
   const progress = ((currentStep + (hasAnsweredCurrent ? 1 : 0)) / totalSteps) * 100;
 
   // Final condition to show success screen:
@@ -398,10 +398,10 @@ export default function PublicPollPage() {
                 <div className="grid gap-4">
                   {currentQuestion.options.map((option) => (
                     <VotingOption
-                      key={option._id}
-                      id={option._id}
+                      key={option._id!}
+                      id={option._id!}
                       text={option.text}
-                      isSelected={selectedOptions[currentQuestion._id] === option._id}
+                      isSelected={selectedOptions[currentQuestion._id!] === option._id}
                       onSelect={handleOptionSelect}
                       disabled={isVoting}
                     />
@@ -439,7 +439,7 @@ export default function PublicPollPage() {
                         disabled={isVoting || (currentQuestion.isMandatory && !hasAnsweredCurrent)}
                         onClick={handleVote}
                       >
-                        {isVoting ? <Loader size="sm" /> : (hasAnsweredCurrent ? "Submit Vote" : "Skip & Submit")}
+                        {isVoting ? <Loader size={20} /> : (hasAnsweredCurrent ? "Submit Vote" : "Skip & Submit")}
                       </Button>
                     )}
                   </div>

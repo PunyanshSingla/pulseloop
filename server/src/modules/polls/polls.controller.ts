@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import { pollsService } from "./polls.service";
-import { pollSchema } from "./poll.types";
-import { socketService } from "../../services/socket.service";
-import Poll from "../../models/Poll";
-import ResponseModel from "../../models/Response";
-import { generateServerFingerprint } from "../../utils/fingerprint";
+import { pollsService } from "./polls.service.js";
+import { pollSchema } from "./poll.types.js";
+import { socketService } from "../../services/socket.service.js";
+import Poll from "../../models/Poll.js";
+import ResponseModel from "../../models/Response.js";
+import { generateServerFingerprint } from "../../utils/fingerprint.js";
 
 export class PollsController {
   async create(req: Request, res: Response, next: NextFunction) {

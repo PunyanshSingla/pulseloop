@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { analyticsService } from "./analytics.service";
+import { analyticsService } from "./analytics.service.js";
 
 export class AnalyticsController {
   async getDashboardData(req: Request, res: Response, next: NextFunction) {

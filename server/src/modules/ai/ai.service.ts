@@ -1,7 +1,7 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { z } from 'zod';
-import { env } from '../../config/env';
+import { env } from "../../config/env.js";
 
 export class AIService {
   private googleProvider;

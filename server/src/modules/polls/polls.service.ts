@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import Poll, { IPoll } from "../../models/Poll";
-import Question from "../../models/Question";
-import QuestionOption from "../../models/QuestionOption";
-import Response from "../../models/Response";
-import User from "../../models/User";
-import PollView from "../../models/PollView";
-import { CreatePollInput, UpdatePollInput } from "./poll.types";
+import Poll, { IPoll } from "../../models/Poll.js";
+import Question from "../../models/Question.js";
+import QuestionOption from "../../models/QuestionOption.js";
+import Response from "../../models/Response.js";
+import User from "../../models/User.js";
+import PollView from "../../models/PollView.js";
+import { CreatePollInput, UpdatePollInput } from "./poll.types.js";
 import geoip from "geoip-lite";
 
 export class PollsService {

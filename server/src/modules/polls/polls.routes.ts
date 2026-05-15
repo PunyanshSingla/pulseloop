@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { pollsController } from "./polls.controller";
-import { authMiddleware } from "../../middlewares/auth.middleware";
-import { optionalAuthMiddleware } from "../../middlewares/optional-auth.middleware";
-import { voteRateLimit, createPollRateLimit } from "../../middlewares/rate-limit.middleware";
+import { pollsController } from "./polls.controller.js";
+import { authMiddleware } from "../../middlewares/auth.middleware.js";
+import { optionalAuthMiddleware } from "../../middlewares/optional-auth.middleware.js";
+import { voteRateLimit, createPollRateLimit } from "../../middlewares/rate-limit.middleware.js";
 
 const router = Router();
 

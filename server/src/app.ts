@@ -1,14 +1,14 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { env } from "./config/env";
-import { errorMiddleware } from "./middlewares/error.middleware";
+import { env } from "./config/env.js";
+import { errorMiddleware } from "./middlewares/error.middleware.js";
 
-import pollRoutes from "./modules/polls/polls.routes";
-import analyticsRoutes from "./modules/analytics/analytics.routes";
-import mediaRoutes from "./modules/media/media.routes";
-import usersRoutes from "./modules/users/users.routes";
-import aiRoutes from "./modules/ai/ai.routes";
+import pollRoutes from "./modules/polls/polls.routes.js";
+import analyticsRoutes from "./modules/analytics/analytics.routes.js";
+import mediaRoutes from "./modules/media/media.routes.js";
+import usersRoutes from "./modules/users/users.routes.js";
+import aiRoutes from "./modules/ai/ai.routes.js";
 
 const app = express();
 

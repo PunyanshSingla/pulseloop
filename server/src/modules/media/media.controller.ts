@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import cloudinary from "../../config/cloudinary";
+import cloudinary from "../../config/cloudinary.js";
 
 export class MediaController {
   async upload(req: Request, res: Response, next: NextFunction) {

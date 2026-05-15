@@ -6,3 +6,4 @@ server/node_modules
 server/.env
 client/skills-lock.json
 client/.agents
+server/dist

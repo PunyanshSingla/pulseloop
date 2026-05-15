@@ -1,7 +1,7 @@
-import { resend } from "../../config/resend"
-import { env } from "../../config/env"
-import { verificationTemplate } from "./tempelates/verification.tempelate";
-import { resetPasswordTemplate } from "./tempelates/reset-password.tempelate";
+import { resend } from "../../config/resend.js"
+import { env } from "../../config/env.js"
+import { verificationTemplate } from "./tempelates/verification.tempelate.js";
+import { resetPasswordTemplate } from "./tempelates/reset-password.tempelate.js";
 export const sendEmail = async ({ to, subject, html }: { to: string; subject: string; html: string }) => {
     const { data, error } = await resend.emails.send({
         from: `PulseLoop <${env.EMAIL_FROM}>`,

@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import app from "./app";
-import { env } from "./config/env";
-import { auth } from "./config/auth";
+import app from "./app.js";
+import { env } from "./config/env.js";
+import { auth } from "./config/auth.js";
 import { toNodeHandler } from "better-auth/node";
 import { createServer } from "http";
-import { socketService } from "./services/socket.service";
-import { connectDB } from "./config/db";
+import { socketService } from "./services/socket.service.js";
+import { connectDB } from "./config/db.js";
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
 

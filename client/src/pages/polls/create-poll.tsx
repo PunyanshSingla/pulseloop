@@ -35,7 +35,7 @@ export default function CreatePollPage() {
   const pollData = pollResponse?.data;
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [questions, setQuestions] = useState([
+  const [questions, setQuestions] = useState<{ id: string | number; text: string; options: string[]; isMandatory: boolean }[]>([
     { id: 1, text: "", options: ["", ""], isMandatory: true }
   ]);
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
@@ -97,7 +97,7 @@ export default function CreatePollPage() {
     setActiveQuestionIndex(questions.length);
   };
 
-  const removeQuestion = (id: number) => {
+  const removeQuestion = (id: string | number) => {
     if (questions.length > 1) {
       setQuestions(questions.filter(q => q.id !== id));
     }
@@ -147,15 +147,15 @@ export default function CreatePollPage() {
     }
   };
 
-  const handleQuestionChange = (id: number, text: string) => {
+  const handleQuestionChange = (id: string | number, text: string) => {
     setQuestions(questions.map(q => q.id === id ? { ...q, text } : q));
   };
 
-  const toggleMandatory = (id: number) => {
+  const toggleMandatory = (id: string | number) => {
     setQuestions(questions.map(q => q.id === id ? { ...q, isMandatory: !q.isMandatory } : q));
   };
 
-  const handleOptionChange = (qId: number, oIdx: number, text: string) => {
+  const handleOptionChange = (qId: string | number, oIdx: number, text: string) => {
     setQuestions(questions.map(q => {
       if (q.id === qId) {
         const newOptions = [...q.options];
@@ -166,7 +166,7 @@ export default function CreatePollPage() {
     }));
   };
 
-  const addOption = (qId: number) => {
+  const addOption = (qId: string | number) => {
     setQuestions(questions.map(q => 
       q.id === qId ? { ...q, options: [...q.options, ""] } : q
     ));

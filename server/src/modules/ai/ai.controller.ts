@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { aiService } from "./ai.service";
+import { aiService } from "./ai.service.js";
 
 export const aiController = {
   async generatePoll(req: Request, res: Response) {

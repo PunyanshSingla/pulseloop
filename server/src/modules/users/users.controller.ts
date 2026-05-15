@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getClient } from "../../config/db";
+import { getClient } from "../../config/db.js";
 
 export class UsersController {
   async getMe(req: Request, res: Response, next: NextFunction) {

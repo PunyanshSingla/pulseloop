@@ -1,4 +1,4 @@
-import type { Poll, PollResponse, PollsResponse, Analytics, DashboardData, VotePayload, Response } from "@/types/polls";
+import type { Poll, PollResponse, PollsResponse, Analytics, AnalyticsResponse, DashboardData, VotePayload, Response } from "@/types/polls";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
@@ -60,7 +60,7 @@ export const pollsApi = {
       body: JSON.stringify(data) 
     }),
   getResponses: (pollId: string) => request<{ data: Response[] }>(`/polls/${pollId}/responses`),
-  getAnalytics: (pollId: string) => request<Analytics>(`/polls/${pollId}/analytics`),
+  getAnalytics: (pollId: string) => request<AnalyticsResponse>(`/polls/${pollId}/analytics`),
   publishResults: (id: string) => request<PollResponse>(`/polls/${id}/publish`, { method: "POST" }),
 };
 
@@ -76,7 +76,7 @@ export const mediaApi = {
 };
 
 export const usersApi = {
-  getMe: () => request<{ success: boolean, data: unknown }>("/user/me"),
+  getMe: () => request<{ success: boolean, data: { hasPassword?: boolean } }>("/user/me"),
 };
 
 export const aiApi = {

@@ -15,7 +15,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { authClient } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Nav ───────────────────────────────────────────────────────────────────────
 function Nav() {

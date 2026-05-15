@@ -1,12 +1,12 @@
 export interface PollOption {
-  _id: string;
+  _id?: string;
   text: string;
   responseCount?: number;
   percentage?: number;
 }
 
 export interface PollQuestion {
-  _id: string;
+  _id?: string;
   text: string;
   isMandatory: boolean;
   options: PollOption[];
@@ -40,6 +40,12 @@ export interface PollsResponse {
 
 export interface PollResponse {
   data: Poll;
+  message?: string;
+}
+
+export interface AnalyticsResponse {
+  success: boolean;
+  data: Analytics;
   message?: string;
 }
 
@@ -105,10 +111,22 @@ export interface ActivityEvent {
 }
 
 export interface DashboardData {
-  totalPolls: number;
-  totalVotes: number;
-  activePolls: number;
-  growth: number;
-  activity: ActivityEvent[];
-  chartData: { date: string; total: number }[];
+  success: boolean;
+  data: {
+    kpis: {
+      totalResponses: number;
+      activePolls: number;
+      totalResponsesGrowth: string;
+      activePollsGrowth: string;
+      completionRate: string;
+      completionRateGrowth: string;
+      avgResponseTime: string;
+      avgResponseTimeGrowth: string;
+      anonymousResponses: number;
+      loggedInResponses: number;
+    };
+    chartData: { date: string; anonymous: number; loggedIn: number; total: number }[];
+    topPoll: Poll | null;
+    activity: ActivityEvent[];
+  };
 }

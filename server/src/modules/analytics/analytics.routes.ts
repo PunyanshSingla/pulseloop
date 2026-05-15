@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { analyticsController } from "./analytics.controller";
-import { authMiddleware } from "../../middlewares/auth.middleware";
+import { analyticsController } from "./analytics.controller.js";
+import { authMiddleware } from "../../middlewares/auth.middleware.js";
 
 const router = Router();
 

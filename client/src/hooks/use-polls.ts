@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { pollsApi } from "@/lib/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import type { Poll, PollResponse, PollsResponse } from "@/types/polls";
+import type { Poll, PollResponse, PollsResponse, AnalyticsResponse, VotePayload } from "@/types/polls";
 import { useEffect } from "react";
 import { socketClient } from "@/lib/socket";
 
@@ -137,7 +137,7 @@ export const useVote = (pollId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Record<string, string>) => pollsApi.vote(pollId, data),
+    mutationFn: (data: VotePayload) => pollsApi.vote(pollId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["poll", pollId] });
       toast.success("Vote recorded!");
@@ -155,12 +155,6 @@ export const usePollResponses = (id: string) => {
   });
 };
 
-export interface PollAnalytics {
-  devices: { name: string; value: number }[];
-  browsers: { name: string; value: number }[];
-  os: { name: string; value: number }[];
-  countries: { name: string; value: number }[];
-}
 
 export const usePollAnalytics = (id: string) => {
   const queryClient = useQueryClient();
@@ -184,7 +178,7 @@ export const usePollAnalytics = (id: string) => {
     };
   }, [id, queryClient]);
 
-  return useQuery<PollAnalytics>({
+  return useQuery<AnalyticsResponse>({
     queryKey: ["poll-analytics", id],
     queryFn: () => pollsApi.getAnalytics(id),
     enabled: !!id,

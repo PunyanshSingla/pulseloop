@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import Poll from "../../models/Poll";
-import User from "../../models/User"
-import Response from "../../models/Response";
-import PollView from "../../models/PollView";
-import Question from "../../models/Question";
-import QuestionOption from "../../models/QuestionOption";
+import Poll from "../../models/Poll.js";
+import User from "../../models/User.js"
+import Response from "../../models/Response.js";
+import PollView from "../../models/PollView.js";
+import Question from "../../models/Question.js";
+import QuestionOption from "../../models/QuestionOption.js";
 
 export class AnalyticsService {
   async getKPIData(userId?: string) {

@@ -48,7 +48,7 @@ const CustomTooltip = ({ active, payload, label, suffix = "votes" }: CustomToolt
 
 interface PollOverviewProps {
   poll: Poll;
-  analytics: Analytics;
+  analytics: Analytics | undefined;
 }
 
 export const PollOverview = ({ poll, analytics }: PollOverviewProps) => {

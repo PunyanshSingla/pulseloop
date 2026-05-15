@@ -15,12 +15,13 @@ export function CreatePollForm() {
   const [questions, setQuestions] = useState([
     {
       text: "",
+      isMandatory: false,
       options: [{ text: "" }, { text: "" }],
     },
   ]);
 
   const addQuestion = () => {
-    setQuestions([...questions, { text: "", options: [{ text: "" }, { text: "" }] }]);
+    setQuestions([...questions, { text: "", isMandatory: false, options: [{ text: "" }, { text: "" }] }]);
   };
 
   const removeQuestion = (index: number) => {

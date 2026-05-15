@@ -1,15 +1,15 @@
 import { motion } from "framer-motion";
 
 interface PollTabsProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab: "overview" | "responses" | "settings";
+  onTabChange: (tab: "overview" | "responses" | "settings") => void;
 }
 
 export const PollTabs = ({ activeTab, onTabChange }: PollTabsProps) => {
   const tabs = [
-    { id: "overview", label: "Overview" },
-    { id: "responses", label: "Responses" },
-    { id: "settings", label: "Settings" },
+    { id: "overview" as const, label: "Overview" },
+    { id: "responses" as const, label: "Responses" },
+    { id: "settings" as const, label: "Settings" },
   ];
 
   return (
