@@ -45,7 +45,8 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 export const pollsApi = {
   create: (data: Partial<Poll>) => request<PollResponse>("/polls", { method: "POST", body: JSON.stringify(data) }),
   getAll: (limit: number = 10, skip: number = 0) => request<PollsResponse>(`/polls?limit=${limit}&skip=${skip}`),
-  getPublic: () => request<PollsResponse>("/polls?type=public"),
+  getPublic: (limit: number = 20, skip: number = 0, search: string = "", allowAnonymous?: boolean) => 
+    request<PollsResponse>(`/polls?type=public&limit=${limit}&skip=${skip}${search ? `&search=${search}` : ""}${allowAnonymous !== undefined ? `&allowAnonymous=${allowAnonymous}` : ""}`),
   getVoted: () => request<PollsResponse>("/polls/voted"),
   getById: (id: string) => request<PollResponse>(`/polls/${id}`),
   trackView: (id: string, data: { fingerprint: string }) => 

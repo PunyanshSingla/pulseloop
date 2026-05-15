@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { pollsApi } from "@/lib/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -13,10 +13,14 @@ export const usePolls = (page: number = 1, limit: number = 10) => {
   });
 };
 
-export const usePublicPolls = () => {
-  return useQuery<PollsResponse>({
-    queryKey: ["public-polls"],
-    queryFn: pollsApi.getPublic,
+export const usePublicPolls = (limit: number = 10, search: string = "", allowAnonymous?: boolean) => {
+  return useInfiniteQuery<PollsResponse>({
+    queryKey: ["public-polls", limit, search, allowAnonymous],
+    queryFn: ({ pageParam = 0 }) => pollsApi.getPublic(limit, pageParam as number, search, allowAnonymous),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.data.length < limit ? undefined : allPages.length * limit;
+    },
   });
 };
 

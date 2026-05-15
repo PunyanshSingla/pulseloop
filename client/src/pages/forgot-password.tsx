@@ -18,15 +18,15 @@ export default function ForgotPasswordPage() {
       </div>
       <div className="relative hidden bg-muted lg:block">
         {
-          theme.theme == "light" ? (
+          theme.resolvedTheme === "dark" ? (
             <img
-              src="/forgotpassword-page-lightmode.png"
+              src="/forgotpassword-page-darkmode.png"
               alt="Image"
               className="absolute h-full w-full object-cover"
             />
           ) : (
             <img
-              src="/forgotpassword-page-darkmode.png"
+              src="/forgotpassword-page-lightmode.png"
               alt="Image"
               className="absolute h-full w-full object-cover"
             />

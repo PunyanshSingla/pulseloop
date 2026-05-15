@@ -23,8 +23,27 @@ import { Logo } from "@/components/logo";
 
 export default function ExplorePage() {
   const { data: session } = authClient.useSession();
-  const { data: pollsResponse, isLoading } = usePublicPolls();
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Debounce search query to avoid excessive API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const [allowAnonymousFilter, setAllowAnonymousFilter] = useState<boolean | undefined>(undefined);
+
+  const { 
+    data: pollsResponse, 
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = usePublicPolls(12, debouncedSearch, allowAnonymousFilter);
+
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -39,11 +58,7 @@ export default function ExplorePage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const polls = pollsResponse?.data || [];
-  const filteredPolls = polls.filter((poll: Poll) => 
-    poll.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (poll.description || "").toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const polls = pollsResponse?.pages.flatMap(page => page.data) || [];
 
   const container = {
     hidden: { opacity: 0 },
@@ -171,7 +186,34 @@ export default function ExplorePage() {
               className="w-full h-11 bg-muted/50 border border-border/50 rounded-xl pl-11 pr-4 text-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none"
             />
           </div>
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex items-center justify-end gap-4">
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-background p-1">
+              <button
+                onClick={() => setAllowAnonymousFilter(undefined)}
+                className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                  allowAnonymousFilter === undefined ? "bg-accent text-accent-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setAllowAnonymousFilter(true)}
+                className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                  allowAnonymousFilter === true ? "bg-accent text-accent-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Guest
+              </button>
+              <button
+                onClick={() => setAllowAnonymousFilter(false)}
+                className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                  allowAnonymousFilter === false ? "bg-accent text-accent-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Login Req
+              </button>
+            </div>
+
             <div className="flex items-center rounded-lg border border-border bg-background p-1">
               <button
                 onClick={() => setViewMode("cards")}
@@ -200,7 +242,7 @@ export default function ExplorePage() {
               <div key={i} className="h-[240px] rounded-2xl bg-muted animate-pulse border border-border" />
             ))}
           </div>
-        ) : filteredPolls.length === 0 ? (
+        ) : polls.length === 0 ? (
           <div className="py-24 text-center">
             <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted text-muted-foreground mb-4">
               <BarChart3 className="size-8" />
@@ -215,27 +257,39 @@ export default function ExplorePage() {
             animate="show"
             className={viewMode === "cards" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}
           >
-            {filteredPolls.map((poll: Poll) => (
+            {polls.map((poll: Poll) => (
               <motion.div key={poll._id} variants={item}>
                 {viewMode === "cards" ? (
                   <Link 
                     to={`/vote/${poll._id}`}
                     className="group flex flex-col h-full bg-card rounded-2xl border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all p-6 relative overflow-hidden"
                   >
-                    <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                        <ArrowRight className="size-4" />
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary flex items-center justify-center transition-colors">
+                          <BarChart3 className="size-5" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <Users className="size-3" />
+                            {poll.responseCount || 0} responses
+                          </span>
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="h-10 w-10 rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary flex items-center justify-center transition-colors">
-                        <BarChart3 className="size-5" />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                          <Users className="size-3" />
-                          {poll.responseCount || 0} responses
+                      <div className="flex flex-col items-end gap-1.5">
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${
+                          poll.status === 'active' 
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
+                            : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                        }`}>
+                          {poll.status}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${
+                          poll.allowAnonymous 
+                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' 
+                            : 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
+                        }`}>
+                          {poll.allowAnonymous ? 'Guest' : 'Login Required'}
                         </span>
                       </div>
                     </div>
@@ -252,7 +306,12 @@ export default function ExplorePage() {
                         <Clock className="size-3.5" />
                         {formatDistanceToNow(new Date(poll.createdAt))} ago
                       </div>
-                      <span className="text-xs font-bold text-primary group-hover:underline">Vote Now</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-primary group-hover:underline">
+                          {poll.status === 'active' ? 'Vote Now' : 'View Results'}
+                        </span>
+                        <ArrowRight className="size-3.5 text-primary opacity-0 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-2 transition-all" />
+                      </div>
                     </div>
                   </Link>
                 ) : (
@@ -275,7 +334,7 @@ export default function ExplorePage() {
                         <p className="text-[10px] uppercase text-muted-foreground">Responses</p>
                       </div>
                       <Button variant="ghost" size="sm" className="text-primary hover:text-primary hover:bg-primary/10">
-                        Vote
+                        {poll.status === 'active' ? 'Vote' : 'Results'}
                       </Button>
                     </div>
                   </Link>
@@ -283,6 +342,28 @@ export default function ExplorePage() {
               </motion.div>
             ))}
           </motion.div>
+        )}
+
+        {/* Load More Button */}
+        {hasNextPage && (
+          <div className="mt-16 flex justify-center border-t border-border pt-12">
+            <Button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              variant="outline"
+              size="lg"
+              className="min-w-[200px] h-12 font-bold rounded-xl"
+            >
+              {isFetchingNextPage ? (
+                <div className="flex items-center">
+                  <div className="mr-2 size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  Loading...
+                </div>
+              ) : (
+                "Load more polls"
+              )}
+            </Button>
+          </div>
         )}
       </main>
 

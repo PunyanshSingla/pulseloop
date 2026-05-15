@@ -23,11 +23,24 @@ export class PollsController {
       const isPublic = req.query.type === "public";
       const limit = parseInt(req.query.limit as string) || 20;
       const skip = parseInt(req.query.skip as string) || 0;
+      const search = req.query.search as string;
+      const allowAnonymous = req.query.allowAnonymous;
       
       let filters: any = {};
       
       if (isPublic) {
-        filters = { visibility: "public", status: "active" };
+        filters = { visibility: "public", status: { $ne: "draft" } };
+        
+        if (allowAnonymous !== undefined) {
+          filters.allowAnonymous = allowAnonymous === "true";
+        }
+
+        if (search) {
+          filters.$or = [
+            { title: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } }
+          ];
+        }
       } else {
         const userId = (req as any).user?.id;
         if (!userId) {

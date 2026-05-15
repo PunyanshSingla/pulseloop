@@ -32,15 +32,15 @@ export default function SignInPage() {
       </div>
       <div className="relative hidden bg-muted lg:block">
         {
-          theme.theme == "light" ? (
+          theme.resolvedTheme === "dark" ? (
             <img
-            src="/signin-page-lightmode.png"
+            src="/signin-page-darkmode.png"
             alt="Image"
             className="absolute h-full w-full object-cover"
           />
           ) : (
             <img
-            src="/signin-page-darkmode.png"
+            src="/signin-page-lightmode.png"
             alt="Image"
             className="absolute h-full w-full object-cover"
           />

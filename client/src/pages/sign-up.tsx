@@ -32,15 +32,15 @@ export default function SignupPage() {
       </div>
       <div className="relative hidden bg-muted lg:block">
         {
-          theme.theme == "light" ? (
+          theme.resolvedTheme === "dark" ? (
             <img
-              src="/signup-page-lightmode.png"
+              src="/signup-page-darkmode.png"
               alt="Image"
               className="absolute h-full w-full object-cover"
             />
           ) : (
             <img
-              src="/signup-page-darkmode.png"
+              src="/signup-page-lightmode.png"
               alt="Image"
               className="absolute h-full w-full object-cover"
             />
