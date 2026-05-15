@@ -1,4 +1,18 @@
-import { PageLoader } from "@/components/ui/page-loader";
+import { useParams, Link } from "react-router-dom";
+import { usePoll, useVote } from "@/hooks/use-polls";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { 
+  ArrowLeft, 
+  BarChart2, 
+  Sparkles, 
+  ShieldCheck, 
+  CheckCircle2 
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Loader, LoaderContainer } from "@/components/ui/loader";
 
 export default function ViewPollPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,7 +30,11 @@ export default function ViewPollPage() {
   }, [isSuccess]);
 
   if (isLoading) {
-    return <PageLoader message="Loading Poll Experience..." />;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f8fafc]">
+        <LoaderContainer message="Loading Poll Experience..." />
+      </div>
+    );
   }
 
   const poll = response?.data;
@@ -42,20 +60,17 @@ export default function ViewPollPage() {
     let os = "Unknown";
     let device = "Desktop";
 
-    // Simple Browser Detection
     if (ua.includes("Firefox")) browser = "Firefox";
     else if (ua.includes("Chrome")) browser = "Chrome";
     else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
     else if (ua.includes("Edge")) browser = "Edge";
 
-    // Simple OS Detection
     if (ua.includes("Win")) os = "Windows";
     else if (ua.includes("Mac")) os = "MacOS";
     else if (ua.includes("Linux")) os = "Linux";
     else if (ua.includes("Android")) os = "Android";
     else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
 
-    // Simple Device Detection
     if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) device = "Tablet";
     else if (/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|NetFront|Silk-Accelerated|(hpw|web)OS|Fennec|Minimo|Opera M(obi|ini)|Blazer|Dolfin|Dolphin|Skyfire|Zune/.test(ua)) device = "Mobile";
 
@@ -73,14 +88,13 @@ export default function ViewPollPage() {
     const poll = response?.data;
     if (!poll) return;
 
-    // Get security tokens from localStorage
     let voterId = localStorage.getItem("voterId");
     if (!voterId) {
       voterId = `voter_${Math.random().toString(36).substring(7)}`;
       localStorage.setItem("voterId", voterId);
     }
 
-    const fingerprint = `fp_${Math.random().toString(36).substring(7)}`; // In real app, use a lib like FingerprintJS
+    const fingerprint = `fp_${Math.random().toString(36).substring(7)}`; 
 
     const responses = Object.entries(selectedOptions).map(([questionId, optionId]) => ({
       questionId,
@@ -105,13 +119,11 @@ export default function ViewPollPage() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-foreground relative overflow-hidden font-sans">
-      {/* Decorative Background Elements */}
       <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
       <div className="absolute top-[-100px] right-[-100px] size-[400px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-[-100px] left-[-100px] size-[400px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="container relative mx-auto py-12 px-4 max-w-2xl">
-        {/* Top Navigation */}
         <div className="flex items-center justify-between mb-10">
           <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors group">
             <div className="size-8 rounded-full border border-border flex items-center justify-center bg-background group-hover:bg-muted transition-colors">
@@ -137,7 +149,6 @@ export default function ViewPollPage() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="space-y-6"
             >
-              {/* Poll Header Card */}
               <div className="relative overflow-hidden rounded-3xl border border-border/50 bg-white shadow-2xl shadow-primary/5 p-8 sm:p-12 text-center">
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
                 <motion.div
@@ -163,7 +174,6 @@ export default function ViewPollPage() {
                 </div>
               </div>
 
-              {/* Questions Area */}
               <div className="space-y-8">
                 {poll.questions.map((q: any, qIdx: number) => (
                   <motion.div 
@@ -218,7 +228,6 @@ export default function ViewPollPage() {
                 ))}
               </div>
 
-              {/* Action Buttons */}
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -233,7 +242,7 @@ export default function ViewPollPage() {
                 >
                   {isPending ? (
                     <span className="flex items-center gap-2">
-                      <Loader2 className="size-5 animate-spin" /> Recording Vote...
+                      <Loader size="sm" /> Recording Vote...
                     </span>
                   ) : "Cast Your Vote"}
                 </Button>
@@ -292,4 +301,3 @@ export default function ViewPollPage() {
     </div>
   );
 }
-

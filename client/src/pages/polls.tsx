@@ -7,13 +7,10 @@ import { Topbar } from "@/components/dashboard/topbar";
 import { 
   Plus, 
   Search, 
-  Filter, 
-  MoreHorizontal, 
   BarChart3, 
   Clock, 
   CheckCircle2,
   Calendar,
-  Eye,
   ArrowUpRight,
   LayoutGrid,
   List,
@@ -21,7 +18,6 @@ import {
   Trash2,
   Edit,
   AlertTriangle,
-  AlertCircle,
   Lock,
   Unlock
 } from "lucide-react";
@@ -29,6 +25,15 @@ import { usePolls, useDeletePoll, useUpdatePollAction } from "@/hooks/use-polls"
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Table, 
+  TableHeader, 
+  TableBody, 
+  TableHead, 
+  TableRow, 
+  TableCell 
+} from "@/components/ui/table";
+import { LoaderContainer } from "@/components/ui/loader";
 
 export default function PollsPage() {
   const { data: session, isPending: isSessionPending } = authClient.useSession();
@@ -82,13 +87,10 @@ export default function PollsPage() {
     poll.visibility.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (isPending) {
+  if (isPending && page === 1) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm font-medium text-muted-foreground">Loading workspace...</p>
-        </div>
+        <LoaderContainer message="Loading your workspace..." />
       </div>
     );
   }
@@ -125,7 +127,7 @@ export default function PollsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background text-foreground">
       <Sidebar user={session.user} />
       
       <div className="flex min-w-0 flex-1 flex-col">
@@ -201,7 +203,13 @@ export default function PollsPage() {
                     {!searchQuery && <Button onClick={() => navigate("/polls/create")}>Create Poll</Button>}
                   </div>
                 ) : filteredPolls.map((poll: any) => (
-                  <div key={poll._id} className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-all hover:shadow-sm">
+                  <motion.div 
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    key={poll._id} 
+                    className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-all hover:shadow-sm"
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         <div className="grid size-10 place-items-center rounded-lg bg-muted text-muted-foreground">
@@ -291,34 +299,34 @@ export default function PollsPage() {
                         Manage Poll <ArrowUpRight className="size-3.5" />
                       </Link>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             ) : (
               <div className="rounded-xl border border-border bg-card overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                        <th className="px-5 py-3.5 font-medium">Poll</th>
-                        <th className="px-5 py-3.5 font-medium">Status</th>
-                        <th className="px-5 py-3.5 font-medium">Type</th>
-                        <th className="px-5 py-3.5 text-right font-medium">Responses</th>
-                        <th className="px-5 py-3.5 text-right font-medium">Completion</th>
-                        <th className="px-5 py-3.5 font-medium">Updated</th>
-                        <th className="px-5 py-3.5"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredPolls.length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground">
-                            {searchQuery ? "No polls match your search." : "No polls found. Create your first poll to start gathering insights."}
-                          </td>
-                        </tr>
-                      ) : filteredPolls.map((p: any) => (
-                        <tr key={p._id} className="border-b border-border/70 last:border-0 transition-colors hover:bg-muted/40">
-                          <td className="px-5 py-3.5">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Poll</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead className="text-right">Responses</TableHead>
+                      <TableHead className="text-right">Completion</TableHead>
+                      <TableHead>Updated</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPolls.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                          {searchQuery ? "No polls match your search." : "No polls found."}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredPolls.map((p: any) => (
+                        <TableRow key={p._id}>
+                          <TableCell>
                             <div className="flex items-center gap-3">
                               <div className="grid size-8 place-items-center rounded-md bg-muted text-muted-foreground">
                                 <BarChart3 className="size-4" />
@@ -327,21 +335,21 @@ export default function PollsPage() {
                                 {p.title}
                               </Link>
                             </div>
-                          </td>
-                          <td className="px-5 py-3.5">
+                          </TableCell>
+                          <TableCell>
                             <StatusPill status={p.status.charAt(0).toUpperCase() + p.status.slice(1)} />
-                          </td>
-                          <td className="px-5 py-3.5 text-xs text-muted-foreground">{p.visibility.charAt(0).toUpperCase() + p.visibility.slice(1)}</td>
-                          <td className="px-5 py-3.5 text-right tabular-nums">{p.responseCount || 0}</td>
-                          <td className="px-5 py-3.5 text-right tabular-nums">
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">{p.visibility.charAt(0).toUpperCase() + p.visibility.slice(1)}</TableCell>
+                          <TableCell className="text-right tabular-nums">{p.responseCount || 0}</TableCell>
+                          <TableCell className="text-right tabular-nums">
                             {p.viewCount > 0 
                               ? `${Math.min(100, Math.round((p.responseCount / p.viewCount) * 100))}%` 
                               : "0%"}
-                          </td>
-                          <td className="px-5 py-3.5 text-xs text-muted-foreground">
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
                             {p.updatedAt ? formatDistanceToNow(new Date(p.updatedAt)) : "N/A"} ago
-                          </td>
-                          <td className="px-5 py-3.5 text-right">
+                          </TableCell>
+                          <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-1">
                               <Button 
                                 variant="ghost" 
@@ -371,12 +379,12 @@ export default function PollsPage() {
                                 <Trash2 className="size-3.5" />
                               </Button>
                             </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
               </div>
             )}
 

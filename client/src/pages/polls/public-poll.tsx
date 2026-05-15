@@ -4,7 +4,7 @@ import { authClient } from "@/lib/auth-client";
 import { usePoll, useVote } from "@/hooks/use-polls";
 import { socketClient } from "@/lib/socket";
 import { Button } from "@/components/ui/button";
-import { Loader2, Check, ChevronLeft, Clock, Lock, AlertTriangle } from "lucide-react";
+import { Check, ChevronLeft, Clock, Lock, AlertTriangle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { VotingOption } from "@/components/polls/voting-option";
 import confetti from "canvas-confetti";
@@ -12,9 +12,8 @@ import { pollsApi } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/logo";
 import { toast } from "sonner";
-import { PageLoader } from "@/components/ui/page-loader";
+import { Loader, LoaderContainer } from "@/components/ui/loader";
 
-// Initialize voter ID early for API consistency
 if (typeof window !== "undefined") {
   if (!localStorage.getItem("pl_voter_id")) {
     localStorage.setItem("pl_voter_id", crypto.randomUUID());
@@ -40,7 +39,6 @@ export default function PublicPollPage() {
   const [timeLeftToStart, setTimeLeftToStart] = useState<{ d: number, h: number, m: number, s: number } | null>(null);
 
   useEffect(() => {
-    // Generate a simple browser fingerprint
     const getFingerprint = () => {
       const { userAgent, language, platform } = navigator;
       const { width, height, colorDepth } = window.screen;
@@ -53,7 +51,6 @@ export default function PublicPollPage() {
     setFingerprint(getFingerprint());
   }, []);
 
-  // Countdown timer logic
   useEffect(() => {
     if (!poll?.startsAt) return;
 
@@ -77,7 +74,6 @@ export default function PublicPollPage() {
     return () => clearInterval(timer);
   }, [poll?.startsAt]);
 
-  // Track unique view
   useEffect(() => {
     if (id && fingerprint) {
       pollsApi.trackView(id, { fingerprint }).catch(err => {
@@ -131,7 +127,6 @@ export default function PublicPollPage() {
     setSelectedOptions(newSelections);
 
     if (currentStep < totalSteps - 1) {
-      // Auto-advance after a small delay for visual feedback
       setTimeout(() => {
         setCurrentStep(prev => prev + 1);
       }, 400);
@@ -140,12 +135,11 @@ export default function PublicPollPage() {
 
   const handleSkip = () => {
     if (!currentQuestion) return;
-    if (currentQuestion.isMandatory) return; // Should not be possible via UI but safety first
+    if (currentQuestion.isMandatory) return;
 
     if (currentStep < totalSteps - 1) {
       setCurrentStep(prev => prev + 1);
     } else {
-      // If it's the last step and optional, skip means submit with whatever we have
       handleVote();
     }
   };
@@ -159,7 +153,6 @@ export default function PublicPollPage() {
   const handleVote = async () => {
     if (!poll) return;
 
-    // Get basic device info
     const getDeviceInfo = () => {
       const ua = navigator.userAgent;
       let browser = "Unknown";
@@ -200,7 +193,6 @@ export default function PublicPollPage() {
       timeTaken: Math.round((Date.now() - startTime) / 1000 / totalSteps),
     }));
 
-    // Frontend validation: Check if all mandatory questions are answered
     const unansweredMandatoryQuestions = poll.questions.filter((q: any) => 
       q.isMandatory && !selectedOptions[q._id]
     );
@@ -211,7 +203,7 @@ export default function PublicPollPage() {
       return;
     }
 
-    if (responses.length >= 0) { // Allow 0 responses if all were optional and skipped
+    if (responses.length >= 0) { 
       vote({ responses, fingerprint, deviceInfo });
     }
   };
@@ -225,8 +217,7 @@ export default function PublicPollPage() {
   if (isAuthPending || isPollLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950">
-        <Loader2 className="size-8 animate-spin text-primary" />
-        <p className="mt-4 text-xs font-black text-muted-foreground uppercase tracking-widest animate-pulse">Initializing Pulse...</p>
+        <LoaderContainer message="Initializing Pulse..." />
       </div>
     );
   }
@@ -271,14 +262,12 @@ export default function PublicPollPage() {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
         <div className="w-full max-w-md space-y-4">
-          <Loader2 className="size-8 animate-spin text-primary mx-auto" />
-          <p className="text-slate-500 dark:text-slate-400 font-medium">Loading poll questions...</p>
+          <Loader message="Loading poll questions..." />
         </div>
       </div>
     );
   }
 
-  // Check Poll Timing
   const now = new Date();
   const startsAt = poll.startsAt ? new Date(poll.startsAt) : null;
   const expiresAt = poll.expiresAt ? new Date(poll.expiresAt) : null;
@@ -361,12 +350,10 @@ export default function PublicPollPage() {
     );
   }
 
-  // If results are published, redirect to results page
   if (poll.resultsPublished) {
     return <Navigate to={`/vote/${id}/results`} replace />;
   }
 
-  // Only redirect to sign-in if the poll specifically DISALLOWS anonymous voting
   if (!session && !poll.allowAnonymous) {
     return <Navigate to={`/sign-in?callbackUrl=/vote/${id}`} replace />;
   }
@@ -377,10 +364,8 @@ export default function PublicPollPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-foreground relative overflow-hidden font-sans selection:bg-primary/20 flex flex-col">
-      {/* Dynamic Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.03),transparent_40%)] pointer-events-none" />
       
-      {/* Fixed Progress Bar */}
       <div className="fixed top-0 left-0 w-full h-1 bg-slate-200 dark:bg-slate-800 z-50">
         <motion.div 
           initial={{ width: 0 }}
@@ -401,7 +386,6 @@ export default function PublicPollPage() {
                 transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                 className="space-y-10"
               >
-                {/* Header Info */}
                 <div className="text-center space-y-4">
                   <div className="inline-flex items-center gap-4 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
                     <span className="text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
@@ -424,7 +408,6 @@ export default function PublicPollPage() {
                   </h1>
                 </div>
 
-                {/* Options List */}
                 <div className="grid gap-4">
                   {currentQuestion.options.map((option: any) => (
                     <VotingOption
@@ -438,7 +421,6 @@ export default function PublicPollPage() {
                   ))}
                 </div>
 
-                {/* Footer Actions */}
                 <div className="pt-6 flex flex-col items-center gap-8">
                   <div className="flex items-center gap-4 w-full">
                     {currentStep > 0 && (
@@ -470,12 +452,11 @@ export default function PublicPollPage() {
                         disabled={isVoting || (currentQuestion.isMandatory && !hasAnsweredCurrent)}
                         onClick={handleVote}
                       >
-                        {isVoting ? <Loader2 className="size-5 animate-spin" /> : (hasAnsweredCurrent ? "Submit Vote" : "Skip & Submit")}
+                        {isVoting ? <Loader size="sm" /> : (hasAnsweredCurrent ? "Submit Vote" : "Skip & Submit")}
                       </Button>
                     )}
                   </div>
 
-                  {/* Real Logo Branding */}
                   <div className="flex flex-col items-center gap-3 mt-4">
                     <Logo className="scale-75 opacity-50 hover:opacity-100 transition-opacity" />
                   </div>
@@ -511,7 +492,6 @@ export default function PublicPollPage() {
                     </motion.div>
                   </div>
                   
-                  {/* Outer Ripples */}
                   {[1, 2].map((i) => (
                     <motion.div
                       key={i}
@@ -540,7 +520,7 @@ export default function PublicPollPage() {
                 <div className="flex flex-col gap-3 w-full max-w-xs pt-4">
                   {poll.resultsPublished && (
                     <Button asChild size="lg" className="h-14 rounded-2xl text-base font-black shadow-lg shadow-primary/10">
-                      <Link to={`/polls/${poll._id}/results`}>View Live Results</Link>
+                      <Link to={`/vote/${poll._id}/results`}>View Live Results</Link>
                     </Button>
                   )}
                   
@@ -562,4 +542,3 @@ export default function PublicPollPage() {
     </div>
   );
 }
-

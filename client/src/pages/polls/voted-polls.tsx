@@ -7,9 +7,7 @@ import { Topbar } from "@/components/dashboard/topbar";
 import { 
   Search, 
   BarChart3, 
-  Clock, 
   CheckCircle2,
-  Calendar,
   ArrowUpRight,
   LayoutGrid,
   List,
@@ -20,6 +18,14 @@ import { useVotedPolls } from "@/hooks/use-polls";
 import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";
 import { PageLoader } from "@/components/ui/page-loader";
+import { 
+  Table, 
+  TableHeader, 
+  TableBody, 
+  TableHead, 
+  TableRow, 
+  TableCell 
+} from "@/components/ui/table";
 
 export default function VotedPollsPage() {
   const { data: session, isPending: isSessionPending } = authClient.useSession();
@@ -135,7 +141,13 @@ export default function VotedPollsPage() {
             ) : viewMode === "cards" ? (
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {filteredPolls.map((poll: any) => (
-                  <div key={poll._id} className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-all hover:shadow-sm">
+                  <motion.div 
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    key={poll._id} 
+                    className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-all hover:shadow-sm"
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         <div className="grid size-10 place-items-center rounded-lg bg-primary/10 text-primary">
@@ -175,52 +187,50 @@ export default function VotedPollsPage() {
                         View Results <ArrowUpRight className="size-3.5" />
                       </Link>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             ) : (
               <div className="rounded-xl border border-border bg-card overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                        <th className="px-5 py-3.5 font-medium">Poll</th>
-                        <th className="px-5 py-3.5 font-medium">Status</th>
-                        <th className="px-5 py-3.5 text-right font-medium">Participants</th>
-                        <th className="px-5 py-3.5 text-right font-medium">Last Activity</th>
-                        <th className="px-5 py-3.5"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredPolls.map((p: any) => (
-                        <tr key={p._id} className="border-b border-border/70 last:border-0 transition-colors hover:bg-muted/40">
-                          <td className="px-5 py-3.5">
-                            <div className="flex items-center gap-3">
-                              <div className="grid size-8 place-items-center rounded-md bg-primary/10 text-primary">
-                                <BarChart3 className="size-4" />
-                              </div>
-                              <Link to={`/vote/${p._id}/results`} className="font-medium hover:text-primary">
-                                {p.title}
-                              </Link>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Poll</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Participants</TableHead>
+                      <TableHead className="text-right">Last Activity</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPolls.map((p: any) => (
+                      <TableRow key={p._id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="grid size-8 place-items-center rounded-md bg-primary/10 text-primary">
+                              <BarChart3 className="size-4" />
                             </div>
-                          </td>
-                          <td className="px-5 py-3.5">
-                            <span className="text-xs text-muted-foreground capitalize">{p.status}</span>
-                          </td>
-                          <td className="px-5 py-3.5 text-right tabular-nums font-medium">{p.responseCount || 0}</td>
-                          <td className="px-5 py-3.5 text-right text-xs text-muted-foreground">
-                            {p.updatedAt ? formatDistanceToNow(new Date(p.updatedAt)) : "N/A"} ago
-                          </td>
-                          <td className="px-5 py-3.5 text-right">
-                             <Link to={`/vote/${p._id}/results`} className="text-primary hover:underline font-bold text-xs">
-                               Results
-                             </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                            <Link to={`/vote/${p._id}/results`} className="font-medium hover:text-primary">
+                              {p.title}
+                            </Link>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-xs text-muted-foreground capitalize">{p.status}</span>
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums font-medium">{p.responseCount || 0}</TableCell>
+                        <TableCell className="text-right text-xs text-muted-foreground">
+                          {p.updatedAt ? formatDistanceToNow(new Date(p.updatedAt)) : "N/A"} ago
+                        </TableCell>
+                        <TableCell className="text-right">
+                           <Link to={`/vote/${p._id}/results`} className="text-primary hover:underline font-bold text-xs">
+                             Results
+                           </Link>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             )}
           </div>

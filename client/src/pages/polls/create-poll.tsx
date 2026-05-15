@@ -14,7 +14,6 @@ import {
   Settings2,
   Globe,
   Lock,
-  MessageSquare,
   CheckCircle2,
   ChevronLeft,
   ChevronRight
@@ -22,14 +21,11 @@ import {
 import { toast } from "sonner";
 import { useCreatePoll, useUpdatePoll, usePoll } from "@/hooks/use-polls";
 import { motion, AnimatePresence } from "framer-motion";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function CreatePollPage() {
   const { id } = useParams<{ id: string }>();
   const isEditing = !!id;
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
   const { data: session, isPending: isSessionPending } = authClient.useSession();
   const { mutate: createPoll, isPending: isCreating } = useCreatePoll();
   const { mutate: updatePoll, isPending: isUpdating } = useUpdatePoll(id || "");

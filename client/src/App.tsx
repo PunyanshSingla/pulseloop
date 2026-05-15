@@ -16,7 +16,6 @@ import ExplorePage from "./pages/explore.tsx";
 import AuthCallbackPage from "./pages/auth-callback.tsx";
 import NotFoundPage from "./pages/not-found.tsx";
 import SettingsPage from "./pages/settings.tsx";
-import { AdminGuard } from "./components/auth/admin-guard";
 import { AuthGuard } from "./components/auth/auth-guard";
 import { Toaster } from "@/components/ui/sonner";
 

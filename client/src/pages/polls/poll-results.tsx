@@ -1,7 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import { usePoll, usePollAnalytics } from "@/hooks/use-polls";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, RefreshCw, BarChart3, Users, Share2, Globe, CheckCircle2, Clock, Smartphone, Monitor } from "lucide-react";
+import { ArrowLeft, RefreshCw, BarChart3, Users, Share2, Globe, CheckCircle2, Clock, Smartphone, Monitor } from "lucide-react";
+import { LoaderContainer } from "@/components/ui/loader";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/logo";
 import { toast } from "sonner";
@@ -29,8 +30,7 @@ export default function PollResultsPage() {
   if (isPollLoading || isAnalyticsLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950">
-        <Loader2 className="size-8 animate-spin text-primary" />
-        <p className="mt-4 text-xs font-black text-muted-foreground uppercase tracking-widest animate-pulse">Aggregating Deep Insights...</p>
+        <LoaderContainer message="Aggregating Deep Insights..." />
       </div>
     );
   }
