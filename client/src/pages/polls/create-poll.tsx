@@ -9,19 +9,14 @@ import { Label } from "@/components/ui/label";
 import { 
   ArrowLeft, 
   Plus, 
-  Trash2, 
-  Sparkles,
-  Settings2,
-  Globe,
-  Lock,
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight
+  Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCreatePoll, useUpdatePoll, usePoll } from "@/hooks/use-polls";
-import { motion, AnimatePresence } from "framer-motion";
 import { aiApi } from "@/lib/api";
+import { PollAIModal } from "@/components/polls/create/PollAIModal";
+import { QuestionSlider } from "@/components/polls/create/QuestionSlider";
+import { PollConfigSidebar } from "@/components/polls/create/PollConfigSidebar";
 
 export default function CreatePollPage() {
   const { id } = useParams<{ id: string }>();
@@ -63,7 +58,7 @@ export default function CreatePollPage() {
         if (pollData.expiresAt) setExpiresAt(new Date(pollData.expiresAt).toISOString().slice(0, 16));
         
         if (pollData.questions && pollData.questions.length > 0) {
-          setQuestions(pollData.questions.map((q: { _id: string, text: string, isMandatory: boolean, options: { text: string }[] }) => ({
+          setQuestions(pollData.questions.map((q: any) => ({
             id: q._id,
             text: q.text,
             isMandatory: q.isMandatory,
@@ -100,6 +95,7 @@ export default function CreatePollPage() {
   const removeQuestion = (id: string | number) => {
     if (questions.length > 1) {
       setQuestions(questions.filter(q => q.id !== id));
+      setActiveQuestionIndex(Math.max(0, activeQuestionIndex - 1));
     }
   };
 
@@ -147,36 +143,8 @@ export default function CreatePollPage() {
     }
   };
 
-  const handleQuestionChange = (id: string | number, text: string) => {
-    setQuestions(questions.map(q => q.id === id ? { ...q, text } : q));
-  };
-
-  const toggleMandatory = (id: string | number) => {
-    setQuestions(questions.map(q => q.id === id ? { ...q, isMandatory: !q.isMandatory } : q));
-  };
-
-  const handleOptionChange = (qId: string | number, oIdx: number, text: string) => {
-    setQuestions(questions.map(q => {
-      if (q.id === qId) {
-        const newOptions = [...q.options];
-        newOptions[oIdx] = text;
-        return { ...q, options: newOptions };
-      }
-      return q;
-    }));
-  };
-
-  const addOption = (qId: string | number) => {
-    setQuestions(questions.map(q => 
-      q.id === qId ? { ...q, options: [...q.options, ""] } : q
-    ));
-  };
-
   const handleCreate = () => {
-    // 1. Basic Title Validation
     if (!title.trim()) return toast.error("Poll title is required");
-    
-    // 2. Date Validation
     if (!startsAt) return toast.error("Please set a start date and time");
     if (!expiresAt) return toast.error("Please set an end date and time");
     
@@ -187,27 +155,18 @@ export default function CreatePollPage() {
       return toast.error("End date must be after the start date");
     }
 
-    // 3. Questions Validation
     if (questions.length === 0) {
       return toast.error("At least one question is required");
     }
 
     const formattedQuestions = [];
-    
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
-      if (!q.text.trim()) {
-        return toast.error(`Question ${i + 1} text is required`);
-      }
-      
-      if (q.options.length < 2) {
-        return toast.error(`Question ${i + 1} needs at least 2 options`);
-      }
+      if (!q.text.trim()) return toast.error(`Question ${i + 1} text is required`);
+      if (q.options.length < 2) return toast.error(`Question ${i + 1} needs at least 2 options`);
       
       for (let j = 0; j < q.options.length; j++) {
-        if (!q.options[j].trim()) {
-          return toast.error(`Option ${j + 1} in Question ${i + 1} is required`);
-        }
+        if (!q.options[j].trim()) return toast.error(`Option ${j + 1} in Question ${i + 1} is required`);
       }
       
       formattedQuestions.push({
@@ -245,14 +204,12 @@ export default function CreatePollPage() {
         
         <main className="flex-1 px-6 py-6 overflow-y-auto">
           <div className="mx-auto max-w-4xl">
-            {/* Back button */}
             <Link to="/polls" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
               <ArrowLeft className="size-4" />
               Back to polls
             </Link>
 
             <div className="flex flex-col gap-8 lg:flex-row">
-              {/* Form Side */}
               <div className="flex-1 min-w-0 space-y-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="space-y-1">
@@ -273,7 +230,6 @@ export default function CreatePollPage() {
                   </Button>
                 </div>
 
-                {/* Title & Description Section */}
                 <div className="space-y-4 rounded-2xl border border-border bg-card p-4 md:p-6 shadow-sm">
                   <div className="space-y-2">
                     <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest text-primary">Poll Title</Label>
@@ -297,133 +253,23 @@ export default function CreatePollPage() {
                   </div>
                 </div>
 
-                {/* Question Slider Container */}
-                <div className="relative space-y-6">
-                  {/* Slider Header / Pagination */}
-                  <div className="flex items-center justify-between px-2">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-black text-primary uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full">
-                        Question {activeQuestionIndex + 1} of {questions.length}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={activeQuestionIndex === 0}
-                        onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}
-                        className="size-9 p-0 rounded-xl"
-                      >
-                        <ChevronLeft className="size-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={activeQuestionIndex === questions.length - 1}
-                        onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}
-                        className="size-9 p-0 rounded-xl"
-                      >
-                        <ChevronRight className="size-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={questions[activeQuestionIndex].id}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                      className="relative space-y-6 rounded-3xl border border-border bg-card p-5 md:p-8 shadow-md"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-4">
-                           <div className="flex items-center gap-2">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Mandatory</Label>
-                            <button
-                              onClick={() => toggleMandatory(questions[activeQuestionIndex].id)}
-                              className={`relative h-5 w-10 rounded-full transition-colors duration-200 ${
-                                questions[activeQuestionIndex].isMandatory ? "bg-emerald-500" : "bg-slate-200 dark:bg-slate-800"
-                              }`}
-                            >
-                              <div className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                                questions[activeQuestionIndex].isMandatory ? "translate-x-5" : ""
-                              }`} />
-                            </button>
-                          </div>
-                        </div>
-                        {questions.length > 1 && (
-                          <Button 
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              const idToRemove = questions[activeQuestionIndex].id;
-                              removeQuestion(idToRemove);
-                              setActiveQuestionIndex(Math.max(0, activeQuestionIndex - 1));
-                            }}
-                            className="text-muted-foreground hover:text-destructive transition-colors h-8 w-8 p-0 rounded-lg"
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
-                        )}
-                      </div>
-
-                      <div className="space-y-6">
-                        <div className="space-y-3">
-                          <Label className="text-xs font-black uppercase tracking-widest text-slate-400">The Question</Label>
-                          <Input 
-                            placeholder="Type your question here..." 
-                            className="h-12 md:h-14 bg-muted/20 border-border text-base md:text-lg font-bold rounded-2xl px-4 md:px-6 focus:bg-background transition-all"
-                            value={questions[activeQuestionIndex].text}
-                            onChange={(e) => handleQuestionChange(questions[activeQuestionIndex].id, e.target.value)}
-                          />
-                        </div>
-
-                        <div className="space-y-4">
-                          <Label className="text-xs font-black uppercase tracking-widest text-slate-400">Options</Label>
-                          <div className="grid gap-3">
-                            {questions[activeQuestionIndex].options.map((option, oIdx) => (
-                              <div key={oIdx} className="relative group">
-                                <Input 
-                                  placeholder={`Option ${oIdx + 1}`} 
-                                  className="h-12 bg-muted/10 border-border/60 rounded-xl pl-12 focus:bg-background transition-all"
-                                  value={option}
-                                  onChange={(e) => handleOptionChange(questions[activeQuestionIndex].id, oIdx, e.target.value)}
-                                />
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-muted-foreground/30 group-focus-within:text-primary transition-colors">
-                                  {String.fromCharCode(65 + oIdx)}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                          <button 
-                            onClick={() => addOption(questions[activeQuestionIndex].id)}
-                            className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors mt-2"
-                          >
-                            <Plus className="size-3" />
-                            Add option
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-
-                  {/* Dot Indicator */}
-                  <div className="flex justify-center gap-1.5">
-                    {questions.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setActiveQuestionIndex(i)}
-                        className={`size-1.5 rounded-full transition-all duration-300 ${
-                          activeQuestionIndex === i 
-                            ? "bg-primary w-6" 
-                            : "bg-slate-300 dark:bg-slate-700 hover:bg-slate-400"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
+                <QuestionSlider 
+                  questions={questions}
+                  activeQuestionIndex={activeQuestionIndex}
+                  setActiveQuestionIndex={setActiveQuestionIndex}
+                  onQuestionChange={(id, text) => setQuestions(questions.map(q => q.id === id ? { ...q, text } : q))}
+                  onToggleMandatory={(id) => setQuestions(questions.map(q => q.id === id ? { ...q, isMandatory: !q.isMandatory } : q))}
+                  onRemoveQuestion={removeQuestion}
+                  onOptionChange={(qId, oIdx, text) => setQuestions(questions.map(q => {
+                    if (q.id === qId) {
+                      const newOptions = [...q.options];
+                      newOptions[oIdx] = text;
+                      return { ...q, options: newOptions };
+                    }
+                    return q;
+                  }))}
+                  onAddOption={(qId) => setQuestions(questions.map(q => q.id === qId ? { ...q, options: [...q.options, ""] } : q))}
+                />
 
                 <Button 
                   variant="outline" 
@@ -435,211 +281,36 @@ export default function CreatePollPage() {
                 </Button>
               </div>
 
-              {/* Settings / Preview Side */}
-              <div className="w-full lg:w-80 shrink-0">
-                <div className="sticky top-6 space-y-6">
-                  <div className="space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm">
-                    <h3 className="flex items-center gap-2 text-sm font-semibold">
-                      <Settings2 className="size-4 text-primary" />
-                      Poll Actions
-                    </h3>
-                    
-                    <div className="space-y-3 pt-2">
-                      <Button 
-                        className="w-full h-11 font-bold shadow-lg shadow-primary/20"
-                        onClick={handleCreate}
-                        disabled={isCreating || isUpdating}
-                      >
-                        {isCreating || isUpdating ? (isEditing ? "Saving..." : "Creating...") : (isEditing ? "Save Changes" : "Create Poll")}
-                      </Button>
-                    </div>
-
-                    <div className="h-px bg-border my-2" />
-
-                    <h3 className="flex items-center gap-2 text-sm font-semibold">
-                      <Globe className="size-4 text-primary" />
-                      Configuration
-                    </h3>
-                    
-                    <div className="space-y-4 pt-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs font-medium">
-                        <Globe className="size-3.5 text-muted-foreground" />
-                        Public access
-                      </div>
-                      <button 
-                        onClick={() => setVisibility(visibility === "public" ? "private" : "public")}
-                        className={`h-4 w-8 rounded-full p-0.5 transition-colors ${visibility === "public" ? "bg-primary" : "bg-muted"}`}
-                      >
-                        <div className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${visibility === "public" ? "translate-x-4" : ""}`} />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs font-medium">
-                        <Lock className="size-3.5 text-muted-foreground" />
-                        Allow Guest Voting
-                      </div>
-                      <button 
-                        onClick={() => setAllowAnonymous(!allowAnonymous)}
-                        className={`h-4 w-8 rounded-full p-0.5 transition-colors ${allowAnonymous ? "bg-primary" : "bg-muted"}`}
-                      >
-                        <div className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${allowAnonymous ? "translate-x-4" : ""}`} />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs font-medium">
-                        <CheckCircle2 className="size-3.5 text-muted-foreground" />
-                        Multi-Submission
-                      </div>
-                      <button 
-                        onClick={() => setAllowMultipleSubmissions(!allowMultipleSubmissions)}
-                        className={`h-4 w-8 rounded-full p-0.5 transition-colors ${allowMultipleSubmissions ? "bg-primary" : "bg-muted"}`}
-                      >
-                        <div className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${allowMultipleSubmissions ? "translate-x-4" : ""}`} />
-                      </button>
-                    </div>
-
-                    <div className="space-y-2 pt-2 border-t border-border mt-2">
-                      <Label htmlFor="startsAt" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Start Date</Label>
-                      <Input 
-                        id="startsAt"
-                        type="datetime-local"
-                        className="h-9 text-xs bg-muted/20"
-                        value={startsAt}
-                        onChange={(e) => setStartsAt(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="expiresAt" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">End Date</Label>
-                      <Input 
-                        id="expiresAt"
-                        type="datetime-local"
-                        className="h-9 text-xs bg-muted/20"
-                        value={expiresAt}
-                        onChange={(e) => setExpiresAt(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                  <div className="rounded-xl border border-border bg-muted/30 p-6">
-                    <div className="flex items-center gap-2 text-sm font-semibold mb-2">
-                      <Sparkles className="size-4 text-primary" />
-                      Pro Tip
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Allowing Guest Voting (Anonymous) usually increases response rates by over 50%.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <PollConfigSidebar 
+                onSave={handleCreate}
+                isPending={isCreating || isUpdating}
+                isEditing={isEditing}
+                visibility={visibility}
+                setVisibility={setVisibility}
+                allowAnonymous={allowAnonymous}
+                setAllowAnonymous={setAllowAnonymous}
+                allowMultipleSubmissions={allowMultipleSubmissions}
+                setAllowMultipleSubmissions={setAllowMultipleSubmissions}
+                startsAt={startsAt}
+                setStartsAt={setStartsAt}
+                expiresAt={expiresAt}
+                setExpiresAt={setExpiresAt}
+              />
             </div>
           </div>
         </main>
       </div>
-      {/* AI Generation Modal */}
-      <AnimatePresence>
-        {isAIModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => !isGenerating && setIsAIModalOpen(false)}
-              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
-            >
-              <div className="p-8">
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
-                    <Sparkles className="size-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold tracking-tight">Generate with Gemini AI</h2>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Enter a topic and our AI will draft a complete poll for you.
-                    </p>
-                  </div>
-                </div>
 
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="ai-prompt" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Poll Topic or Description</Label>
-                    <textarea 
-                      id="ai-prompt"
-                      placeholder="e.g. Employee satisfaction survey for a tech company, or A fun poll about favorite summer vacation spots..."
-                      className="min-h-[120px] w-full rounded-xl border border-border bg-muted/30 p-4 text-sm outline-none ring-primary/10 transition-all focus:border-primary/50 focus:ring-4"
-                      value={aiPrompt}
-                      onChange={(e) => setAIPrompt(e.target.value)}
-                      disabled={isGenerating}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Generation Mode</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        type="button"
-                        variant={aiMode === "replace" ? "default" : "outline"}
-                        className="rounded-xl"
-                        onClick={() => setAIMode("replace")}
-                        disabled={isGenerating}
-                      >
-                        Replace Poll
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={aiMode === "append" ? "default" : "outline"}
-                        className="rounded-xl"
-                        onClick={() => setAIMode("append")}
-                        disabled={isGenerating}
-                      >
-                        Add Questions
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-3 pt-2">
-                    <Button 
-                      variant="outline" 
-                      className="flex-1 rounded-xl"
-                      onClick={() => setIsAIModalOpen(false)}
-                      disabled={isGenerating}
-                    >
-                      Cancel
-                    </Button>
-                    <Button 
-                      className="flex-1 rounded-xl font-bold gap-2"
-                      onClick={handleAIGenerate}
-                      disabled={isGenerating || !aiPrompt.trim()}
-                    >
-                      {isGenerating ? (
-                        <>
-                          <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="size-4" />
-                          {aiMode === "append" ? "Add Questions" : "Generate Poll"}
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      <PollAIModal 
+        isOpen={isAIModalOpen}
+        onClose={() => setIsAIModalOpen(false)}
+        prompt={aiPrompt}
+        setPrompt={setAIPrompt}
+        mode={aiMode}
+        setMode={setAIMode}
+        isGenerating={isGenerating}
+        onGenerate={handleAIGenerate}
+      />
     </div>
   );
 }

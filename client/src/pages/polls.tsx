@@ -9,32 +9,17 @@ import {
   Plus, 
   Search, 
   BarChart3, 
-  Clock, 
-  CheckCircle2,
-  Calendar,
-  ArrowUpRight,
-  LayoutGrid,
-  List,
-  X,
-  Trash2,
-  Edit,
-  AlertTriangle,
-  Lock,
-  Unlock
+  LayoutGrid, 
+  List, 
+  X
 } from "lucide-react";
 import { usePolls, useDeletePoll, useUpdatePollAction } from "@/hooks/use-polls";
-import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Table, 
-  TableHeader, 
-  TableBody, 
-  TableHead, 
-  TableRow, 
-  TableCell 
-} from "@/components/ui/table";
+import { motion } from "framer-motion";
 import { LoaderContainer } from "@/components/ui/loader";
+import { PollCard } from "@/components/polls/poll-card";
+import { PollTable } from "@/components/polls/poll-table";
+import { DeleteConfirmationModal } from "@/components/ui/delete-confirmation-modal";
 
 export default function PollsPage() {
   const { data: session, isPending: isSessionPending } = authClient.useSession();
@@ -205,189 +190,25 @@ export default function PollsPage() {
                     {!searchQuery && <Button onClick={() => navigate("/polls/create")}>Create Poll</Button>}
                   </div>
                 ) : filteredPolls.map((poll: Poll) => (
-                  <motion.div 
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    key={poll._id} 
-                    className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 transition-all hover:shadow-sm"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="grid size-10 place-items-center rounded-lg bg-muted text-muted-foreground">
-                          <BarChart3 className="size-5" />
-                        </div>
-                        <div>
-                          <Link to={`/polls/${poll._id}`}>
-                            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                              {poll.title}
-                            </h3>
-                          </Link>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            {(() => {
-                              const isExpired = poll.expiresAt && new Date(poll.expiresAt) < new Date();
-                              const isRunning = poll.status === "active" && !isExpired;
-                              const displayStatus = isRunning ? "Running" : isExpired ? "Ended" : poll.status.charAt(0).toUpperCase() + poll.status.slice(1);
-                              return <StatusPill status={displayStatus} />;
-                            })()}
-                            <span className="text-xs text-muted-foreground">• {poll.visibility.charAt(0).toUpperCase() + poll.visibility.slice(1)}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleEdit(poll)}
-                          className={`h-8 w-8 p-0 ${!canEdit(poll) ? "opacity-50 cursor-not-allowed" : ""}`}
-                          title={canEdit(poll) ? "Edit Poll" : "Edit Restricted"}
-                        >
-                          <Edit className="size-4" />
-                        </Button>
-                        {(() => {
-                          const isExpired = poll.expiresAt && new Date(poll.expiresAt) < new Date();
-                          if (isExpired) return null;
-                          return (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => handleToggleStatus(poll)}
-                              className={`h-8 w-8 p-0 ${poll.status === "active" ? "text-amber-500 hover:text-amber-600 hover:bg-amber-500/10" : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"}`}
-                              title={poll.status === "active" ? "Close Poll" : "Re-open Poll"}
-                            >
-                              {poll.status === "active" ? <Lock className="size-4" /> : <Unlock className="size-4" />}
-                            </Button>
-                          );
-                        })()}
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => setDeletingPollId(poll._id)}
-                          className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                          title="Delete Poll"
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 grid grid-cols-3 gap-4 border-t border-border/50 pt-4">
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Responses</p>
-                        <p className="mt-0.5 text-lg font-semibold">{poll.responseCount || 0}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Completion</p>
-                        <p className="mt-0.5 text-lg font-semibold">
-                          {poll.viewCount > 0 
-                            ? `${Math.min(100, Math.round((poll.responseCount / poll.viewCount) * 100))}%` 
-                            : "0%"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Created</p>
-                        <p className="mt-0.5 text-lg font-semibold">
-                          {poll.createdAt ? formatDistanceToNow(new Date(poll.createdAt)) : "N/A"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="size-3.5" />
-                        Updated {poll.updatedAt ? formatDistanceToNow(new Date(poll.updatedAt)) : "N/A"} ago
-                      </span>
-                      <Link to={`/polls/${poll._id}`} className="inline-flex items-center gap-1 font-medium text-foreground hover:underline">
-                        Manage Poll <ArrowUpRight className="size-3.5" />
-                      </Link>
-                    </div>
-                  </motion.div>
+                  <PollCard 
+                    key={poll._id}
+                    poll={poll}
+                    onEdit={handleEdit}
+                    onToggleStatus={handleToggleStatus}
+                    onDelete={(id) => setDeletingPollId(id)}
+                    canEdit={canEdit(poll)}
+                  />
                 ))}
               </div>
             ) : (
-              <div className="rounded-xl border border-border bg-card overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Poll</TableHead>
-                      <TableHead className="hidden sm:table-cell">Status</TableHead>
-                      <TableHead className="hidden md:table-cell">Type</TableHead>
-                      <TableHead className="text-right">Responses</TableHead>
-                      <TableHead className="hidden lg:table-cell text-right">Completion</TableHead>
-                      <TableHead className="hidden xl:table-cell">Updated</TableHead>
-                      <TableHead></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredPolls.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                          {searchQuery ? "No polls match your search." : "No polls found."}
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredPolls.map((p: Poll) => (
-                        <TableRow key={p._id}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <div className="grid size-8 place-items-center rounded-md bg-muted text-muted-foreground">
-                                <BarChart3 className="size-4" />
-                              </div>
-                              <Link to={`/polls/${p._id}`} className="font-medium hover:text-primary transition-colors">
-                                {p.title}
-                              </Link>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell">
-                            <StatusPill status={p.status.charAt(0).toUpperCase() + p.status.slice(1)} />
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell text-xs text-muted-foreground">{p.visibility.charAt(0).toUpperCase() + p.visibility.slice(1)}</TableCell>
-                          <TableCell className="text-right tabular-nums font-semibold">{p.responseCount || 0}</TableCell>
-                          <TableCell className="hidden lg:table-cell text-right tabular-nums">
-                            {p.viewCount > 0 
-                              ? `${Math.min(100, Math.round((p.responseCount / p.viewCount) * 100))}%` 
-                              : "0%"}
-                          </TableCell>
-                          <TableCell className="hidden xl:table-cell text-xs text-muted-foreground">
-                            {p.updatedAt ? formatDistanceToNow(new Date(p.updatedAt)) : "N/A"} ago
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => handleEdit(p)}
-                                className={`h-7 w-7 p-0 ${!canEdit(p) ? "opacity-50 cursor-not-allowed" : ""}`}
-                                title={canEdit(p) ? "Edit Poll" : "Edit Restricted"}
-                              >
-                                <Edit className="size-3.5" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => handleToggleStatus(p)}
-                                className={`h-7 w-7 p-0 ${p.status === "active" ? "text-amber-500 hover:text-amber-600 hover:bg-amber-500/10" : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"}`}
-                                title={p.status === "active" ? "Close Poll" : "Re-open Poll"}
-                              >
-                                {p.status === "active" ? <Lock className="size-3.5" /> : <Unlock className="size-3.5" />}
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => setDeletingPollId(p._id)}
-                                className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                title="Delete Poll"
-                              >
-                                <Trash2 className="size-3.5" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+              <PollTable 
+                polls={filteredPolls}
+                onEdit={handleEdit}
+                onToggleStatus={handleToggleStatus}
+                onDelete={(id) => setDeletingPollId(id)}
+                canEdit={canEdit}
+                searchQuery={searchQuery}
+              />
             )}
 
             {/* Pagination Controls */}
@@ -418,69 +239,13 @@ export default function PollsPage() {
         </main>
       </div>
 
-      {/* Delete Confirmation Modal */}
-      <AnimatePresence>
-        {deletingPollId && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setDeletingPollId(null)}
-              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
-            >
-              <div className="flex flex-col items-center p-8 text-center">
-                <div className="mb-4 grid size-14 place-items-center rounded-full bg-destructive/10 text-destructive">
-                  <AlertTriangle className="size-7" />
-                </div>
-                <h2 className="text-xl font-bold tracking-tight">Delete Poll Permanently?</h2>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  This action will remove all questions and gathered responses. You cannot undo this once confirmed.
-                </p>
-                <div className="mt-8 flex w-full flex-col gap-2 sm:flex-row">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1 rounded-xl"
-                    onClick={() => setDeletingPollId(null)}
-                  >
-                    Keep Poll
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    className="flex-1 rounded-xl font-bold"
-                    onClick={confirmDelete}
-                  >
-                    Delete Now
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      <DeleteConfirmationModal 
+        isOpen={!!deletingPollId}
+        onClose={() => setDeletingPollId(null)}
+        onConfirm={confirmDelete}
+        title="Delete Poll Permanently?"
+        description="This action will remove all questions and gathered responses. You cannot undo this once confirmed."
+      />
     </div>
-  );
-}
-
-function StatusPill({ status }: { status: string }) {
-  const map: Record<string, { cls: string; icon: React.ReactNode }> = {
-    Running: { cls: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", icon: <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" /> },
-    Ended: { cls: "bg-amber-500/10 text-amber-600 dark:text-amber-400", icon: <Calendar className="size-3" /> },
-    Active: { cls: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", icon: <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" /> },
-    Draft: { cls: "bg-muted text-muted-foreground", icon: <Clock className="size-3" /> },
-    Closed: { cls: "bg-foreground/5 text-foreground/70", icon: <CheckCircle2 className="size-3" /> },
-  };
-  const s = map[status] || map.Draft;
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium ${s.cls}`}>
-      {s.icon}
-      {status}
-    </span>
   );
 }
