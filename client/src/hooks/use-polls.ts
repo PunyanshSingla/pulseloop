@@ -68,16 +68,16 @@ export const useCreatePoll = () => {
       toast.success("Poll created successfully!");
       navigate("/polls");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       let message = error.message || "Failed to create poll";
       
       // Handle Zod error arrays if they come back as JSON
       try {
         const parsed = JSON.parse(message);
         if (Array.isArray(parsed) && parsed[0]?.message) {
-          message = parsed.map((err: any) => err.message).join(", ");
+          message = parsed.map((err: { message: string }) => err.message).join(", ");
         }
-      } catch (e) {
+      } catch {
         // Not JSON, keep original message
       }
 
@@ -90,13 +90,13 @@ export const useUpdatePoll = (id: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: any) => pollsApi.update(id, data),
+    mutationFn: (data: Partial<Poll>) => pollsApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["polls"] });
       queryClient.invalidateQueries({ queryKey: ["poll", id] });
       toast.success("Poll updated successfully!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to update poll");
     },
   });
@@ -106,13 +106,13 @@ export const useUpdatePollAction = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => pollsApi.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<Poll> }) => pollsApi.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["polls"] });
       queryClient.invalidateQueries({ queryKey: ["poll", variables.id] });
       toast.success("Poll updated successfully!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to update poll");
     },
   });
@@ -127,7 +127,7 @@ export const useDeletePoll = () => {
       queryClient.invalidateQueries({ queryKey: ["polls"] });
       toast.success("Poll deleted successfully!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to delete poll");
     },
   });
@@ -137,12 +137,12 @@ export const useVote = (pollId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: any) => pollsApi.vote(pollId, data),
+    mutationFn: (data: Record<string, string>) => pollsApi.vote(pollId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["poll", pollId] });
       toast.success("Vote recorded!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to record vote");
     },
   });
@@ -154,6 +154,13 @@ export const usePollResponses = (id: string) => {
     enabled: !!id,
   });
 };
+
+export interface PollAnalytics {
+  devices: { name: string; value: number }[];
+  browsers: { name: string; value: number }[];
+  os: { name: string; value: number }[];
+  countries: { name: string; value: number }[];
+}
 
 export const usePollAnalytics = (id: string) => {
   const queryClient = useQueryClient();
@@ -177,12 +184,7 @@ export const usePollAnalytics = (id: string) => {
     };
   }, [id, queryClient]);
 
-  return useQuery<{
-    devices: { name: string; value: number }[];
-    browsers: { name: string; value: number }[];
-    os: { name: string; value: number }[];
-    countries: { name: string; value: number }[];
-  } | any>({
+  return useQuery<PollAnalytics>({
     queryKey: ["poll-analytics", id],
     queryFn: () => pollsApi.getAnalytics(id),
     enabled: !!id,
@@ -199,7 +201,7 @@ export const usePublishResults = (id: string) => {
       queryClient.invalidateQueries({ queryKey: ["poll-analytics", id] });
       toast.success("Results published successfully!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to publish results");
     },
   });

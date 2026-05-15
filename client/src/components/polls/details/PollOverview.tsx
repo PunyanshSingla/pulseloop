@@ -18,10 +18,18 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { PollMetrics } from "./PollMetrics";
+import type { Poll, Analytics } from "@/types/polls";
 
 const COLORS = ["#10b981", "#14b8a6", "#f59e0b", "#f97316", "#f43f5e", "#84cc16", "#0f766e"];
 
-const CustomTooltip = ({ active, payload, label, suffix = "votes" }: any) => {
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: { color?: string; fill?: string; value: number }[];
+  label?: string;
+  suffix?: string;
+}
+
+const CustomTooltip = ({ active, payload, label, suffix = "votes" }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="rounded-xl border border-border bg-card/95 p-3 shadow-2xl backdrop-blur-md ring-1 ring-black/5">
@@ -39,8 +47,8 @@ const CustomTooltip = ({ active, payload, label, suffix = "votes" }: any) => {
 };
 
 interface PollOverviewProps {
-  poll: any;
-  analytics: any;
+  poll: Poll;
+  analytics: Analytics;
 }
 
 export const PollOverview = ({ poll, analytics }: PollOverviewProps) => {
@@ -145,7 +153,7 @@ export const PollOverview = ({ poll, analytics }: PollOverviewProps) => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                {analytics?.results.map((q: any, idx: number) => (
+                {analytics?.results.map((q, idx) => (
                   idx === currentQuestionIndex && (
                     <div key={q.id} className="space-y-10">
                       <div className="flex items-start gap-4">
@@ -160,7 +168,7 @@ export const PollOverview = ({ poll, analytics }: PollOverviewProps) => {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
                         <div className="space-y-5">
-                          {q.options.map((o: any, oIdx: number) => (
+                          {q.options.map((o, oIdx) => (
                             <div key={o.id} className="group space-y-2.5">
                               <div className="flex items-center justify-between text-xs">
                                 <span className="font-medium text-muted-foreground group-hover:text-foreground transition-colors">{o.text}</span>
@@ -192,7 +200,7 @@ export const PollOverview = ({ poll, analytics }: PollOverviewProps) => {
                                 animationDuration={1500}
                                 stroke="none"
                               >
-                                {q.options.map((index: number) => (
+                                {q.options.map((_, index) => (
                                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                               </Pie>
@@ -228,7 +236,7 @@ export const PollOverview = ({ poll, analytics }: PollOverviewProps) => {
                     stroke="none"
                     paddingAngle={4}
                   >
-                    {analytics?.demographics.devices.map((index: number) => (
+                    {(analytics?.demographics.devices || []).map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -253,7 +261,7 @@ export const PollOverview = ({ poll, analytics }: PollOverviewProps) => {
               <p className="text-[10px] text-muted-foreground mt-0.5">Top OS utilized by participants</p>
             </div>
             <div className="space-y-4">
-              {analytics?.demographics.os.slice(0, 5).map((os: any, idx: number) => (
+              {analytics?.demographics.os.slice(0, 5).map((os, idx) => (
                 <div key={os.name} className="flex items-center gap-3">
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center justify-between text-[10px] font-medium">
@@ -404,7 +412,7 @@ export const PollOverview = ({ poll, analytics }: PollOverviewProps) => {
                 <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--foreground)" }} width={100} />
                 <Tooltip content={<CustomTooltip label="" suffix="users" />} cursor={{ fill: 'transparent' }} />
                 <Bar dataKey="value" fill="#10b981" radius={[0, 4, 4, 0]} barSize={12}>
-                  {analytics?.demographics.browsers.map((index: number) => (
+                  {(analytics?.demographics.browsers || []).map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Bar>
@@ -420,7 +428,7 @@ export const PollOverview = ({ poll, analytics }: PollOverviewProps) => {
           </div>
           <div className="h-[180px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={analytics?.demographics.countries?.map((c: any) => ({
+              <BarChart data={analytics?.demographics.countries?.map((c) => ({
                 name: c.name,
                 value: c.value
               })) || []} layout="vertical" margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
@@ -428,7 +436,7 @@ export const PollOverview = ({ poll, analytics }: PollOverviewProps) => {
                 <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--foreground)" }} width={100} />
                 <Tooltip content={<CustomTooltip label="" suffix="users" />} cursor={{ fill: 'transparent' }} />
                 <Bar dataKey="value" fill="#f59e0b" radius={[0, 4, 4, 0]} barSize={12}>
-                  {analytics?.demographics.countries?.map((index: number) => (
+                  {(analytics?.demographics.countries || []).map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[(index + 3) % COLORS.length]} />
                   ))}
                 </Bar>

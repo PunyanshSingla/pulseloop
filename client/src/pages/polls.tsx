@@ -1,4 +1,5 @@
 import { authClient } from "@/lib/auth-client";
+import type { Poll } from "@/types/polls";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -58,7 +59,7 @@ export default function PollsPage() {
     }
   };
 
-  const handleEdit = (poll: any) => {
+  const handleEdit = (poll: Poll) => {
     if (poll.status === "closed") {
       return toast.error("Cannot edit a closed poll. Re-open it first if needed.");
     }
@@ -70,18 +71,18 @@ export default function PollsPage() {
     navigate(`/polls/${poll._id}/edit`);
   };
 
-  const handleToggleStatus = (poll: any) => {
+  const handleToggleStatus = (poll: Poll) => {
     const nextStatus = poll.status === "active" ? "closed" : "active";
     updatePoll({ id: poll._id, data: { status: nextStatus } });
   };
 
-  const canEdit = (poll: any) => {
+  const canEdit = (poll: Poll) => {
     if (poll.status === "closed") return false;
     if (!poll.startsAt) return true;
     return new Date(poll.startsAt) > new Date();
   };
 
-  const filteredPolls = polls.filter((poll: any) => 
+  const filteredPolls = polls.filter((poll: Poll) => 
     poll.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     poll.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
     poll.visibility.toLowerCase().includes(searchQuery.toLowerCase())
@@ -113,7 +114,7 @@ export default function PollsPage() {
               </div>
               <h3 className="font-semibold text-lg">Failed to load polls</h3>
               <p className="text-sm text-muted-foreground mt-1 mb-6 max-w-xs">
-                {(pollsError as any)?.message || "There was an error connecting to the server. Please try again."}
+                {(pollsError as Error).message || "There was an error connecting to the server. Please try again."}
               </p>
               <Button onClick={() => window.location.reload()} className="gap-2">
                 <Plus className="size-4 rotate-45" />
@@ -202,7 +203,7 @@ export default function PollsPage() {
                     </p>
                     {!searchQuery && <Button onClick={() => navigate("/polls/create")}>Create Poll</Button>}
                   </div>
-                ) : filteredPolls.map((poll: any) => (
+                ) : filteredPolls.map((poll: Poll) => (
                   <motion.div 
                     layout
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -324,7 +325,7 @@ export default function PollsPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredPolls.map((p: any) => (
+                      filteredPolls.map((p: Poll) => (
                         <TableRow key={p._id}>
                           <TableCell>
                             <div className="flex items-center gap-3">

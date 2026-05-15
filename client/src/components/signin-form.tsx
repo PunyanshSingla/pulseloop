@@ -38,18 +38,9 @@ export function LoginForm({
       return
     }
 
-    // Fetch session manually to determine role immediately after sign-in
-    const { data: session } = await authClient.useSession.getState()
-    const user = session?.user as any
-    
     setLoading(false)
     toast.success("Signed in successfully")
-    
-    if (user?.role === "admin") {
-      navigate("/dashboard")
-    } else {
-      navigate("/")
-    }
+    navigate("/dashboard")
   }
 
   const handleSocialSignIn = async (provider: "google") => {

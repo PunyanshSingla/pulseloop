@@ -15,7 +15,7 @@ export const useDashboardData = (days: number = 30) => {
     const socket = socketClient.connect();
     socketClient.joinDashboard(userId);
 
-    const handleUpdate = (data: any) => {
+    const handleUpdate = (data: unknown) => {
       console.log("🚀 Real-time update received:", data);
       queryClient.invalidateQueries({ queryKey: ["dashboard-data"] });
     };

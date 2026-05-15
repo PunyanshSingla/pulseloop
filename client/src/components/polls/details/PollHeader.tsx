@@ -11,8 +11,10 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import type { Poll } from "@/types/polls";
+
 interface PollHeaderProps {
-  poll: any;
+  poll: Poll;
   isPublishing: boolean;
   onCopyLink: () => void;
   onToggleStatus: () => void;

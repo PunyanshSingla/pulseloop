@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 import { BarChart3, CheckCircle2, Eye, Clock } from "lucide-react";
 
+import type { Poll, Analytics } from "@/types/polls";
+
 interface PollMetricsProps {
-  analytics: any;
-  poll: any;
+  analytics: Analytics;
+  poll: Poll;
 }
 
 export const PollMetrics = ({ analytics, poll }: PollMetricsProps) => {

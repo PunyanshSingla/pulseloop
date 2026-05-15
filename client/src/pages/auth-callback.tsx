@@ -10,16 +10,10 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     if (isPending) return;
 
-    if (!session) {
-      navigate("/sign-in");
-      return;
-    }
-
-    const user = session.user as any;
-    if (user?.role === "admin") {
+    if (session) {
       navigate("/dashboard");
     } else {
-      navigate("/");
+      navigate("/sign-in");
     }
   }, [session, isPending, navigate]);
 

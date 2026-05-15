@@ -33,7 +33,7 @@ export default function VerifyEmailPage() {
           setStatus("success")
           setMessage("Your email has been successfully verified! You can now sign in to your account.")
         }
-      } catch (err) {
+      } catch {
         setStatus("error")
         setMessage("An unexpected error occurred.")
       }

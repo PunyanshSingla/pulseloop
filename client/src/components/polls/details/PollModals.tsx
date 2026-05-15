@@ -5,8 +5,10 @@ import { Logo } from "@/components/logo";
 import { QRCodeCanvas } from "qrcode.react";
 import { toast } from "sonner";
 
+import type { Poll } from "@/types/polls";
+
 interface PollModalsProps {
-  poll: any;
+  poll: Poll;
   showDeleteModal: boolean;
   setShowDeleteModal: (show: boolean) => void;
   confirmDelete: () => void;
@@ -218,8 +220,8 @@ export const PollModals = ({
                           toast.success("Branded QR Shared!");
                           return;
                         }
-                      } catch (err) {
-                        console.error("Share failed", err);
+                      } catch {
+                        console.error("Share failed");
                       }
                     }
 

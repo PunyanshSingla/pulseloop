@@ -31,7 +31,7 @@ export function ActivityFeed({ className }: { className?: string }) {
       </div>
       <div className="mt-5 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent min-h-[200px]">
         <ul className="space-y-5">
-          {events.map((e: any, i: number) => (
+          {events.map((e: { who: string, what: string, poll: string, when: string }, i: number) => (
             <li key={i} className="flex items-start gap-3.5">
               <div className="mt-0.5 grid size-8 place-items-center rounded-full bg-muted text-xs font-bold text-muted-foreground shrink-0">
                 {e.who.split(" ").map((s: string) => s[0]).join("").slice(0, 2)}

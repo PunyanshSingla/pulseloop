@@ -1,4 +1,5 @@
 import { authClient } from "@/lib/auth-client";
+import type { Poll } from "@/types/polls";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,7 @@ export default function VotedPollsPage() {
   const isPending = isSessionPending || isPollsLoading;
   const polls = pollsResponse?.data || [];
 
-  const filteredPolls = polls.filter((poll: any) => 
+  const filteredPolls = polls.filter((poll: Poll) => 
     poll.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     poll.status.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -64,7 +65,7 @@ export default function VotedPollsPage() {
               </div>
               <h3 className="font-semibold text-lg">Failed to load history</h3>
               <p className="text-sm text-muted-foreground mt-1 mb-6 max-w-xs">
-                {(pollsError as any)?.message || "There was an error connecting to the server."}
+                {(pollsError as Error).message || "There was an error connecting to the server."}
               </p>
               <Button onClick={() => window.location.reload()}>Retry</Button>
             </div>
@@ -140,7 +141,7 @@ export default function VotedPollsPage() {
               </div>
             ) : viewMode === "cards" ? (
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                {filteredPolls.map((poll: any) => (
+                {filteredPolls.map((poll: Poll) => (
                   <motion.div 
                     layout
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -203,7 +204,7 @@ export default function VotedPollsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPolls.map((p: any) => (
+                    {filteredPolls.map((p: Poll) => (
                       <TableRow key={p._id}>
                         <TableCell>
                           <div className="flex items-center gap-3">

@@ -13,9 +13,24 @@ import {
 import { LoaderContainer } from "@/components/ui/loader";
 import { formatDistanceToNow } from "date-fns";
 
+import type { Poll } from "@/types/polls";
+
+interface Response {
+  _id: string;
+  respondentId?: {
+    name?: string;
+    email?: string;
+  };
+  questionId: string;
+  questionText: string;
+  optionText: string;
+  timeTaken: number;
+  createdAt: string;
+}
+
 interface PollResponsesProps {
-  poll: any;
-  responsesData: any;
+  poll: Poll;
+  responsesData: { data: Response[] };
   isLoading: boolean;
 }
 
@@ -26,7 +41,7 @@ export const PollResponses = ({ poll, responsesData, isLoading }: PollResponsesP
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const filtered = (responsesData?.data || []).filter((resp: any) => {
+  const filtered = (responsesData?.data || []).filter((resp) => {
     const matchesSearch = !responseSearch || 
       resp.respondentId?.name?.toLowerCase().includes(responseSearch.toLowerCase()) ||
       resp.respondentId?.email?.toLowerCase().includes(responseSearch.toLowerCase()) ||
@@ -84,7 +99,7 @@ export const PollResponses = ({ poll, responsesData, isLoading }: PollResponsesP
             className="h-10 px-3 rounded-xl border border-border/50 bg-background text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
           >
             <option value="all">All Questions</option>
-            {poll.questions.map((q: any) => (
+            {poll.questions.map((q) => (
               <option key={q._id} value={q._id}>{q.text}</option>
             ))}
           </select>
@@ -137,7 +152,7 @@ export const PollResponses = ({ poll, responsesData, isLoading }: PollResponsesP
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginated.map((resp: any) => (
+                {paginated.map((resp) => (
                   <TableRow key={resp._id}>
                     <TableCell>
                       <div className="flex flex-col">

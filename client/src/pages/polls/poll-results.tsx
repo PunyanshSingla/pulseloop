@@ -3,7 +3,7 @@ import { usePoll, usePollAnalytics } from "@/hooks/use-polls";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, RefreshCw, BarChart3, Users, Share2, Globe, CheckCircle2, Clock, Smartphone, Monitor } from "lucide-react";
 import { LoaderContainer } from "@/components/ui/loader";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Logo } from "@/components/logo";
 import { toast } from "sonner";
 import { 
@@ -18,14 +18,15 @@ import {
   Pie, 
   Cell 
 } from "recharts";
+import type { Poll, Analytics } from "@/types/polls";
 
 export default function PollResultsPage() {
   const { id } = useParams<{ id: string }>();
   const { data: response, isLoading: isPollLoading, refetch, isRefetching } = usePoll(id!);
   const { data: analyticsResponse, isLoading: isAnalyticsLoading } = usePollAnalytics(id!);
 
-  const poll = response?.data;
-  const analytics = analyticsResponse?.data;
+  const poll = response?.data as Poll;
+  const analytics = analyticsResponse as unknown as Analytics;
 
   if (isPollLoading || isAnalyticsLoading) {
     return (
@@ -54,7 +55,6 @@ export default function PollResultsPage() {
     toast.success("Results link copied!");
   };
 
-  const COLORS = ["#10b981", "#14b8a6", "#f59e0b", "#f97316", "#f43f5e", "#84cc16", "#0f766e"];
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-foreground selection:bg-primary/20 flex flex-col relative overflow-hidden">
@@ -245,7 +245,7 @@ export default function PollResultsPage() {
                   Top Devices
                 </h4>
                 <div className="space-y-4">
-                  {analytics?.demographics.devices.slice(0, 4).map((d: any, i: number) => (
+                  {analytics?.demographics.devices.slice(0, 4).map((d) => (
                     <div key={d.name} className="space-y-2">
                       <div className="flex justify-between text-xs font-bold">
                         <span className="text-slate-600 dark:text-slate-300">{d.name}</span>
@@ -270,7 +270,7 @@ export default function PollResultsPage() {
                   Top OS
                 </h4>
                 <div className="space-y-4">
-                  {analytics?.demographics.os.slice(0, 4).map((o: any, i: number) => (
+                  {analytics?.demographics.os.slice(0, 4).map((o) => (
                     <div key={o.name} className="space-y-2">
                       <div className="flex justify-between text-xs font-bold">
                         <span className="text-slate-600 dark:text-slate-300">{o.name}</span>
@@ -295,7 +295,7 @@ export default function PollResultsPage() {
                   Top Locations
                 </h4>
                 <div className="space-y-4">
-                  {analytics?.demographics.countries.slice(0, 4).map((c: any, i: number) => (
+                  {analytics?.demographics.countries.slice(0, 4).map((c) => (
                     <div key={c.name} className="space-y-2">
                       <div className="flex justify-between text-xs font-bold">
                         <span className="text-slate-600 dark:text-slate-300">{c.name}</span>
@@ -323,8 +323,8 @@ export default function PollResultsPage() {
               <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Question Summaries</h2>
               <p className="text-slate-500 dark:text-slate-400 font-medium mt-2">Granular breakdown of every response option.</p>
             </div>
-            {poll.questions.map((q: any, idx: number) => {
-              const totalVotesForQuestion = q.options.reduce((acc: number, o: any) => acc + (o.responseCount || 0), 0);
+            {poll.questions.map((q, idx) => {
+              const totalVotesForQuestion = q.options.reduce((acc: number, o: { responseCount?: number }) => acc + (o.responseCount || 0), 0);
               
               return (
                 <motion.div 
@@ -346,7 +346,7 @@ export default function PollResultsPage() {
                   </div>
 
                   <div className="grid gap-6">
-                    {q.options.map((o: any) => {
+                    {q.options.map((o) => {
                       const votes = o.responseCount || 0;
                       const percentage = Math.round(o.percentage || 0);
                       

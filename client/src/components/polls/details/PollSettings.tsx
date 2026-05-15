@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 import { Settings2, Globe, Lock, CheckCircle2 } from "lucide-react";
 
+import type { Poll } from "@/types/polls";
+
 interface PollSettingsProps {
-  poll: any;
-  onUpdatePoll: (data: any) => void;
+  poll: Poll;
+  onUpdatePoll: (data: Partial<Poll>) => void;
 }
 
 export const PollSettings = ({ poll, onUpdatePoll }: PollSettingsProps) => {

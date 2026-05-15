@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/table";
 import { LoaderContainer } from "@/components/ui/loader";
 
+import type { Poll } from "@/types/polls";
+
 export function PollsTable({ className }: { className?: string }) {
   const { data: pollsResponse, isLoading } = usePolls();
   const polls = pollsResponse?.data?.slice(0, 10) || [];
@@ -49,7 +51,7 @@ export function PollsTable({ className }: { className?: string }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {polls.map((p: any) => (
+            {polls.map((p: Poll & { completionRate?: number }) => (
               <TableRow key={p._id}>
                 <TableCell>
                   <div className="flex items-center gap-3">

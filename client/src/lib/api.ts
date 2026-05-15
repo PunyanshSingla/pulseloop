@@ -1,3 +1,5 @@
+import type { Poll, PollResponse, PollsResponse, Analytics, DashboardData, VotePayload, Response } from "@/types/polls";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -22,7 +24,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   });
 
   const contentType = response.headers.get("content-type");
-  let data: any;
+  let data: T;
 
   if (contentType && contentType.includes("application/json")) {
     data = await response.json();
@@ -33,36 +35,37 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   }
 
   if (!response.ok) {
-    throw new Error(data.message || data.error || "Something went wrong");
+    const errorData = data as Record<string, unknown>;
+    throw new Error((errorData.message as string) || (errorData.error as string) || "Something went wrong");
   }
 
   return data;
 }
 
 export const pollsApi = {
-  create: (data: any) => request("/polls", { method: "POST", body: JSON.stringify(data) }),
-  getAll: (limit: number = 10, skip: number = 0) => request(`/polls?limit=${limit}&skip=${skip}`),
-  getPublic: () => request("/polls?type=public"),
-  getVoted: () => request("/polls/voted"),
-  getById: (id: string) => request(`/polls/${id}`),
+  create: (data: Partial<Poll>) => request<PollResponse>("/polls", { method: "POST", body: JSON.stringify(data) }),
+  getAll: (limit: number = 10, skip: number = 0) => request<PollsResponse>(`/polls?limit=${limit}&skip=${skip}`),
+  getPublic: () => request<PollsResponse>("/polls?type=public"),
+  getVoted: () => request<PollsResponse>("/polls/voted"),
+  getById: (id: string) => request<PollResponse>(`/polls/${id}`),
   trackView: (id: string, data: { fingerprint: string }) => 
-    request(`/polls/${id}/view`, { method: "POST", body: JSON.stringify(data) }),
-  update: (id: string, data: any) => request(`/polls/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-  delete: (id: string) => request(`/polls/${id}`, { method: "DELETE" }),
+    request<{ success: boolean }>(`/polls/${id}/view`, { method: "POST", body: JSON.stringify(data) }),
+  update: (id: string, data: Partial<Poll>) => request<PollResponse>(`/polls/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  delete: (id: string) => request<{ success: boolean }>(`/polls/${id}`, { method: "DELETE" }),
   
   // Voting
-  vote: (pollId: string, data: any) => 
-    request(`/polls/${pollId}/vote`, { 
+  vote: (pollId: string, data: VotePayload) => 
+    request<{ success: boolean }>(`/polls/${pollId}/vote`, { 
       method: "POST", 
       body: JSON.stringify(data) 
     }),
-  getResponses: (pollId: string) => request(`/polls/${pollId}/responses`),
-  getAnalytics: (pollId: string) => request(`/polls/${pollId}/analytics`),
-  publishResults: (id: string) => request(`/polls/${id}/publish`, { method: "POST" }),
+  getResponses: (pollId: string) => request<{ data: Response[] }>(`/polls/${pollId}/responses`),
+  getAnalytics: (pollId: string) => request<Analytics>(`/polls/${pollId}/analytics`),
+  publishResults: (id: string) => request<PollResponse>(`/polls/${id}/publish`, { method: "POST" }),
 };
 
 export const analyticsApi = {
-  getDashboardData: (days: number = 30) => request(`/analytics/dashboard?days=${days}`),
+  getDashboardData: (days: number = 30) => request<DashboardData>(`/analytics/dashboard?days=${days}`),
 };
 
 export const mediaApi = {
@@ -73,5 +76,5 @@ export const mediaApi = {
 };
 
 export const usersApi = {
-  getMe: () => request<{ success: boolean, data: any }>("/user/me"),
+  getMe: () => request<{ success: boolean, data: unknown }>("/user/me"),
 };

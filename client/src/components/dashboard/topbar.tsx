@@ -1,4 +1,4 @@
-import { Search, Bell, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Link } from "react-router-dom";
 

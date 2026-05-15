@@ -1,4 +1,5 @@
 import { usePublicPolls } from "@/hooks/use-polls";
+import type { Poll } from "@/types/polls";
 import { authClient } from "@/lib/auth-client";
 import { motion } from "framer-motion";
 import { 
@@ -6,7 +7,6 @@ import {
   BarChart3, 
   Users, 
   ArrowRight,
-  TrendingUp,
   Clock,
   LayoutGrid,
   List,
@@ -25,9 +25,9 @@ export default function ExplorePage() {
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
 
   const polls = pollsResponse?.data || [];
-  const filteredPolls = polls.filter((poll: any) => 
+  const filteredPolls = polls.filter((poll: Poll) => 
     poll.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    poll.description.toLowerCase().includes(searchQuery.toLowerCase())
+    (poll.description || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const container = {
@@ -145,7 +145,7 @@ export default function ExplorePage() {
             animate="show"
             className={viewMode === "cards" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}
           >
-            {filteredPolls.map((poll: any) => (
+            {filteredPolls.map((poll: Poll) => (
               <motion.div key={poll._id} variants={item}>
                 {viewMode === "cards" ? (
                   <Link 

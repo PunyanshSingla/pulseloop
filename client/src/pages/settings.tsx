@@ -16,8 +16,9 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<{ hasPassword?: boolean } | null>(null);
   const [isUserPending, setIsUserPending] = useState(true);
+  const [isProfileInitialized, setIsProfileInitialized] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -38,11 +39,14 @@ export default function SettingsPage() {
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    if (session?.user) {
-      setName(session.user.name || "");
-      setImage(session.user.image || "");
+    if (session?.user && !isProfileInitialized) {
+      queueMicrotask(() => {
+        setName(session.user.name || "");
+        setImage(session.user.image || "");
+        setIsProfileInitialized(true);
+      });
     }
-  }, [session]);
+  }, [session, isProfileInitialized]);
 
   if (isPending || isUserPending) {
     return (
@@ -73,8 +77,9 @@ export default function SettingsPage() {
       } else {
         throw new Error("Upload failed");
       }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to upload image");
+    } catch (error) {
+      const err = error as Error;
+      toast.error(err.message || "Failed to upload image");
     } finally {
       setIsUploading(false);
     }
@@ -93,8 +98,9 @@ export default function SettingsPage() {
       
       if (error) throw error;
       toast.success("Profile updated successfully");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update profile");
+    } catch (error) {
+      const err = error as Error;
+      toast.error(err.message || "Failed to update profile");
     } finally {
       setIsUpdatingProfile(false);
     }
@@ -121,8 +127,9 @@ export default function SettingsPage() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update password");
+    } catch (error) {
+      const err = error as Error;
+      toast.error(err.message || "Failed to update password");
     } finally {
       setIsUpdatingPassword(false);
     }

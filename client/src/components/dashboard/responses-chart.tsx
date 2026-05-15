@@ -7,24 +7,23 @@ export function ResponsesChart() {
   const { data: dashboardDataResponse, isLoading } = useDashboardData(range);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   
-  const rawData = dashboardDataResponse?.data?.chartData || [];
-  
   // Fill in missing dates with zero counts
   const chartData = useMemo(() => {
+    const rawData = dashboardDataResponse?.data?.chartData || [];
     const end = new Date();
     const start = subDays(end, range - 1);
     const interval = eachDayOfInterval({ start, end });
     
     return interval.map(date => {
       const dateStr = format(date, "yyyy-MM-dd");
-      const found = rawData.find((d: any) => d.date === dateStr);
+      const found = (rawData as { date: string, total: number }[]).find((d) => d.date === dateStr);
       return {
         date: dateStr,
         label: format(date, "MMM dd"),
         count: found ? found.total : 0
       };
     });
-  }, [rawData, range]);
+  }, [dashboardDataResponse, range]);
 
   const data = chartData.map(d => d.count);
   const max = Math.max(...data, 5); // Minimum scale

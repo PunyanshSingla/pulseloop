@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 interface PollTabsProps {
   activeTab: string;
-  onTabChange: (tab: any) => void;
+  onTabChange: (tab: string) => void;
 }
 
 export const PollTabs = ({ activeTab, onTabChange }: PollTabsProps) => {

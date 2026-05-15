@@ -1,7 +1,7 @@
 import { Globe, QrCode, Share2 } from "lucide-react";
 import { usePolls } from "@/hooks/use-polls";
 import { toast } from "sonner";
-import { QRCodeSVG, QRCodeCanvas } from "qrcode.react";
+import { QRCodeCanvas } from "qrcode.react";
 import { Logo } from "@/components/logo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ export function ShareLinkCard() {
       try {
         await navigator.share(shareData);
         return;
-      } catch (e) {
+      } catch {
         // Fallback to clipboard if native share fails or is cancelled
         navigator.clipboard.writeText(shareLink);
         toast.success("Link copied to clipboard!");
@@ -119,7 +119,9 @@ export function ShareLinkCard() {
                   });
                   toast.success("Branded QR Shared!");
                   return;
-                } catch (e) {}
+                } catch {
+                  // Fallback to direct download
+                }
               }
 
               const link = document.createElement("a");

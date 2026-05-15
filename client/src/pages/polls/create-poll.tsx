@@ -43,27 +43,31 @@ export default function CreatePollPage() {
   const [allowMultipleSubmissions, setAllowMultipleSubmissions] = useState(false);
   const [startsAt, setStartsAt] = useState<string>("");
   const [expiresAt, setExpiresAt] = useState<string>("");
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (isEditing && pollData) {
-      setTitle(pollData.title);
-      setDescription(pollData.description || "");
-      setVisibility(pollData.visibility);
-      setAllowAnonymous(pollData.allowAnonymous);
-      setAllowMultipleSubmissions(pollData.allowMultipleSubmissions);
-      if (pollData.startsAt) setStartsAt(new Date(pollData.startsAt).toISOString().slice(0, 16));
-      if (pollData.expiresAt) setExpiresAt(new Date(pollData.expiresAt).toISOString().slice(0, 16));
-      
-      if (pollData.questions && pollData.questions.length > 0) {
-        setQuestions(pollData.questions.map((q: any) => ({
-          id: q._id,
-          text: q.text,
-          isMandatory: q.isMandatory,
-          options: q.options.map((o: any) => o.text)
-        })));
-      }
+    if (isEditing && pollData && !isInitialized) {
+      queueMicrotask(() => {
+        setTitle(pollData.title);
+        setDescription(pollData.description || "");
+        setVisibility(pollData.visibility);
+        setAllowAnonymous(pollData.allowAnonymous);
+        setAllowMultipleSubmissions(pollData.allowMultipleSubmissions);
+        if (pollData.startsAt) setStartsAt(new Date(pollData.startsAt).toISOString().slice(0, 16));
+        if (pollData.expiresAt) setExpiresAt(new Date(pollData.expiresAt).toISOString().slice(0, 16));
+        
+        if (pollData.questions && pollData.questions.length > 0) {
+          setQuestions(pollData.questions.map((q: { _id: string, text: string, isMandatory: boolean, options: { text: string }[] }) => ({
+            id: q._id,
+            text: q.text,
+            isMandatory: q.isMandatory,
+            options: q.options.map((o: { text: string }) => o.text)
+          })));
+        }
+        setIsInitialized(true);
+      });
     }
-  }, [isEditing, pollData]);
+  }, [isEditing, pollData, isInitialized]);
 
   if (isSessionPending || (isEditing && isPollLoading)) {
     return (

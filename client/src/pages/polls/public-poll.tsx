@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, Navigate, Link } from "react-router-dom";
 import { authClient } from "@/lib/auth-client";
 import { usePoll, useVote } from "@/hooks/use-polls";
@@ -13,12 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/logo";
 import { toast } from "sonner";
 import { Loader, LoaderContainer } from "@/components/ui/loader";
-
-if (typeof window !== "undefined") {
-  if (!localStorage.getItem("pl_voter_id")) {
-    localStorage.setItem("pl_voter_id", crypto.randomUUID());
-  }
-}
+import type { VotePayload } from "@/types/polls";
 
 export default function PublicPollPage() {
   const { id } = useParams<{ id: string }>();
@@ -33,23 +28,18 @@ export default function PublicPollPage() {
   const currentQuestion = poll?.questions?.[currentStep];
 
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
-  const [hasVoted, setHasVoted] = useState(false);
-  const [startTime] = useState<number>(Date.now());
-  const [fingerprint, setFingerprint] = useState<string>("");
+  const [startTime] = useState<number>(() => Date.now());
+  const [fingerprint] = useState<string>(() => {
+    const { userAgent, language, platform } = navigator;
+    const { width, height, colorDepth } = window.screen;
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const voterId = localStorage.getItem("pl_voter_id");
+    return btoa(`${userAgent}-${language}-${platform}-${width}x${height}-${colorDepth}-${timezone}-${voterId}`).slice(0, 64);
+  });
   const [timeLeftToStart, setTimeLeftToStart] = useState<{ d: number, h: number, m: number, s: number } | null>(null);
 
-  useEffect(() => {
-    const getFingerprint = () => {
-      const { userAgent, language, platform } = navigator;
-      const { width, height, colorDepth } = window.screen;
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const voterId = localStorage.getItem("pl_voter_id");
-
-      return btoa(`${userAgent}-${language}-${platform}-${width}x${height}-${colorDepth}-${timezone}-${voterId}`).slice(0, 64);
-    };
-
-    setFingerprint(getFingerprint());
-  }, []);
+  // Success state derived from mutation or server data
+  const hasVoted = useMemo(() => isSuccess || !!poll?.userHasVoted, [isSuccess, poll?.userHasVoted]);
 
   useEffect(() => {
     if (!poll?.startsAt) return;
@@ -84,7 +74,6 @@ export default function PublicPollPage() {
 
   useEffect(() => {
     if (isSuccess) {
-      setHasVoted(true);
       confetti({
         particleCount: 100,
         spread: 60,
@@ -113,12 +102,6 @@ export default function PublicPollPage() {
       socket?.off("poll:published");
     };
   }, [id, queryClient]);
-
-  useEffect(() => {
-    if (poll?.userHasVoted) {
-      setHasVoted(true);
-    }
-  }, [poll?.userHasVoted]);
 
   const handleOptionSelect = (optionId: string) => {
     if (!currentQuestion) return;
@@ -193,25 +176,25 @@ export default function PublicPollPage() {
       timeTaken: Math.round((Date.now() - startTime) / 1000 / totalSteps),
     }));
 
-    const unansweredMandatoryQuestions = poll.questions.filter((q: any) => 
+    const unansweredMandatoryQuestions = poll.questions.filter((q) => 
       q.isMandatory && !selectedOptions[q._id]
     );
 
     if (unansweredMandatoryQuestions.length > 0) {
-      const firstUnansweredIdx = poll.questions.findIndex((q: any) => q._id === unansweredMandatoryQuestions[0]._id);
+      const firstUnansweredIdx = poll.questions.findIndex((q) => q._id === unansweredMandatoryQuestions[0]._id);
       setCurrentStep(firstUnansweredIdx);
       return;
     }
 
-    if (responses.length >= 0) { 
-      vote({ responses, fingerprint, deviceInfo });
-    }
+    vote({ responses, fingerprint, deviceInfo } as VotePayload);
   };
 
   const handleReset = () => {
     setSelectedOptions({});
     setCurrentStep(0);
-    setHasVoted(false);
+    // Note: poll.userHasVoted will still be true from the server
+    // If multiple submissions are allowed, the UI will still show the form
+    // based on logic in the render block.
   };
 
   if (isAuthPending || isPollLoading) {
@@ -362,6 +345,10 @@ export default function PublicPollPage() {
   const hasAnsweredCurrent = !!selectedOptions[currentQuestion._id];
   const progress = ((currentStep + (hasAnsweredCurrent ? 1 : 0)) / totalSteps) * 100;
 
+  // Final condition to show success screen:
+  // If user has voted AND multiple submissions are NOT allowed.
+  const showSuccess = hasVoted && !poll.allowMultipleSubmissions;
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-foreground relative overflow-hidden font-sans selection:bg-primary/20 flex flex-col">
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.03),transparent_40%)] pointer-events-none" />
@@ -377,7 +364,7 @@ export default function PublicPollPage() {
       <div className="flex-1 flex flex-col items-center justify-center relative p-6">
         <div className="w-full max-w-xl">
           <AnimatePresence mode="wait">
-            {!hasVoted ? (
+            {!showSuccess ? (
               <motion.div
                 key={currentStep}
                 initial={{ opacity: 0, x: 20 }}
@@ -409,7 +396,7 @@ export default function PublicPollPage() {
                 </div>
 
                 <div className="grid gap-4">
-                  {currentQuestion.options.map((option: any) => (
+                  {currentQuestion.options.map((option) => (
                     <VotingOption
                       key={option._id}
                       id={option._id}

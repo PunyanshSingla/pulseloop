@@ -34,7 +34,7 @@ export default function PollDetailsPage() {
   
   const [activeTab, setActiveTab] = useState<"overview" | "responses" | "settings">("overview");
   const { data: responsesData, isLoading: isResponsesLoading } = usePollResponses(id!);
-  const { data: analyticsResponse, isLoading: isAnalyticsLoading } = usePollAnalytics(id!);
+  const { data: analyticsResponse } = usePollAnalytics(id!);
   const { mutate: publishResults, isPending: isPublishing } = usePublishResults(id!);
   
   const [showDeleteModal, setShowDeleteModal] = useState(false);

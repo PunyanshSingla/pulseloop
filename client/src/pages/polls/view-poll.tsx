@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { usePoll, useVote } from "@/hooks/use-polls";
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowLeft, 
@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Loader, LoaderContainer } from "@/components/ui/loader";
+import type { VotePayload } from "@/types/polls";
 
 export default function ViewPollPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,14 +21,10 @@ export default function ViewPollPage() {
   const { mutate: vote, isPending, isSuccess } = useVote(id!);
   
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
-  const [startTime] = useState<number>(Date.now());
-  const [isVoted, setIsVoted] = useState(false);
+  const [startTime] = useState<number>(() => Date.now());
+  const [resetKey, setResetKey] = useState(0);
 
-  useEffect(() => {
-    if (isSuccess) {
-      setIsVoted(true);
-    }
-  }, [isSuccess]);
+  const isVoted = useMemo(() => isSuccess || !!response?.data?.userHasVoted, [isSuccess, response?.data?.userHasVoted]);
 
   if (isLoading) {
     return (
@@ -85,7 +82,6 @@ export default function ViewPollPage() {
   };
 
   const handleVote = () => {
-    const poll = response?.data;
     if (!poll) return;
 
     let voterId = localStorage.getItem("voterId");
@@ -108,14 +104,16 @@ export default function ViewPollPage() {
         voterId,
         fingerprint,
         deviceInfo: getDeviceInfo()
-      });
+      } as VotePayload);
     }
   };
 
   const handleReset = () => {
     setSelectedOptions({});
-    setIsVoted(false);
+    setResetKey(prev => prev + 1);
   };
+
+  const showForm = !isVoted || (poll.allowMultipleSubmissions && resetKey > 0);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-foreground relative overflow-hidden font-sans">
@@ -141,7 +139,7 @@ export default function ViewPollPage() {
         </div>
 
         <AnimatePresence mode="wait">
-          {!isVoted ? (
+          {showForm ? (
             <motion.div
               key="poll-form"
               initial={{ opacity: 0, y: 20 }}
@@ -175,7 +173,7 @@ export default function ViewPollPage() {
               </div>
 
               <div className="space-y-8">
-                {poll.questions.map((q: any, qIdx: number) => (
+                {poll.questions.map((q, qIdx) => (
                   <motion.div 
                     key={q._id} 
                     initial={{ opacity: 0, x: -10 }}
@@ -194,7 +192,7 @@ export default function ViewPollPage() {
                       value={selectedOptions[q._id]}
                       className="grid gap-4"
                     >
-                      {q.options.map((o: any, oIdx: number) => {
+                      {q.options.map((o: { _id: string, text: string }) => {
                         const isSelected = selectedOptions[q._id] === o._id;
                         return (
                           <motion.div
@@ -237,7 +235,7 @@ export default function ViewPollPage() {
                 <Button 
                   onClick={handleVote} 
                   size="lg"
-                  disabled={isPending || poll.questions.some((q: any) => !selectedOptions[q._id])}
+                  disabled={isPending || poll.questions.some((q) => !selectedOptions[q._id])}
                   className="h-16 rounded-2xl text-xl font-black bg-slate-900 hover:bg-slate-800 shadow-xl shadow-slate-900/10 transition-all disabled:opacity-50"
                 >
                   {isPending ? (
