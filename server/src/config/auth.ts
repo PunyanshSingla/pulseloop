@@ -28,13 +28,15 @@ export const auth = betterAuth({
             const verificationUrl = `${env.CLIENT_URL}/verify-email?token=${token}`;
             await sendVerificationEmail({ email: user.email, url: verificationUrl, name: user.name });
         },
+        sendOnSignUp: true,
         sendOnSignIn: true,
     },
 
     emailAndPassword: {
         enabled: true,
         async sendResetPassword({ user, url }) {
-            const resetUrl = url.replace(env.BETTER_AUTH_URL, env.CLIENT_URL);
+            const token = url.split("/").pop()?.split("?")[0];
+            const resetUrl = `${env.CLIENT_URL}/reset-password?token=${token}`;
             await sendResetPasswordEmail({
                 to: user.email,
                 resetUrl: resetUrl,

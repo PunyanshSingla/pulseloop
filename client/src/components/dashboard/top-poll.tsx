@@ -7,12 +7,12 @@ export function TopPoll() {
   const poll = dashboardDataResponse?.data?.topPoll;
 
   if (isLoading) {
-    return <div className="h-[300px] animate-pulse rounded-xl border border-border bg-card/50" />;
+    return <div className="h-[380px] animate-pulse rounded-xl border border-border bg-card/50" />;
   }
 
   if (!poll) {
     return (
-      <div className="rounded-xl border border-border bg-card p-5 text-center flex flex-col items-center justify-center h-[300px]">
+      <div className="rounded-xl border border-border bg-card p-5 text-center flex flex-col items-center justify-center h-[380px]">
         <TrendingUp className="size-8 text-muted-foreground mb-2" />
         <p className="text-sm font-medium">No trending polls yet</p>
         <p className="text-xs text-muted-foreground">Start by creating your first poll!</p>
@@ -25,8 +25,8 @@ export function TopPoll() {
   const options = firstQuestion?.options || [];
   
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
-      <div className="flex items-start justify-between">
+    <div className="rounded-xl border border-border bg-card p-6 h-[380px] flex flex-col">
+      <div className="flex items-start justify-between shrink-0">
         <div>
           <p className="text-base font-bold text-foreground">Top performing poll</p>
           <p className="text-sm text-muted-foreground font-medium">Across the last 30 days</p>
@@ -36,10 +36,10 @@ export function TopPoll() {
           Trending
         </span>
       </div>
-      <h3 className="mt-5 text-xl font-extrabold tracking-tight text-foreground">
+      <h3 className="mt-5 text-xl font-extrabold tracking-tight text-foreground shrink-0 line-clamp-2">
         {poll.title}
       </h3>
-      <div className="mt-5 space-y-4">
+      <div className="mt-5 space-y-4 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
         {options.map((o: { _id: string, text: string, percentage?: number, responseCount?: number }, i: number) => (
           <div key={o._id}>
             <div className="flex items-center justify-between text-sm">

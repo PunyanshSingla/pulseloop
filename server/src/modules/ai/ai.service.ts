@@ -33,7 +33,8 @@ export class AIService {
       prompt: `Create a professional and engaging poll about: ${prompt}. 
       Return a title, a brief description, and 1 to 10 questions. 
       Each question should have at least 2 options. 
-      Make the questions diverse and interesting.`,
+      Make the questions diverse and interesting.
+      IMPORTANT: Return ONLY plain text. Do NOT use any markdown formatting (no asterisks, bold, italics, or hashes). The content must be ready to be placed directly into standard text inputs.`,
     });
     
     return object;

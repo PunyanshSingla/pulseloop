@@ -1,9 +1,10 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { usePoll, usePollAnalytics } from "@/hooks/use-polls";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, RefreshCw, BarChart3, Users, Share2, Globe, CheckCircle2, Clock, Smartphone, Monitor } from "lucide-react";
+import { ArrowLeft, RefreshCw, BarChart3, Users, Share2, Globe, CheckCircle2, Clock, Smartphone, Monitor, ChevronLeft, ChevronRight } from "lucide-react";
 import { LoaderContainer } from "@/components/ui/loader";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/logo";
 import { toast } from "sonner";
 import { 
@@ -24,6 +25,7 @@ export default function PollResultsPage() {
   const { id } = useParams<{ id: string }>();
   const { data: response, isLoading: isPollLoading, refetch, isRefetching } = usePoll(id!);
   const { data: analyticsResponse, isLoading: isAnalyticsLoading } = usePollAnalytics(id!);
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
 
   const poll = response?.data as Poll;
   const analytics = analyticsResponse as unknown as Analytics;
@@ -195,8 +197,8 @@ export default function PollResultsPage() {
                   <PieChart>
                     <Pie
                       data={[
-                        { name: 'Logged In', value: analytics?.poll.loggedInResponses || 0 },
-                        { name: 'Guest Users', value: analytics?.poll.anonymousResponses || 0 },
+                        { name: 'Logged In', value: analytics?.poll?.loggedInResponses || 0 },
+                        { name: 'Guest Users', value: analytics?.poll?.anonymousResponses || 0 },
                       ]}
                       cx="50%"
                       cy="50%"
@@ -222,14 +224,14 @@ export default function PollResultsPage() {
                     <div className="size-2 rounded-full bg-[#6366f1]" />
                     <span className="text-slate-500">Registered</span>
                   </div>
-                  <span>{analytics?.poll.loggedInResponses || 0}</span>
+                  <span>{analytics?.poll?.loggedInResponses || 0}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs font-bold">
                   <div className="flex items-center gap-2">
                     <div className="size-2 rounded-full bg-slate-300" />
                     <span className="text-slate-500">Anonymous</span>
                   </div>
-                  <span>{analytics?.poll.anonymousResponses || 0}</span>
+                  <span>{analytics?.poll?.anonymousResponses || 0}</span>
                 </div>
               </div>
             </div>
@@ -245,7 +247,7 @@ export default function PollResultsPage() {
                   Top Devices
                 </h4>
                 <div className="space-y-4">
-                  {analytics?.demographics.devices.slice(0, 4).map((d) => (
+                  {analytics?.demographics?.devices?.slice(0, 4).map((d) => (
                     <div key={d.name} className="space-y-2">
                       <div className="flex justify-between text-xs font-bold">
                         <span className="text-slate-600 dark:text-slate-300">{d.name}</span>
@@ -270,7 +272,7 @@ export default function PollResultsPage() {
                   Top OS
                 </h4>
                 <div className="space-y-4">
-                  {analytics?.demographics.os.slice(0, 4).map((o) => (
+                  {analytics?.demographics?.os?.slice(0, 4).map((o) => (
                     <div key={o.name} className="space-y-2">
                       <div className="flex justify-between text-xs font-bold">
                         <span className="text-slate-600 dark:text-slate-300">{o.name}</span>
@@ -295,7 +297,7 @@ export default function PollResultsPage() {
                   Top Locations
                 </h4>
                 <div className="space-y-4">
-                  {analytics?.demographics.countries.slice(0, 4).map((c) => (
+                  {analytics?.demographics?.countries?.slice(0, 4).map((c) => (
                     <div key={c.name} className="space-y-2">
                       <div className="flex justify-between text-xs font-bold">
                         <span className="text-slate-600 dark:text-slate-300">{c.name}</span>
@@ -317,65 +319,124 @@ export default function PollResultsPage() {
 
           <div className="h-px bg-slate-200 dark:bg-slate-800" />
 
-          {/* Questions & Results (Original section) */}
-          <div className="space-y-16">
-            <div className="text-center sm:text-left">
-              <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Question Summaries</h2>
-              <p className="text-slate-500 dark:text-slate-400 font-medium mt-2">Granular breakdown of every response option.</p>
-            </div>
-            {poll.questions.map((q, idx) => {
-              const totalVotesForQuestion = q.options.reduce((acc: number, o: { responseCount?: number }) => acc + (o.responseCount || 0), 0);
-              
-              return (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1 }}
-                  key={q._id} 
-                  className="space-y-8"
+          {/* Questions & Results (Slider section) */}
+          <div className="space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+              <div className="text-center sm:text-left">
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Question Summaries</h2>
+                <p className="text-slate-500 dark:text-slate-400 font-medium mt-2">Explore granular breakdowns for each question.</p>
+              </div>
+              <div className="flex items-center justify-center gap-3">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  disabled={activeQuestionIndex === 0}
+                  onClick={() => setActiveQuestionIndex(prev => prev - 1)}
+                  className="size-10 p-0 rounded-xl border-slate-200 dark:border-slate-800"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                    <div className="space-y-2">
-                      <span className="text-[11px] font-black uppercase tracking-[0.2em] text-primary/70">Question {idx + 1}</span>
-                      <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-tight">{q.text}</h3>
-                    </div>
-                    <div className="text-sm font-bold text-slate-500 dark:text-slate-400">
-                      {totalVotesForQuestion} responses
-                    </div>
-                  </div>
+                  <ChevronLeft className="size-5" />
+                </Button>
+                <div className="bg-slate-100 dark:bg-slate-900 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest text-slate-500">
+                  {activeQuestionIndex + 1} <span className="text-slate-300 dark:text-slate-700 mx-1">/</span> {poll.questions.length}
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  disabled={activeQuestionIndex === poll.questions.length - 1}
+                  onClick={() => setActiveQuestionIndex(prev => prev + 1)}
+                  className="size-10 p-0 rounded-xl border-slate-200 dark:border-slate-800"
+                >
+                  <ChevronRight className="size-5" />
+                </Button>
+              </div>
+            </div>
 
-                  <div className="grid gap-6">
-                    {q.options.map((o) => {
-                      const votes = o.responseCount || 0;
-                      const percentage = Math.round(o.percentage || 0);
-                      
-                      return (
-                        <div key={o._id} className="space-y-3">
-                          <div className="flex justify-between items-center text-sm">
-                            <span className="font-bold text-slate-700 dark:text-slate-300">{o.text}</span>
-                            <span className="font-black text-slate-900 dark:text-white">
-                              {votes} <span className="text-slate-400 dark:text-slate-500 font-bold ml-1">({percentage}%)</span>
+            <div className="relative min-h-[400px]">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeQuestionIndex}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="space-y-10"
+                >
+                  {(() => {
+                    const q = poll.questions[activeQuestionIndex];
+                    const totalVotesForQuestion = q.options.reduce((acc: number, o: { responseCount?: number }) => acc + (o.responseCount || 0), 0);
+                    
+                    return (
+                      <>
+                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                          <div className="space-y-3">
+                            <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/20">
+                              Question Details
                             </span>
+                            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white leading-tight">
+                              {q.text}
+                            </h3>
                           </div>
-                          <div className="h-4 w-full bg-slate-200/50 dark:bg-slate-900 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800 relative">
-                            <motion.div 
-                              initial={{ width: 0 }}
-                              whileInView={{ width: `${percentage}%` }}
-                              viewport={{ once: true }}
-                              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-                              className="h-full bg-primary relative overflow-hidden"
-                            >
-                              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent" />
-                            </motion.div>
+                          <div className="flex items-center gap-2 text-sm font-bold text-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2 rounded-2xl">
+                            <Users className="size-4 text-primary" />
+                            {totalVotesForQuestion} responses
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
+
+                        <div className="grid gap-4 sm:gap-6">
+                          {q.options.map((o, oIdx) => {
+                            const votes = o.responseCount || 0;
+                            const percentage = Math.round(o.percentage || 0);
+                            
+                            return (
+                              <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: oIdx * 0.05 }}
+                                key={o._id} 
+                                className="space-y-3 p-1"
+                              >
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="font-bold text-slate-700 dark:text-slate-300">{o.text}</span>
+                                  <span className="font-black text-slate-900 dark:text-white">
+                                    {votes} <span className="text-slate-400 dark:text-slate-500 font-bold ml-1">({percentage}%)</span>
+                                  </span>
+                                </div>
+                                <div className="h-5 w-full bg-slate-200/50 dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 relative">
+                                  <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${percentage}%` }}
+                                    transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+                                    className="h-full bg-primary relative overflow-hidden"
+                                  >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent" />
+                                  </motion.div>
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </motion.div>
-              );
-            })}
+              </AnimatePresence>
+            </div>
+
+            {/* Pagination Dots */}
+            <div className="flex justify-center gap-2 pt-8">
+              {poll.questions.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveQuestionIndex(i)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    activeQuestionIndex === i 
+                      ? "bg-primary w-8" 
+                      : "bg-slate-200 dark:bg-slate-800 w-2 hover:bg-slate-300 dark:hover:bg-slate-700"
+                  }`}
+                  aria-label={`Go to question ${i + 1}`}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Footer Branding */}

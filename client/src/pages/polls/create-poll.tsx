@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { 
   ArrowLeft, 
@@ -233,20 +234,20 @@ export default function CreatePollPage() {
                 <div className="space-y-4 rounded-2xl border border-border bg-card p-4 md:p-6 shadow-sm">
                   <div className="space-y-2">
                     <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest text-primary">Poll Title</Label>
-                    <Input 
+                    <Textarea 
                       id="title" 
                       placeholder="e.g. Product Discovery Survey" 
-                      className="h-12 bg-muted/30 border-border font-bold text-base md:text-lg focus:ring-primary/20 rounded-xl"
+                      className="min-h-[60px] bg-muted/30 border-border font-bold text-base md:text-lg focus:ring-primary/20 rounded-xl resize-none py-3"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Description (Optional)</Label>
-                    <Input 
+                    <Textarea 
                       id="description" 
                       placeholder="What is this poll about?" 
-                      className="h-11 bg-muted/20 border-border focus:ring-primary/20 rounded-xl text-sm"
+                      className="min-h-[80px] bg-muted/20 border-border focus:ring-primary/20 rounded-xl text-sm resize-none"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                     />

@@ -111,9 +111,9 @@ export class PollsController {
   async vote(req: Request, res: Response, next: NextFunction) {
     try {
       const pollId = req.params.id as string;
-      const { responses, timeTaken: totalTimeTaken, deviceInfo, fingerprint: clientFingerprint } = req.body; 
+      const { responses, timeTaken: totalTimeTaken, deviceInfo, fingerprint: clientFingerprint, voteAsAnonymous } = req.body; 
       const user = (req as any).user;
-      const userId = user?.id;
+      let userId = user?.id;
       const ipAddress = (req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").toString();
       const voterId = (req.headers["x-voter-id"] || "").toString();
       
@@ -124,6 +124,10 @@ export class PollsController {
       // Check if the poll exists
       const poll = await Poll.findById(pollId);
       if (!poll) throw new Error("Poll not found");
+
+      if (voteAsAnonymous && poll.allowAnonymous) {
+        userId = undefined;
+      }
 
       console.log(`[Vote Attempt] Poll: ${poll.title}, User: ${userId || "Guest"}, Device: ${deviceInfo?.os}/${deviceInfo?.browser}`);
 
@@ -143,6 +147,36 @@ export class PollsController {
       if (!userId && !poll.allowAnonymous) {
         res.status(401).json({ success: false, message: "This poll requires authentication. Please log in to vote." });
         return;
+      }
+
+      // 4. Check Multiple Submissions
+      if (!poll.allowMultipleSubmissions) {
+        const query: any = { pollId };
+        
+        if (userId) {
+          query.respondentId = userId;
+        } else {
+          const orConditions = [];
+          if (fingerprint) orConditions.push({ fingerprint });
+          if (voterId) orConditions.push({ voterId });
+          // If we don't have fingerprint or voterId, we fall back to checking ipAddress as a last resort, though it's less reliable for shared networks
+          if (ipAddress && orConditions.length === 0) orConditions.push({ ipAddress });
+          
+          if (orConditions.length > 0) {
+            query.$or = orConditions;
+          }
+        }
+        
+        if (Object.keys(query).length > 1) { // Ensure we have at least one condition besides pollId
+          const existingResponse = await ResponseModel.findOne(query);
+          if (existingResponse) {
+            res.status(403).json({ 
+              success: false, 
+              message: "You have already voted on this poll. Multiple submissions are not allowed." 
+            });
+            return;
+          }
+        }
       }
 
       // Backend Validation: Mandatory Questions

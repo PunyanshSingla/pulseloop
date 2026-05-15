@@ -88,6 +88,7 @@ export interface VotePayload {
     language: string;
   };
   voterId?: string;
+  voteAsAnonymous?: boolean;
 }
 
 export interface Response {

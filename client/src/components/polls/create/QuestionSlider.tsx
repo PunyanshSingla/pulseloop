@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Trash2, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -106,9 +107,9 @@ export function QuestionSlider({
           <div className="space-y-6">
             <div className="space-y-3">
               <Label className="text-xs font-black uppercase tracking-widest text-slate-400">The Question</Label>
-              <Input 
+              <Textarea 
                 placeholder="Type your question here..." 
-                className="h-12 md:h-14 bg-muted/20 border-border text-base md:text-lg font-bold rounded-2xl px-4 md:px-6 focus:bg-background transition-all"
+                className="min-h-[100px] bg-muted/20 border-border text-base md:text-lg font-bold rounded-2xl px-4 md:px-6 focus:bg-background transition-all resize-none py-4"
                 value={currentQ.text}
                 onChange={(e) => onQuestionChange(currentQ.id, e.target.value)}
               />

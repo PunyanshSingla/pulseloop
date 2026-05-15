@@ -1,21 +1,23 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { authClient } from "@/lib/auth-client";
 import { Loader2 } from "lucide-react";
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
     if (isPending) return;
 
     if (session) {
-      navigate("/dashboard");
+      const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+      navigate(callbackUrl);
     } else {
       navigate("/sign-in");
     }
-  }, [session, isPending, navigate]);
+  }, [session, isPending, navigate, searchParams]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">

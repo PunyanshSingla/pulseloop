@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/logo";
 import { toast } from "sonner";
 import { Loader, LoaderContainer } from "@/components/ui/loader";
+import { cn } from "@/lib/utils";
 import type { VotePayload } from "@/types/polls";
 
 export default function PublicPollPage() {
@@ -37,9 +38,10 @@ export default function PublicPollPage() {
     return btoa(`${userAgent}-${language}-${platform}-${width}x${height}-${colorDepth}-${timezone}-${voterId}`).slice(0, 64);
   });
   const [timeLeftToStart, setTimeLeftToStart] = useState<{ d: number, h: number, m: number, s: number } | null>(null);
+  const [voteAsAnonymous, setVoteAsAnonymous] = useState(false);
 
   // Success state derived from mutation or server data
-  const hasVoted = useMemo(() => isSuccess || !!poll?.userHasVoted, [isSuccess, poll?.userHasVoted]);
+  const hasVoted = useMemo(() => isSuccess || !!poll?.hasVoted, [isSuccess, poll?.hasVoted]);
 
   useEffect(() => {
     if (!poll?.startsAt) return;
@@ -186,13 +188,13 @@ export default function PublicPollPage() {
       return;
     }
 
-    vote({ responses, fingerprint, deviceInfo } as VotePayload);
+    vote({ responses, fingerprint, deviceInfo, voteAsAnonymous } as VotePayload);
   };
 
   const handleReset = () => {
     setSelectedOptions({});
     setCurrentStep(0);
-    // Note: poll.userHasVoted will still be true from the server
+    // Note: poll.hasVoted will still be true from the server
     // If multiple submissions are allowed, the UI will still show the form
     // based on logic in the render block.
   };
@@ -409,6 +411,21 @@ export default function PublicPollPage() {
                 </div>
 
                 <div className="pt-6 flex flex-col items-center gap-8">
+                  {session && poll.allowAnonymous && isLastStep && (
+                    <div 
+                      onClick={() => setVoteAsAnonymous(!voteAsAnonymous)}
+                      className="flex items-center gap-3 cursor-pointer p-3 px-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all shadow-sm"
+                    >
+                      <div className={cn("size-5 rounded-md flex items-center justify-center border-2 transition-colors", voteAsAnonymous ? "bg-primary border-primary" : "border-slate-300 dark:border-slate-600")}>
+                        {voteAsAnonymous && <Check className="size-3.5 text-white" strokeWidth={4} />}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight">Vote Anonymously</span>
+                        <span className="text-xs font-medium text-slate-500">Hide your identity for this vote</span>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-4 w-full">
                     {currentStep > 0 && (
                       <Button 
@@ -497,10 +514,12 @@ export default function PublicPollPage() {
                 
                 <div className="space-y-2">
                   <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                    Vote Recorded!
+                    {isSuccess ? "Vote Recorded!" : "Already Voted"}
                   </h2>
-                  <p className="text-base text-slate-500 dark:text-slate-400 font-medium">
-                    Thank you for your participation.
+                  <p className="text-base text-slate-500 dark:text-slate-400 font-medium max-w-md mx-auto">
+                    {isSuccess 
+                      ? "Thank you for your participation." 
+                      : (poll.resultsPublished ? "You have already participated in this poll. Check out the results below." : "You have already participated in this poll. The results have not been published yet.")}
                   </p>
                 </div>
 

@@ -21,8 +21,8 @@ export function PollsTable({ className }: { className?: string }) {
   const totalCount = pollsResponse?.data?.length || 0;
 
   return (
-    <div className={`rounded-xl border border-border bg-card ${className}`}>
-      <div className="flex items-center justify-between border-b border-border px-5 py-4">
+    <div className={`rounded-xl border border-border bg-card flex flex-col h-[500px] ${className}`}>
+      <div className="flex items-center justify-between border-b border-border px-5 py-4 shrink-0">
         <div>
           <p className="text-sm font-medium">Recent polls</p>
           <p className="text-xs text-muted-foreground">{polls.length} of {totalCount} polls</p>
@@ -33,15 +33,18 @@ export function PollsTable({ className }: { className?: string }) {
       </div>
       
       {isLoading ? (
-        <LoaderContainer message="Loading polls..." />
+        <div className="flex-1 flex items-center justify-center">
+          <LoaderContainer message="Loading polls..." />
+        </div>
       ) : polls.length === 0 ? (
-        <div className="px-5 py-12 text-center text-muted-foreground">
+        <div className="px-5 py-12 text-center text-muted-foreground flex-1 flex items-center justify-center">
           No polls found.
         </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
+        <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+          <Table>
+            <TableHeader className="sticky top-0 bg-card z-10 shadow-[0_1px_0_0_var(--border)]">
+              <TableRow>
               <TableHead>Poll</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Responses</TableHead>
@@ -98,6 +101,7 @@ export function PollsTable({ className }: { className?: string }) {
             ))}
           </TableBody>
         </Table>
+        </div>
       )}
     </div>
   );

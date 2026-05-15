@@ -42,11 +42,11 @@ export function ResponsesChart() {
   const area = `0,${h} ${points} ${w},${h}`;
 
   if (isLoading) {
-    return <div className="h-[280px] animate-pulse rounded-xl border border-border bg-card/50" />;
+    return <div className="h-[380px] animate-pulse rounded-xl border border-border bg-card/50" />;
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div className="rounded-xl border border-border bg-card p-6 h-[380px] flex flex-col justify-between">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-base font-bold text-foreground">Responses over time</p>

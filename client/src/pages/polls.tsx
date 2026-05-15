@@ -47,7 +47,7 @@ export default function PollsPage() {
 
   const handleEdit = (poll: Poll) => {
     if (poll.status === "closed") {
-      return toast.error("Cannot edit a closed poll. Re-open it first if needed.");
+      return toast.error("Cannot edit a closed poll.");
     }
     
     if (poll.startsAt && new Date(poll.startsAt) < new Date()) {

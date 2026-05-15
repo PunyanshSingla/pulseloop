@@ -8,7 +8,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { useState } from "react"
 import { authClient } from "@/lib/auth-client"
 import { toast } from "sonner"
@@ -22,6 +22,8 @@ export function LoginForm({
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,14 +42,14 @@ export function LoginForm({
 
     setLoading(false)
     toast.success("Signed in successfully")
-    navigate("/dashboard")
+    navigate(callbackUrl)
   }
 
   const handleSocialSignIn = async (provider: "google") => {
       setLoading(true)
       await authClient.signIn.social({
           provider,
-          callbackURL: appUrl("/auth-callback"),
+          callbackURL: appUrl(`/auth-callback?callbackUrl=${encodeURIComponent(callbackUrl)}`),
           errorCallbackURL: appUrl("/sign-in"),
       })
   }

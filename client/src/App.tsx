@@ -18,11 +18,13 @@ import NotFoundPage from "./pages/not-found.tsx";
 import SettingsPage from "./pages/settings.tsx";
 import { AuthGuard } from "./components/auth/auth-guard";
 import { Toaster } from "@/components/ui/sonner";
+import { ErrorBoundary } from "./components/error-boundary";
 
 export default function App() {
   return (
     <>
-      <Routes>
+      <ErrorBoundary>
+        <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/explore" element={<ExplorePage />} />
         
@@ -47,6 +49,7 @@ export default function App() {
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      </ErrorBoundary>
       <Toaster />
     </>
   );
